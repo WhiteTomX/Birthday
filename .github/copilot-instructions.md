@@ -1,3 +1,7 @@
+## Cloudflare Workers File Bundling Limitation
+
+**Important:** Cloudflare Workers are deployed as a single bundled JavaScript file. You cannot dynamically load files at runtime using `fetch(new URL(..., import.meta.url))` or similar methods. All HTML, CSS, and other assets must be imported at build time (using supported import loaders or inlined directly in the Worker code. Do not rely on runtime file access for Worker logic or rendering.
+
 # Copilot Instructions for Birthday Project
 
 This document guides AI coding agents to be productive in this codebase. It summarizes architecture, workflows, and conventions specific to this project.

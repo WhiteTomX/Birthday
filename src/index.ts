@@ -38,8 +38,25 @@ export default {
 			return unauthorizedResponse();
 		}
 
-		// Authenticated: show the site
-		return new Response(mainHtml, {
+		// Authenticated: show the site with dynamic live location
+		const liveLocation = await env.BIRTHDAY_KV.get('live_location');
+
+		let locationHtml = liveLocation
+			? `<div style="margin:1.5em 0">
+					<a href="${liveLocation}" target="_blank" style="font-size:1.1em;color:#2563eb;word-break:break-all">
+						🔗 Livestandort öffnen
+					</a><br>
+					<span style="color:#6b7280;font-size:0.95em">
+						Falls der Link nicht funktioniert, bitte bei mir melden, damit ich ihn aktualisieren kann.
+					</span>
+				</div>`
+			: `<div style="margin:1.5em 0;color:#eab308;font-size:1.05em">
+					Livestandort-Link wird rechtzeitig hier erscheinen.
+				</div>`;
+
+		const html = mainHtml.replace('<!-- LIVE_LOCATION_PLACEHOLDER -->', locationHtml);
+
+		return new Response(html, {
 			headers: {
 				'content-type': 'text/html; charset=UTF-8',
 			},
