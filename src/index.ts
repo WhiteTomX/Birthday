@@ -1,19 +1,41 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `npm run deploy` to publish your worker
- *
- * Bind resources to your worker in `wrangler.jsonc`. After adding bindings, a type definition for the
- * `Env` object can be regenerated with `npm run cf-typegen`.
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
+function unauthorizedResponse() {
+	return new Response('Authentifizierung erforderlich', {
+		status: 401,
+		headers: {
+			'WWW-Authenticate': 'Basic realm="Geburtstag", charset="UTF-8"',
+			'content-type': 'text/plain; charset=UTF-8',
+		},
+	});
+}
 
+function parseBasicAuth(authHeader: string | null): { username: string; password: string } | null {
+	if (!authHeader || !authHeader.startsWith('Basic ')) return null;
+	try {
+		const b64 = authHeader.slice(6);
+		const [username, password] = atob(b64).split(':');
+		if (!username || !password) return null;
+		return { username, password };
+	} catch {
+		return null;
+	}
+}
 
 export default {
-	async fetch(request, env, ctx): Promise<Response> {
+	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+		// Get credentials from KV
+		const storedUsername = await env.BIRTHDAY_KV.get('auth_username');
+		const storedPassword = await env.BIRTHDAY_KV.get('auth_password');
+		if (!storedUsername || !storedPassword) {
+			return new Response('Fehler: Zugangsdaten nicht gesetzt.', { status: 500 });
+		}
+
+		// Parse Authorization header
+		const auth = parseBasicAuth(request.headers.get('Authorization'));
+		if (!auth || auth.username !== storedUsername || auth.password !== storedPassword) {
+			return unauthorizedResponse();
+		}
+
+		// Authenticated: show the site
 		const html = `<!DOCTYPE html>
 <html lang="de">
 <head>
