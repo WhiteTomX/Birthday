@@ -38,8 +38,11 @@ export default {
 			return unauthorizedResponse();
 		}
 
-		// Authenticated: show the site with dynamic live location
-		const liveLocation = await env.BIRTHDAY_KV.get('live_location');
+		// Authenticated: show the site with dynamic live location and list URL
+		const [liveLocation, listUrl] = await Promise.all([
+			env.BIRTHDAY_KV.get('live_location'),
+			env.BIRTHDAY_KV.get('list_url')
+		]);
 
 		let locationHtml = liveLocation
 			? `<div style="margin:1.5em 0">
@@ -54,7 +57,21 @@ export default {
 					Livestandort-Link wird rechtzeitig hier erscheinen.
 				</div>`;
 
-		const html = mainHtml.replace('<!-- LIVE_LOCATION_PLACEHOLDER -->', locationHtml);
+		let listHtml = listUrl
+			? `<div style="margin:2em 0;padding-top:1em;border-top:1px solid #e5e7eb">
+					<p style="color:#4f46e5;font-size:1.1em;margin-bottom:0.5em">📝 Mitbringliste</p>
+					<a href="${listUrl}" target="_blank" style="color:#2563eb;text-decoration:none;display:inline-block;padding:0.5em 1em;background:#f0f9ff;border-radius:0.5em;margin-top:0.5em">
+						Liste öffnen
+					</a>
+					<p style="color:#6b7280;font-size:0.95em;margin-top:0.5em">
+						Hier könnt ihr eintragen, was ihr mitbringen möchtet! Ich werde hier hoffentlich auch eintragen, was ich da habe.
+					</p>
+				</div>`
+			: '';
+
+		const html = mainHtml
+			.replace('<!-- LIVE_LOCATION_PLACEHOLDER -->', locationHtml)
+			.replace('<!-- LIST_URL_PLACEHOLDER -->', listHtml);
 
 		return new Response(html, {
 			headers: {
