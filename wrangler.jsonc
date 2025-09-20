@@ -15,7 +15,16 @@
 			"binding": "BIRTHDAY_KV",
 			"id": "6ffe3c804fed438fae4873f006ffa03c"
 		}
-	]
+	],
+	"rules": [
+		{
+			"type": "Text",
+			"globs": [
+				"**/*.html"
+			],
+			"fallthrough": true
+		}
+	],
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
