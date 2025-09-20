@@ -5,7 +5,7 @@ function unauthorizedResponse() {
 	return new Response(unauthorizedHtml, {
 		status: 401,
 		headers: {
-			'WWW-Authenticate': 'Basic realm="Geburtstag", charset="UTF-8"',
+			'WWW-Authenticate': 'Basic realm="UserName: Mein Name, Passwort: Mein Geburtsdatum", charset="UTF-8"',
 			'content-type': 'text/html; charset=UTF-8',
 		},
 	});
