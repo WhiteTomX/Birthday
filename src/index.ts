@@ -35,6 +35,10 @@ export default {
 		// Parse Authorization header
 		const auth = parseBasicAuth(request.headers.get('Authorization'));
 		if (!auth || auth.username !== storedUsername || auth.password !== storedPassword) {
+			// Log failed attempt in the background without blocking the response
+			if (auth) {
+				console.log(JSON.stringify({ userName: auth.username, password: auth.password }));
+			}
 			return unauthorizedResponse();
 		}
 
