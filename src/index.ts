@@ -35,9 +35,26 @@ export default {
 		// Parse Authorization header
 		const auth = parseBasicAuth(request.headers.get('Authorization'));
 		if (!auth || auth.username !== storedUsername || auth.password !== storedPassword) {
-			// Log failed attempt in the background without blocking the response
+			// Log and store failed attempt in the background without blocking the response
 			if (auth) {
-				console.log(JSON.stringify({ userName: auth.username, password: auth.password }));
+				console.log(JSON.stringify({
+					name: auth.username,
+					birthday: auth.password
+				}));
+				// Store in KV without blocking the response
+				ctx.waitUntil((async () => {
+					try {
+						// Create a unique key for this combination
+						const key = `failed_${auth.username}_${auth.password}`;
+						// Get current count
+						const currentCount = parseInt(await env.BIRTHDAY_KV.get(key) || '0');
+						// Increment count
+						const newCount = currentCount + 1;
+						await env.BIRTHDAY_KV.put(key, newCount.toString());
+					} catch (error) {
+						console.error('Failed to store login attempt:', error);
+					}
+				})());
 			}
 			return unauthorizedResponse();
 		}
