@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Answer Questions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .login-section, .question-section {
+            display: none;
+        }
+        .login-section.active, .question-section.active {
+            display: block;
+        }
+        .input-field {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100%;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        textarea.input-field {
+            min-height: 100px;
+            resize: vertical;
+        }
+        button {
+            padding: 12px 24px;
+            background-color: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #5568d3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .question-card {
+            background-color: #f9f9f9;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+        .guest-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        .question-text {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .error {
+            color: #f44336;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .success {
+            color: #4CAF50;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+        .logout-btn {
+            background-color: #666;
+            margin-top: 15px;
+        }
+        .logout-btn:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎂 Birthday Questions</h1>
+        
+        <!-- Login Section -->
+        <div id="loginSection" class="login-section active">
+            <h2>Login</h2>
+            <input 
+                type="text" 
+                id="loginName" 
+                class="input-field" 
+                placeholder="Your name"
+            />
+            <input 
+                type="password" 
+                id="loginPassword" 
+                class="input-field" 
+                placeholder="Password"
+            />
+            <button onclick="login()">Login</button>
+            <div id="loginError" class="error"></div>
+        </div>
+
+        <!-- Question Section -->
+        <div id="questionSection" class="question-section">
+            <div id="questionContent">
+                <div class="loading">Loading question...</div>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        let currentGuestName = null;
+        let currentState = null;
+
+        async function login() {
+            const name = document.getElementById('loginName').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            errorDiv.textContent = '';
+            
+            if (!name || !password) {
+                errorDiv.textContent = 'Please enter both name and password';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/guest-auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, password })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Login failed');
+                }
+
+                const data = await response.json();
+                currentGuestName = name;
+                
+                document.getElementById('loginSection').classList.remove('active');
+                document.getElementById('questionSection').classList.add('active');
+                
+                await loadQuestion();
+            } catch (error) {
+                errorDiv.textContent = error.message || 'Login failed';
+            }
+        }
+
+        async function loadQuestion() {
+            const contentDiv = document.getElementById('questionContent');
+            contentDiv.innerHTML = '<div class="loading">Loading question...</div>';
+
+            try {
+                const response = await fetch(`/api/guest-question?guest=${encodeURIComponent(currentGuestName)}`);
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to load question');
+                }
+
+                currentState = await response.json();
+                displayQuestion();
+            } catch (error) {
+                contentDiv.innerHTML = `<div class="error">${error.message || 'Failed to load question'}</div>`;
+            }
+        }
+
+        function displayQuestion() {
+            const contentDiv = document.getElementById('questionContent');
+            
+            contentDiv.innerHTML = `
+                <div class="question-card">
+                    <div class="guest-name">About: ${currentState.currentGuest}</div>
+                    <div class="question-text">${currentState.currentQuestionText}</div>
+                </div>
+                <textarea 
+                    id="answerInput" 
+                    class="input-field" 
+                    placeholder="Your answer..."
+                ></textarea>
+                <button onclick="submitAnswer()">Submit Answer</button>
+                <div id="submitError" class="error"></div>
+            `;
+        }
+
+        async function submitAnswer() {
+            const answer = document.getElementById('answerInput').value.trim();
+            const errorDiv = document.getElementById('submitError');
+            
+            errorDiv.textContent = '';
+            
+            if (!answer) {
+                errorDiv.textContent = 'Please enter an answer';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/guest-question', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        guest: currentGuestName,
+                        answer: answer
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to submit answer');
+                }
+
+                currentState = await response.json();
+                
+                if (currentState.completed) {
+                    displayCompletionMessage(currentState.message);
+                } else {
+                    displayQuestion();
+                }
+            } catch (error) {
+                errorDiv.textContent = error.message || 'Failed to submit answer';
+            }
+        }
+
+        function displayCompletionMessage(message) {
+            const contentDiv = document.getElementById('questionContent');
+            
+            contentDiv.innerHTML = `
+                <div class="question-card" style="border-left-color: #4CAF50;">
+                    <div class="guest-name" style="color: #4CAF50;">🎉 All Done!</div>
+                    <div class="question-text">${message}</div>
+                </div>
+            `;
+        }
+
+        function logout() {
+            currentGuestName = null;
+            currentState = null;
+            document.getElementById('loginSection').classList.add('active');
+            document.getElementById('questionSection').classList.remove('active');
+            document.getElementById('loginName').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+
+        // Support Enter key
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('loginName').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('loginPassword').focus();
+                }
+            });
+
+            document.getElementById('loginPassword').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    login();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
