@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Questions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .add-question {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .question-input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100%;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        .question-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        button.delete {
+            background-color: #f44336;
+        }
+        button.delete:hover {
+            background-color: #da190b;
+        }
+        button.edit {
+            background-color: #2196F3;
+        }
+        button.edit:hover {
+            background-color: #0b7dda;
+        }
+        button.cancel {
+            background-color: #666;
+        }
+        button.cancel:hover {
+            background-color: #555;
+        }
+        .question-list {
+            list-style: none;
+            padding: 0;
+        }
+        .question-item {
+            padding: 15px;
+            margin: 10px 0;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border-left: 4px solid #4CAF50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .question-text {
+            flex: 1;
+            margin-right: 15px;
+        }
+        .question-id {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        .question-content {
+            font-size: 1.1em;
+        }
+        .question-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .editing {
+            background-color: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        .success {
+            color: green;
+            margin-top: 10px;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Manage Questions</h1>
+        
+        <div class="add-question">
+            <h2>Add New Question</h2>
+            <input 
+                type="text" 
+                id="newQuestionId" 
+                class="question-input" 
+                placeholder="Question ID (e.g., q1, favorite_color)"
+            />
+            <input 
+                type="text" 
+                id="newQuestionText" 
+                class="question-input" 
+                placeholder="Question text"
+            />
+            <button onclick="addQuestion()">Add Question</button>
+            <div id="addError" class="error"></div>
+            <div id="addSuccess" class="success"></div>
+        </div>
+        
+        <h2>Questions</h2>
+        <div id="questionContainer">
+            <div class="loading">Loading...</div>
+        </div>
+    </div>
+
+    <script>
+        let questions = {};
+
+        async function loadQuestions() {
+            try {
+                const response = await fetch('/api/questions');
+                if (response.status === 401) {
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                    return;
+                }
+                const data = await response.json();
+                questions = data.questions || {};
+                displayQuestions();
+            } catch (error) {
+                document.getElementById('questionContainer').innerHTML = 
+                    '<p class="error">Error loading questions</p>';
+            }
+        }
+
+        async function addQuestion() {
+            const idInput = document.getElementById('newQuestionId');
+            const textInput = document.getElementById('newQuestionText');
+            const errorDiv = document.getElementById('addError');
+            const successDiv = document.getElementById('addSuccess');
+            
+            const id = idInput.value.trim();
+            const text = textInput.value.trim();
+            
+            errorDiv.textContent = '';
+            successDiv.textContent = '';
+            
+            if (!id || !text) {
+                errorDiv.textContent = 'Please provide both ID and question text';
+                return;
+            }
+            
+            if (questions[id]) {
+                errorDiv.textContent = `Question with ID "${id}" already exists`;
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/questions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id, question: text })
+                });
+
+                if (response.status === 401) {
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                    return;
+                }
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to add question');
+                }
+
+                const data = await response.json();
+                questions = data.questions;
+                displayQuestions();
+                
+                idInput.value = '';
+                textInput.value = '';
+                successDiv.textContent = 'Question added successfully!';
+                setTimeout(() => successDiv.textContent = '', 3000);
+            } catch (error) {
+                errorDiv.textContent = error.message || 'Error adding question';
+            }
+        }
+
+        async function updateQuestion(id) {
+            const input = document.getElementById(`edit-${id}`);
+            const newText = input.value.trim();
+            
+            if (!newText) {
+                alert('Question text cannot be empty');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/questions', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id, question: newText })
+                });
+
+                if (response.status === 401) {
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                    return;
+                }
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to update question');
+                }
+
+                const data = await response.json();
+                questions = data.questions;
+                displayQuestions();
+            } catch (error) {
+                alert(error.message || 'Error updating question');
+            }
+        }
+
+        async function deleteQuestion(id) {
+            if (!confirm(`Are you sure you want to delete question "${id}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/questions', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id })
+                });
+
+                if (response.status === 401) {
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                    return;
+                }
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to delete question');
+                }
+
+                const data = await response.json();
+                questions = data.questions;
+                displayQuestions();
+            } catch (error) {
+                alert(error.message || 'Error deleting question');
+            }
+        }
+
+        function startEdit(id) {
+            displayQuestions(id);
+        }
+
+        function cancelEdit() {
+            displayQuestions();
+        }
+
+        function displayQuestions(editingId = null) {
+            const container = document.getElementById('questionContainer');
+            
+            const questionIds = Object.keys(questions);
+            
+            if (questionIds.length === 0) {
+                container.innerHTML = '<p>No questions yet. Add the first one!</p>';
+                return;
+            }
+
+            const list = document.createElement('ul');
+            list.className = 'question-list';
+            
+            questionIds.sort().forEach(id => {
+                const li = document.createElement('li');
+                li.className = 'question-item' + (editingId === id ? ' editing' : '');
+                
+                const textDiv = document.createElement('div');
+                textDiv.className = 'question-text';
+                
+                const idDiv = document.createElement('div');
+                idDiv.className = 'question-id';
+                idDiv.textContent = `ID: ${id}`;
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'question-content';
+                
+                if (editingId === id) {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = `edit-${id}`;
+                    input.className = 'question-input';
+                    input.value = questions[id];
+                    contentDiv.appendChild(input);
+                } else {
+                    contentDiv.textContent = questions[id];
+                }
+                
+                textDiv.appendChild(idDiv);
+                textDiv.appendChild(contentDiv);
+                
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'question-actions';
+                
+                if (editingId === id) {
+                    const saveBtn = document.createElement('button');
+                    saveBtn.textContent = 'Save';
+                    saveBtn.onclick = () => updateQuestion(id);
+                    
+                    const cancelBtn = document.createElement('button');
+                    cancelBtn.textContent = 'Cancel';
+                    cancelBtn.className = 'cancel';
+                    cancelBtn.onclick = cancelEdit;
+                    
+                    actionsDiv.appendChild(saveBtn);
+                    actionsDiv.appendChild(cancelBtn);
+                } else {
+                    const editBtn = document.createElement('button');
+                    editBtn.textContent = 'Edit';
+                    editBtn.className = 'edit';
+                    editBtn.onclick = () => startEdit(id);
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = 'Delete';
+                    deleteBtn.className = 'delete';
+                    deleteBtn.onclick = () => deleteQuestion(id);
+                    
+                    actionsDiv.appendChild(editBtn);
+                    actionsDiv.appendChild(deleteBtn);
+                }
+                
+                li.appendChild(textDiv);
+                li.appendChild(actionsDiv);
+                list.appendChild(li);
+            });
+
+            container.innerHTML = '';
+            container.appendChild(list);
+        }
+
+        // Support Enter key for adding questions
+        document.getElementById('newQuestionId').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('newQuestionText').focus();
+            }
+        });
+
+        document.getElementById('newQuestionText').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addQuestion();
+            }
+        });
+
+        loadQuestions();
+    </script>
+</body>
+</html>

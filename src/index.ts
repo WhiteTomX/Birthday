@@ -43,6 +43,18 @@ async function addMultipleGuests(env: Env, names: string[]): Promise<string[]> {
 	return guests;
 }
 
+async function getQuestions(env: Env): Promise<Record<string, string>> {
+	const questionsJson = await env.BIRTHDAY_KV.get('questions');
+	if (!questionsJson) {
+		return {};
+	}
+	return JSON.parse(questionsJson);
+}
+
+async function saveQuestions(env: Env, questions: Record<string, string>): Promise<void> {
+	await env.BIRTHDAY_KV.put('questions', JSON.stringify(questions));
+}
+
 async function handleGuestsAPI(request: Request, env: Env): Promise<Response> {
 	if (request.method === 'GET') {
 		const guests = await getGuests(env);
@@ -78,6 +90,87 @@ async function handleGuestsAPI(request: Request, env: Env): Promise<Response> {
 	return new Response('Method Not Allowed', { status: 405 });
 }
 
+async function handleQuestionsAPI(request: Request, env: Env): Promise<Response> {
+	const questions = await getQuestions(env);
+
+	if (request.method === 'GET') {
+		return new Response(JSON.stringify({ questions }), {
+			headers: { 'Content-Type': 'application/json' },
+		});
+	} else if (request.method === 'POST') {
+		const body = await request.json() as { id?: string; question?: string };
+		
+		if (!body.id || !body.question) {
+			return new Response(JSON.stringify({ error: 'Both id and question are required' }), {
+				status: 400,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
+
+		if (questions[body.id]) {
+			return new Response(JSON.stringify({ error: 'Question with this ID already exists' }), {
+				status: 400,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
+
+		questions[body.id] = body.question;
+		await saveQuestions(env, questions);
+
+		return new Response(JSON.stringify({ questions }), {
+			headers: { 'Content-Type': 'application/json' },
+		});
+	} else if (request.method === 'PUT') {
+		const body = await request.json() as { id?: string; question?: string };
+		
+		if (!body.id || !body.question) {
+			return new Response(JSON.stringify({ error: 'Both id and question are required' }), {
+				status: 400,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
+
+		if (!questions[body.id]) {
+			return new Response(JSON.stringify({ error: 'Question not found' }), {
+				status: 404,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
+
+		questions[body.id] = body.question;
+		await saveQuestions(env, questions);
+
+		return new Response(JSON.stringify({ questions }), {
+			headers: { 'Content-Type': 'application/json' },
+		});
+	} else if (request.method === 'DELETE') {
+		const body = await request.json() as { id?: string };
+		
+		if (!body.id) {
+			return new Response(JSON.stringify({ error: 'Question ID is required' }), {
+				status: 400,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
+
+		if (!questions[body.id]) {
+			return new Response(JSON.stringify({ error: 'Question not found' }), {
+				status: 404,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
+
+		delete questions[body.id];
+		await saveQuestions(env, questions);
+
+		return new Response(JSON.stringify({ questions }), {
+			headers: { 'Content-Type': 'application/json' },
+		});
+	}
+
+	return new Response('Method Not Allowed', { status: 405 });
+}
+
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
 		const url = new URL(request.url);
@@ -92,6 +185,10 @@ export default {
 			// Handle API routes
 			if (url.pathname === '/api/guests') {
 				return handleGuestsAPI(request, env);
+			}
+
+			if (url.pathname === '/api/questions') {
+				return handleQuestionsAPI(request, env);
 			}
 
 			// Serve static assets
