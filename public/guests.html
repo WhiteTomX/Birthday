@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 600px;
+            max-width: 800px;
             margin: 50px auto;
             padding: 20px;
             background-color: #f5f5f5;
@@ -22,8 +22,11 @@
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        #inputsContainer {
-            margin-bottom: 20px;
+        .add-guest {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
         }
         .guest-input {
             padding: 10px;
@@ -38,10 +41,6 @@
             outline: none;
             border-color: #4CAF50;
         }
-        #submitButton {
-            width: 100%;
-            margin-bottom: 20px;
-        }
         button {
             padding: 10px 20px;
             background-color: #4CAF50;
@@ -50,6 +49,7 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
+            margin-right: 10px;
         }
         button:hover {
             background-color: #45a049;
@@ -58,19 +58,56 @@
             background-color: #ccc;
             cursor: not-allowed;
         }
+        button.delete {
+            background-color: #f44336;
+        }
+        button.delete:hover {
+            background-color: #da190b;
+        }
+        button.edit {
+            background-color: #2196F3;
+        }
+        button.edit:hover {
+            background-color: #0b7dda;
+        }
+        button.cancel {
+            background-color: #666;
+        }
+        button.cancel:hover {
+            background-color: #555;
+        }
         .guest-list {
             list-style: none;
             padding: 0;
         }
-        .guest-list li {
-            padding: 10px;
-            margin: 5px 0;
+        .guest-item {
+            padding: 15px;
+            margin: 10px 0;
             background-color: #f9f9f9;
             border-radius: 5px;
             border-left: 4px solid #4CAF50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .guest-name {
+            flex: 1;
+            font-size: 1.1em;
+        }
+        .guest-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .editing {
+            background-color: #fff3cd;
+            border-left-color: #ffc107;
         }
         .error {
             color: red;
+            margin-top: 10px;
+        }
+        .success {
+            color: green;
             margin-top: 10px;
         }
         .loading {
@@ -83,13 +120,24 @@
     <div class="container">
         <h1>Birthday Guest List</h1>
         
-        <div id="inputsContainer">
-            <!-- Dynamic inputs will be added here -->
+        <div class="add-guest">
+            <h2>Add New Guest</h2>
+            <input 
+                type="text" 
+                id="newGuestName" 
+                class="guest-input" 
+                placeholder="Guest name"
+            />
+            <input 
+                type="password" 
+                id="newGuestPassword" 
+                class="guest-input" 
+                placeholder="Guest password"
+            />
+            <button onclick="addGuest()">Add Guest</button>
+            <div id="addError" class="error"></div>
+            <div id="addSuccess" class="success"></div>
         </div>
-        
-        <button id="submitButton" onclick="submitGuests()">Add Guests</button>
-        
-        <div id="error" class="error"></div>
         
         <h2>Guests</h2>
         <div id="guestContainer">
@@ -98,53 +146,7 @@
     </div>
 
     <script>
-        let inputCounter = 0;
-
-        function createInput(index) {
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'guest-input';
-            input.placeholder = `Guest ${index + 1}`;
-            input.dataset.index = index;
-            
-            input.addEventListener('input', function() {
-                handleInputChange(this);
-            });
-            
-            input.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    const nextInput = this.nextElementSibling;
-                    if (nextInput) {
-                        nextInput.focus();
-                    } else {
-                        submitGuests();
-                    }
-                }
-            });
-            
-            return input;
-        }
-
-        function handleInputChange(input) {
-            const container = document.getElementById('inputsContainer');
-            const allInputs = container.querySelectorAll('.guest-input');
-            const lastInput = allInputs[allInputs.length - 1];
-            
-            // If the last input has text and there isn't already an empty one after it, add a new input
-            if (input === lastInput && input.value.trim() !== '') {
-                inputCounter++;
-                const newInput = createInput(inputCounter);
-                container.appendChild(newInput);
-            }
-        }
-
-        function initializeInputs() {
-            const container = document.getElementById('inputsContainer');
-            const firstInput = createInput(inputCounter);
-            container.appendChild(firstInput);
-            firstInput.focus();
-        }
+        let guests = [];
 
         async function loadGuests() {
             try {
@@ -153,29 +155,35 @@
                     window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
                     return;
                 }
-                const data = await response.json();
-                displayGuests(data.guests);
+                guests = await response.json();
+                displayGuests();
             } catch (error) {
-                document.getElementById('error').textContent = 'Error loading guests';
+                document.getElementById('guestContainer').innerHTML = 
+                    '<p class="error">Error loading guests</p>';
             }
         }
 
-        async function submitGuests() {
-            const container = document.getElementById('inputsContainer');
-            const inputs = container.querySelectorAll('.guest-input');
+        async function addGuest() {
+            const nameInput = document.getElementById('newGuestName');
+            const passwordInput = document.getElementById('newGuestPassword');
+            const errorDiv = document.getElementById('addError');
+            const successDiv = document.getElementById('addSuccess');
             
-            const names = Array.from(inputs)
-                .map(input => input.value.trim())
-                .filter(name => name.length > 0);
+            const name = nameInput.value.trim();
+            const password = passwordInput.value;
             
-            if (names.length === 0) {
-                document.getElementById('error').textContent = 'Please enter at least one name';
+            errorDiv.textContent = '';
+            successDiv.textContent = '';
+            
+            if (!name || !password) {
+                errorDiv.textContent = 'Please provide both name and password';
                 return;
             }
-
-            const button = document.getElementById('submitButton');
-            button.disabled = true;
-            document.getElementById('error').textContent = '';
+            
+            if (guests.includes(name)) {
+                errorDiv.textContent = `Guest "${name}" already exists`;
+                return;
+            }
 
             try {
                 const response = await fetch('/api/guests', {
@@ -183,7 +191,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ names })
+                    body: JSON.stringify({ name, password })
                 });
 
                 if (response.status === 401) {
@@ -193,27 +201,90 @@
 
                 if (!response.ok) {
                     const error = await response.json();
-                    throw new Error(error.error || 'Failed to add guests');
+                    throw new Error(error.error || 'Failed to add guest');
                 }
 
-                const data = await response.json();
-                displayGuests(data.guests);
+                guests = await response.json();
+                displayGuests();
                 
-                // Clear all inputs and reset
-                container.innerHTML = '';
-                inputCounter = 0;
-                initializeInputs();
+                nameInput.value = '';
+                passwordInput.value = '';
+                successDiv.textContent = 'Guest added successfully!';
+                setTimeout(() => successDiv.textContent = '', 3000);
             } catch (error) {
-                document.getElementById('error').textContent = error.message || 'Error adding guests';
-            } finally {
-                button.disabled = false;
+                errorDiv.textContent = error.message || 'Error adding guest';
             }
         }
 
-        function displayGuests(guests) {
+        async function updatePassword(name) {
+            const newPassword = prompt(`Enter new password for ${name}:`);
+            
+            if (!newPassword) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/guests', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, password: newPassword })
+                });
+
+                if (response.status === 401) {
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                    return;
+                }
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to update password');
+                }
+
+                guests = await response.json();
+                alert('Password updated successfully!');
+                displayGuests();
+            } catch (error) {
+                alert(error.message || 'Error updating password');
+            }
+        }
+
+        async function deleteGuest(name) {
+            if (!confirm(`Are you sure you want to delete guest "${name}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/guests', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name })
+                });
+
+                if (response.status === 401) {
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                    return;
+                }
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to delete guest');
+                }
+
+                guests = await response.json();
+                displayGuests();
+            } catch (error) {
+                alert(error.message || 'Error deleting guest');
+            }
+        }
+
+        function displayGuests() {
             const container = document.getElementById('guestContainer');
             
-            if (!guests || guests.length === 0) {
+            if (guests.length === 0) {
                 container.innerHTML = '<p>No guests yet. Add the first one!</p>';
                 return;
             }
@@ -221,9 +292,32 @@
             const list = document.createElement('ul');
             list.className = 'guest-list';
             
-            guests.forEach(guest => {
+            guests.sort().forEach(name => {
                 const li = document.createElement('li');
-                li.textContent = guest;
+                li.className = 'guest-item';
+                
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'guest-name';
+                nameDiv.textContent = name;
+                
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'guest-actions';
+                
+                const editBtn = document.createElement('button');
+                editBtn.textContent = 'Change Password';
+                editBtn.className = 'edit';
+                editBtn.onclick = () => updatePassword(name);
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.className = 'delete';
+                deleteBtn.onclick = () => deleteGuest(name);
+                
+                actionsDiv.appendChild(editBtn);
+                actionsDiv.appendChild(deleteBtn);
+                
+                li.appendChild(nameDiv);
+                li.appendChild(actionsDiv);
                 list.appendChild(li);
             });
 
@@ -231,7 +325,19 @@
             container.appendChild(list);
         }
 
-        initializeInputs();
+        // Support Enter key for adding guests
+        document.getElementById('newGuestName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('newGuestPassword').focus();
+            }
+        });
+
+        document.getElementById('newGuestPassword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addGuest();
+            }
+        });
+
         loadGuests();
     </script>
 </body>

@@ -13,34 +13,18 @@
 
 import { requireAuth } from './auth/middleware';
 import { handleLogin } from './auth/login';
+import { sha256 } from './auth/utils';
 
-async function getGuests(env: Env): Promise<string[]> {
+async function getGuests(env: Env): Promise<Record<string, string>> {
 	const guestsJson = await env.BIRTHDAY_KV.get('guests');
 	if (!guestsJson) {
-		return [];
+		return {};
 	}
 	return JSON.parse(guestsJson);
 }
 
-async function addGuest(env: Env, name: string): Promise<string[]> {
-	const guests = await getGuests(env);
-	if (!guests.includes(name)) {
-		guests.push(name);
-		await env.BIRTHDAY_KV.put('guests', JSON.stringify(guests));
-	}
-	return guests;
-}
-
-async function addMultipleGuests(env: Env, names: string[]): Promise<string[]> {
-	const guests = await getGuests(env);
-	const newGuests = names.filter(name => name.trim() && !guests.includes(name.trim()));
-	
-	if (newGuests.length > 0) {
-		guests.push(...newGuests.map(name => name.trim()));
-		await env.BIRTHDAY_KV.put('guests', JSON.stringify(guests));
-	}
-	
-	return guests;
+async function saveGuests(env: Env, guests: Record<string, string>): Promise<void> {
+	await env.BIRTHDAY_KV.put('guests', JSON.stringify(guests));
 }
 
 async function getQuestions(env: Env): Promise<Record<string, string>> {
@@ -56,37 +40,95 @@ async function saveQuestions(env: Env, questions: Record<string, string>): Promi
 }
 
 async function handleGuestsAPI(request: Request, env: Env): Promise<Response> {
+	const guests = await getGuests(env);
+
 	if (request.method === 'GET') {
-		const guests = await getGuests(env);
-		return new Response(JSON.stringify({ guests }), {
+		const guestNames = Object.keys(guests);
+		return new Response(JSON.stringify(guestNames), {
 			headers: { 'Content-Type': 'application/json' },
 		});
 	} else if (request.method === 'POST') {
-		const body = await request.json() as { name?: string; names?: string[] };
-		
-		if (body.names && Array.isArray(body.names)) {
-			if (body.names.length === 0) {
-				return new Response(JSON.stringify({ error: 'Names array cannot be empty' }), {
-					status: 400,
-					headers: { 'Content-Type': 'application/json' },
-				});
-			}
-			const guests = await addMultipleGuests(env, body.names);
-			return new Response(JSON.stringify({ guests }), {
-				headers: { 'Content-Type': 'application/json' },
-			});
-		} else if (body.name && typeof body.name === 'string') {
-			const guests = await addGuest(env, body.name.trim());
-			return new Response(JSON.stringify({ guests }), {
-				headers: { 'Content-Type': 'application/json' },
-			});
-		} else {
-			return new Response(JSON.stringify({ error: 'Invalid request: provide either "name" or "names"' }), {
+		const body = await request.json() as { name?: string; password?: string };
+
+		if (!body.name || !body.password) {
+			return new Response(JSON.stringify({ error: 'Both name and password are required' }), {
 				status: 400,
 				headers: { 'Content-Type': 'application/json' },
 			});
 		}
+
+		const name = body.name.trim();
+		if (guests[name]) {
+			return new Response(JSON.stringify({ error: 'Guest already exists' }), {
+				status: 400,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
+
+		const hashedPassword = await sha256(body.password);
+		guests[name] = hashedPassword;
+
+		await saveGuests(env, guests);
+
+		const guestNames = Object.keys(guests);
+		return new Response(JSON.stringify(guestNames), {
+			headers: { 'Content-Type': 'application/json' },
+		});
+	} else if (request.method === 'PUT') {
+		const body = await request.json() as { name?: string; password?: string };
+
+		if (!body.name || !body.password) {
+			return new Response(JSON.stringify({ error: 'Both name and password are required' }), {
+				status: 400,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
+
+		const name = body.name.trim();
+		if (!guests[name]) {
+			console.log(guests);
+			return new Response(JSON.stringify({ error: 'Guest not found' }), {
+				status: 404,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
+
+		const hashedPassword = await sha256(body.password);
+		guests[name] = hashedPassword;
+
+		await saveGuests(env, guests);
+
+		const guestNames = Object.keys(guests);
+		return new Response(JSON.stringify(guestNames), {
+			headers: { 'Content-Type': 'application/json' },
+		});
+	} else if (request.method === 'DELETE') {
+		const body = await request.json() as { name?: string };
+
+		if (!body.name) {
+			return new Response(JSON.stringify({ error: 'Guest name is required' }), {
+				status: 400,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
+
+		const name = body.name.trim();
+		if (!guests[name]) {
+			return new Response(JSON.stringify({ error: 'Guest not found' }), {
+				status: 404,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
+
+		delete guests[name];
+		await saveGuests(env, guests);
+
+		const guestNames = Object.keys(guests);
+		return new Response(JSON.stringify(guestNames), {
+			headers: { 'Content-Type': 'application/json' },
+		});
 	}
+
 	return new Response('Method Not Allowed', { status: 405 });
 }
 
@@ -99,7 +141,7 @@ async function handleQuestionsAPI(request: Request, env: Env): Promise<Response>
 		});
 	} else if (request.method === 'POST') {
 		const body = await request.json() as { id?: string; question?: string };
-		
+
 		if (!body.id || !body.question) {
 			return new Response(JSON.stringify({ error: 'Both id and question are required' }), {
 				status: 400,
@@ -122,7 +164,7 @@ async function handleQuestionsAPI(request: Request, env: Env): Promise<Response>
 		});
 	} else if (request.method === 'PUT') {
 		const body = await request.json() as { id?: string; question?: string };
-		
+
 		if (!body.id || !body.question) {
 			return new Response(JSON.stringify({ error: 'Both id and question are required' }), {
 				status: 400,
@@ -145,7 +187,7 @@ async function handleQuestionsAPI(request: Request, env: Env): Promise<Response>
 		});
 	} else if (request.method === 'DELETE') {
 		const body = await request.json() as { id?: string };
-		
+
 		if (!body.id) {
 			return new Response(JSON.stringify({ error: 'Question ID is required' }), {
 				status: 400,
@@ -174,12 +216,12 @@ async function handleQuestionsAPI(request: Request, env: Env): Promise<Response>
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
 		const url = new URL(request.url);
-		
+
 		// Handle login endpoint
 		if (url.pathname === '/login') {
 			return handleLogin(request, env);
 		}
-		
+
 		// Apply authentication middleware
 		return requireAuth(request, env, async () => {
 			// Handle API routes
