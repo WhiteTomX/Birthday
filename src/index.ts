@@ -11,6 +11,9 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
+import { requireAuth } from './auth/middleware';
+import { handleLogin } from './auth/login';
+
 async function getGuests(env: Env): Promise<string[]> {
 	const guestsJson = await env.BIRTHDAY_KV.get('guests');
 	if (!guestsJson) {
@@ -40,48 +43,59 @@ async function addMultipleGuests(env: Env, names: string[]): Promise<string[]> {
 	return guests;
 }
 
+async function handleGuestsAPI(request: Request, env: Env): Promise<Response> {
+	if (request.method === 'GET') {
+		const guests = await getGuests(env);
+		return new Response(JSON.stringify({ guests }), {
+			headers: { 'Content-Type': 'application/json' },
+		});
+	} else if (request.method === 'POST') {
+		const body = await request.json() as { name?: string; names?: string[] };
+		
+		if (body.names && Array.isArray(body.names)) {
+			if (body.names.length === 0) {
+				return new Response(JSON.stringify({ error: 'Names array cannot be empty' }), {
+					status: 400,
+					headers: { 'Content-Type': 'application/json' },
+				});
+			}
+			const guests = await addMultipleGuests(env, body.names);
+			return new Response(JSON.stringify({ guests }), {
+				headers: { 'Content-Type': 'application/json' },
+			});
+		} else if (body.name && typeof body.name === 'string') {
+			const guests = await addGuest(env, body.name.trim());
+			return new Response(JSON.stringify({ guests }), {
+				headers: { 'Content-Type': 'application/json' },
+			});
+		} else {
+			return new Response(JSON.stringify({ error: 'Invalid request: provide either "name" or "names"' }), {
+				status: 400,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
+	}
+	return new Response('Method Not Allowed', { status: 405 });
+}
+
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
 		const url = new URL(request.url);
 		
-		if (url.pathname === '/api/guests') {
-			if (request.method === 'GET') {
-				const guests = await getGuests(env);
-				return new Response(JSON.stringify({ guests }), {
-					headers: { 'Content-Type': 'application/json' },
-				});
-			} else if (request.method === 'POST') {
-				const body = await request.json() as { name?: string; names?: string[] };
-				
-				// Support both single and multiple guest additions
-				if (body.names && Array.isArray(body.names)) {
-					// Add multiple guests
-					if (body.names.length === 0) {
-						return new Response(JSON.stringify({ error: 'Names array cannot be empty' }), {
-							status: 400,
-							headers: { 'Content-Type': 'application/json' },
-						});
-					}
-					const guests = await addMultipleGuests(env, body.names);
-					return new Response(JSON.stringify({ guests }), {
-						headers: { 'Content-Type': 'application/json' },
-					});
-				} else if (body.name && typeof body.name === 'string') {
-					// Add single guest
-					const guests = await addGuest(env, body.name.trim());
-					return new Response(JSON.stringify({ guests }), {
-						headers: { 'Content-Type': 'application/json' },
-					});
-				} else {
-					return new Response(JSON.stringify({ error: 'Invalid request: provide either "name" or "names"' }), {
-						status: 400,
-						headers: { 'Content-Type': 'application/json' },
-					});
-				}
-			}
-			return new Response('Method Not Allowed', { status: 405 });
+		// Handle login endpoint
+		if (url.pathname === '/login') {
+			return handleLogin(request, env);
 		}
+		
+		// Apply authentication middleware
+		return requireAuth(request, env, async () => {
+			// Handle API routes
+			if (url.pathname === '/api/guests') {
+				return handleGuestsAPI(request, env);
+			}
 
-		return env.ASSETS.fetch(request);
+			// Serve static assets
+			return env.ASSETS.fetch(request);
+		});
 	},
 } satisfies ExportedHandler<Env>;

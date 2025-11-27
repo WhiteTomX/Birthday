@@ -23,7 +23,13 @@
 			"id": "preview_id",
 			"preview_id": "preview_id"
 		}
-	]
+	],
+	/**
+	 * Environment Variables
+	 * Use `wrangler secret put GUESTS_PASSWORD` to set the password in production
+	 * For local development, create a .dev.vars file with:
+	 * GUESTS_PASSWORD=your_password_here
+	 */
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

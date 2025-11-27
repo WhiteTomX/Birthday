@@ -149,6 +149,10 @@
         async function loadGuests() {
             try {
                 const response = await fetch('/api/guests');
+                if (response.status === 401) {
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                    return;
+                }
                 const data = await response.json();
                 displayGuests(data.guests);
             } catch (error) {
@@ -181,6 +185,11 @@
                     },
                     body: JSON.stringify({ names })
                 });
+
+                if (response.status === 401) {
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                    return;
+                }
 
                 if (!response.ok) {
                     const error = await response.json();
