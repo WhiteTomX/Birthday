@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guest List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        #inputsContainer {
+            margin-bottom: 20px;
+        }
+        .guest-input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 100%;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        .guest-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        #submitButton {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .guest-list {
+            list-style: none;
+            padding: 0;
+        }
+        .guest-list li {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border-left: 4px solid #4CAF50;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Birthday Guest List</h1>
+        
+        <div id="inputsContainer">
+            <!-- Dynamic inputs will be added here -->
+        </div>
+        
+        <button id="submitButton" onclick="submitGuests()">Add Guests</button>
+        
+        <div id="error" class="error"></div>
+        
+        <h2>Guests</h2>
+        <div id="guestContainer">
+            <div class="loading">Loading...</div>
+        </div>
+    </div>
+
+    <script>
+        let inputCounter = 0;
+
+        function createInput(index) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'guest-input';
+            input.placeholder = `Guest ${index + 1}`;
+            input.dataset.index = index;
+            
+            input.addEventListener('input', function() {
+                handleInputChange(this);
+            });
+            
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const nextInput = this.nextElementSibling;
+                    if (nextInput) {
+                        nextInput.focus();
+                    } else {
+                        submitGuests();
+                    }
+                }
+            });
+            
+            return input;
+        }
+
+        function handleInputChange(input) {
+            const container = document.getElementById('inputsContainer');
+            const allInputs = container.querySelectorAll('.guest-input');
+            const lastInput = allInputs[allInputs.length - 1];
+            
+            // If the last input has text and there isn't already an empty one after it, add a new input
+            if (input === lastInput && input.value.trim() !== '') {
+                inputCounter++;
+                const newInput = createInput(inputCounter);
+                container.appendChild(newInput);
+            }
+        }
+
+        function initializeInputs() {
+            const container = document.getElementById('inputsContainer');
+            const firstInput = createInput(inputCounter);
+            container.appendChild(firstInput);
+            firstInput.focus();
+        }
+
+        async function loadGuests() {
+            try {
+                const response = await fetch('/api/guests');
+                const data = await response.json();
+                displayGuests(data.guests);
+            } catch (error) {
+                document.getElementById('error').textContent = 'Error loading guests';
+            }
+        }
+
+        async function submitGuests() {
+            const container = document.getElementById('inputsContainer');
+            const inputs = container.querySelectorAll('.guest-input');
+            
+            const names = Array.from(inputs)
+                .map(input => input.value.trim())
+                .filter(name => name.length > 0);
+            
+            if (names.length === 0) {
+                document.getElementById('error').textContent = 'Please enter at least one name';
+                return;
+            }
+
+            const button = document.getElementById('submitButton');
+            button.disabled = true;
+            document.getElementById('error').textContent = '';
+
+            try {
+                const response = await fetch('/api/guests', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ names })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to add guests');
+                }
+
+                const data = await response.json();
+                displayGuests(data.guests);
+                
+                // Clear all inputs and reset
+                container.innerHTML = '';
+                inputCounter = 0;
+                initializeInputs();
+            } catch (error) {
+                document.getElementById('error').textContent = error.message || 'Error adding guests';
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        function displayGuests(guests) {
+            const container = document.getElementById('guestContainer');
+            
+            if (!guests || guests.length === 0) {
+                container.innerHTML = '<p>No guests yet. Add the first one!</p>';
+                return;
+            }
+
+            const list = document.createElement('ul');
+            list.className = 'guest-list';
+            
+            guests.forEach(guest => {
+                const li = document.createElement('li');
+                li.textContent = guest;
+                list.appendChild(li);
+            });
+
+            container.innerHTML = '';
+            container.appendChild(list);
+        }
+
+        initializeInputs();
+        loadGuests();
+    </script>
+</body>
+</html>
