@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .nav-buttons button {
+            flex: 1;
+            padding: 12px;
+            background-color: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .nav-buttons button:hover {
+            background-color: #5568d3;
+        }
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .leaderboard-table th {
+            background-color: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+        .leaderboard-table td {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        .leaderboard-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        .rank {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.2em;
+            width: 60px;
+            text-align: center;
+        }
+        .rank-1 {
+            color: #FFD700;
+            font-size: 1.5em;
+        }
+        .rank-2 {
+            color: #C0C0C0;
+            font-size: 1.3em;
+        }
+        .rank-3 {
+            color: #CD7F32;
+            font-size: 1.2em;
+        }
+        .name {
+            font-weight: 500;
+        }
+        .stat {
+            text-align: center;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+        }
+        .error {
+            color: #f44336;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 Leaderboard</h1>
+        <p class="subtitle">See who's answered the most questions!</p>
+        
+        <div class="nav-buttons">
+            <button onclick="window.location.href='/guests.html'">Manage Guests</button>
+            <button onclick="window.location.href='/questions.html'">Manage Questions</button>
+            <button onclick="loadLeaderboard()">Refresh</button>
+        </div>
+        
+        <div id="leaderboardContent">
+            <div class="loading">Loading leaderboard...</div>
+        </div>
+    </div>
+
+    <script>
+        async function loadLeaderboard() {
+            const contentDiv = document.getElementById('leaderboardContent');
+            contentDiv.innerHTML = '<div class="loading">Loading leaderboard...</div>';
+
+            try {
+                const response = await fetch('/api/leaderboard');
+
+                if (response.status === 401) {
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                    return;
+                }
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to load leaderboard');
+                }
+
+                const data = await response.json();
+                displayLeaderboard(data.leaderboard);
+            } catch (error) {
+                contentDiv.innerHTML = `<div class="error">${error.message || 'Failed to load leaderboard'}</div>`;
+            }
+        }
+
+        function displayLeaderboard(leaderboard) {
+            const contentDiv = document.getElementById('leaderboardContent');
+            
+            if (!leaderboard || leaderboard.length === 0) {
+                contentDiv.innerHTML = '<p style="text-align: center; color: #666;">No data yet. Be the first to answer questions!</p>';
+                return;
+            }
+
+            let html = `
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Guest</th>
+                            <th style="text-align: center;">Guests Talked To</th>
+                            <th style="text-align: center;">Total Answers</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            leaderboard.forEach((entry, index) => {
+                const rank = index + 1;
+                let rankClass = 'rank';
+                let rankDisplay = rank;
+                
+                if (rank === 1) {
+                    rankClass = 'rank rank-1';
+                    rankDisplay = '🥇';
+                } else if (rank === 2) {
+                    rankClass = 'rank rank-2';
+                    rankDisplay = '🥈';
+                } else if (rank === 3) {
+                    rankClass = 'rank rank-3';
+                    rankDisplay = '🥉';
+                }
+                
+                html += `
+                    <tr>
+                        <td class="${rankClass}">${rankDisplay}</td>
+                        <td class="name">${entry.name}</td>
+                        <td class="stat">${entry.guestsTalkedTo}</td>
+                        <td class="stat">${entry.totalAnswered}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+
+            contentDiv.innerHTML = html;
+        }
+
+        // Load leaderboard on page load
+        loadLeaderboard();
+
+        // Auto-refresh every 5 minutes (300000 milliseconds)
+        setInterval(loadLeaderboard, 300000);
+    </script>
+</body>
+</html>

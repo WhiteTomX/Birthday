@@ -436,6 +436,59 @@ async function handleGuestQuestionAPI(request: Request, env: Env): Promise<Respo
         return new Response('Method Not Allowed', { status: 405 });
 }
 
+async function handleLeaderboardAPI(request: Request, env: Env): Promise<Response> {
+        if (request.method !== 'GET') {
+                return new Response('Method Not Allowed', { status: 405 });
+        }
+
+        try {
+                const guests = await getGuests(env);
+                const guestNames = Object.keys(guests);
+                
+                const leaderboard = [];
+
+                for (const guestName of guestNames) {
+                        const state = await getGuestState(env, guestName);
+                        
+                        let guestsTalkedTo = 0;
+                        let totalAnswered = 0;
+                        
+                        if (state && state.answers) {
+                                // Count unique guests talked to
+                                guestsTalkedTo = Object.keys(state.answers).length;
+                                
+                                // Count total answered questions
+                                for (const guestAnswers of Object.values(state.answers)) {
+                                        totalAnswered += Object.keys(guestAnswers).length;
+                                }
+                        }
+                        
+                        leaderboard.push({
+                                name: guestName,
+                                guestsTalkedTo,
+                                totalAnswered
+                        });
+                }
+
+                // Sort by guests talked to (descending), then by total answered (descending)
+                leaderboard.sort((a, b) => {
+                        if (b.guestsTalkedTo !== a.guestsTalkedTo) {
+                                return b.guestsTalkedTo - a.guestsTalkedTo;
+                        }
+                        return b.totalAnswered - a.totalAnswered;
+                });
+
+                return new Response(JSON.stringify({ leaderboard }), {
+                        headers: { 'Content-Type': 'application/json' },
+                });
+        } catch (error) {
+                return new Response(JSON.stringify({ error: 'Failed to load leaderboard' }), {
+                        status: 500,
+                        headers: { 'Content-Type': 'application/json' },
+                });
+        }
+}
+
 export default {
         async fetch(request, env, ctx): Promise<Response> {
                 const url = new URL(request.url);
@@ -469,6 +522,10 @@ export default {
 
                         if (url.pathname === '/api/questions') {
                                 return handleQuestionsAPI(request, env);
+                        }
+
+                        if (url.pathname === '/api/leaderboard') {
+                                return handleLeaderboardAPI(request, env);
                         }
 
                         // Serve static assets
