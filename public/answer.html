@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,22 +13,27 @@
             padding: 20px;
             background-color: #f5f5f5;
         }
+
         h1 {
             color: #333;
             text-align: center;
         }
+
         .container {
             background: white;
             padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
+
         .question-section {
             display: none;
         }
+
         .question-section.active {
             display: block;
         }
+
         .input-field {
             padding: 10px;
             border: 1px solid #ddd;
@@ -37,14 +43,17 @@
             margin-bottom: 15px;
             box-sizing: border-box;
         }
+
         .input-field:focus {
             outline: none;
             border-color: #667eea;
         }
+
         textarea.input-field {
             min-height: 100px;
             resize: vertical;
         }
+
         button {
             padding: 12px 24px;
             background-color: #667eea;
@@ -55,13 +64,16 @@
             font-size: 16px;
             width: 100%;
         }
+
         button:hover {
             background-color: #5568d3;
         }
+
         button:disabled {
             background-color: #ccc;
             cursor: not-allowed;
         }
+
         .question-card {
             background-color: #f9f9f9;
             padding: 25px;
@@ -69,45 +81,53 @@
             margin-bottom: 25px;
             border-left: 4px solid #667eea;
         }
+
         .guest-name {
             font-size: 1.3em;
             font-weight: bold;
             color: #667eea;
             margin-bottom: 15px;
         }
+
         .question-text {
             font-size: 1.1em;
             color: #333;
             margin-bottom: 20px;
         }
+
         .error {
             color: #f44336;
             margin-top: 10px;
             text-align: center;
         }
+
         .success {
             color: #4CAF50;
             margin-top: 10px;
             text-align: center;
         }
+
         .loading {
             text-align: center;
             color: #666;
             padding: 20px;
         }
+
         .logout-btn {
             background-color: #666;
             margin-top: 15px;
         }
+
         .logout-btn:hover {
             background-color: #555;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>🎂 Birthday Questions</h1>
-        
+
         <!-- Question Section -->
         <div id="questionSection" class="question-section">
             <div id="questionContent">
@@ -127,7 +147,7 @@
                 if (response.ok) {
                     currentState = await response.json();
                     document.getElementById('questionSection').classList.add('active');
-                    
+
                     if (currentState.completed) {
                         displayCompletionMessage(currentState.message);
                     } else {
@@ -148,10 +168,10 @@
 
         function displayQuestion() {
             const contentDiv = document.getElementById('questionContent');
-            
+
             contentDiv.innerHTML = `
                 <div class="question-card">
-                    <div class="guest-name">About: ${currentState.currentGuest}</div>
+                    <div class="guest-name">Frage ${currentState.currentGuest}</div>
                     <div class="question-text">${currentState.currentQuestionText}</div>
                 </div>
                 <textarea 
@@ -167,9 +187,9 @@
         async function submitAnswer() {
             const answer = document.getElementById('answerInput').value.trim();
             const errorDiv = document.getElementById('submitError');
-            
+
             errorDiv.textContent = '';
-            
+
             if (!answer) {
                 errorDiv.textContent = 'Please enter an answer';
                 return;
@@ -190,7 +210,7 @@
                 }
 
                 currentState = await response.json();
-                
+
                 if (currentState.completed) {
                     displayCompletionMessage(currentState.message);
                 } else {
@@ -203,7 +223,7 @@
 
         function displayCompletionMessage(message) {
             const contentDiv = document.getElementById('questionContent');
-            
+
             contentDiv.innerHTML = `
                 <div class="question-card" style="border-left-color: #4CAF50;">
                     <div class="guest-name" style="color: #4CAF50;">🎉 All Done!</div>
@@ -214,10 +234,10 @@
 
         function logout() {
             currentState = null;
-            
+
             // Clear cookie by setting it to expire
             document.cookie = 'Guest-Auth-Key=; Max-Age=0; Path=/';
-            
+
             // Redirect to login page
             window.location.href = '/guest-login';
         }
@@ -226,4 +246,5 @@
         checkAuth();
     </script>
 </body>
+
 </html>
