@@ -18,589 +18,675 @@ import { sha256, verifyGuestCookie } from './auth/utils';
 import { AUTH_COOKIE_MAX_AGE, GUEST_AUTH_COOKIE_KEY } from './auth/constants';
 
 async function getGuests(env: Env): Promise<Record<string, string>> {
-        const guestsJson = await env.BIRTHDAY_KV.get('guests');
-        if (!guestsJson) {
-                return {};
-        }
-        return JSON.parse(guestsJson);
+	const guestsJson = await env.BIRTHDAY_KV.get('guests');
+	if (!guestsJson) {
+		return {};
+	}
+	return JSON.parse(guestsJson);
 }
 
 async function saveGuests(env: Env, guests: Record<string, string>): Promise<void> {
-        await env.BIRTHDAY_KV.put('guests', JSON.stringify(guests));
+	await env.BIRTHDAY_KV.put('guests', JSON.stringify(guests));
 }
 
 async function getQuestions(env: Env): Promise<Record<string, string>> {
-        const questionsJson = await env.BIRTHDAY_KV.get('questions');
-        if (!questionsJson) {
-                return {};
-        }
-        return JSON.parse(questionsJson);
+	const questionsJson = await env.BIRTHDAY_KV.get('questions');
+	if (!questionsJson) {
+		return {};
+	}
+	return JSON.parse(questionsJson);
 }
 
 async function saveQuestions(env: Env, questions: Record<string, string>): Promise<void> {
-        await env.BIRTHDAY_KV.put('questions', JSON.stringify(questions));
+	await env.BIRTHDAY_KV.put('questions', JSON.stringify(questions));
 }
 
 interface GuestState {
-        currentQuestion: string;
-        currentGuest: string;
-        answers: Record<string, Record<string, string>>;
+	currentQuestion: string;
+	currentGuest: string;
+	answers: Record<string, Record<string, string>>;
 }
 
 async function getGuestState(env: Env, guestName: string): Promise<GuestState | null> {
-        const stateJson = await env.BIRTHDAY_KV.get(`guest-state:${guestName}`);
-        if (!stateJson) {
-                return null;
-        }
-        return JSON.parse(stateJson);
+	const stateJson = await env.BIRTHDAY_KV.get(`guest-state:${guestName}`);
+	if (!stateJson) {
+		return null;
+	}
+	return JSON.parse(stateJson);
 }
 
 async function saveGuestState(env: Env, guestName: string, state: GuestState): Promise<void> {
-        await env.BIRTHDAY_KV.put(`guest-state:${guestName}`, JSON.stringify(state));
+	await env.BIRTHDAY_KV.put(`guest-state:${guestName}`, JSON.stringify(state));
 }
 
 function getRandomElement<T>(array: T[]): T {
-        return array[Math.floor(Math.random() * array.length)];
+	return array[Math.floor(Math.random() * array.length)];
 }
 
 async function initializeGuestState(env: Env, guestName: string): Promise<GuestState> {
-        const guests = await getGuests(env);
-        const questions = await getQuestions(env);
+	const guests = await getGuests(env);
+	const questions = await getQuestions(env);
 
-        const guestNames = Object.keys(guests).filter(name => name !== guestName);
-        const questionIds = Object.keys(questions);
+	const guestNames = Object.keys(guests).filter(name => name !== guestName);
+	const questionIds = Object.keys(questions);
 
-        if (guestNames.length === 0) {
-                throw new Error('No other guests available');
-        }
+	if (guestNames.length === 0) {
+		throw new Error('No other guests available');
+	}
 
-        if (questionIds.length === 0) {
-                throw new Error('No questions available');
-        }
+	if (questionIds.length === 0) {
+		throw new Error('No questions available');
+	}
 
-        const state: GuestState = {
-                currentQuestion: getRandomElement(questionIds),
-                currentGuest: getRandomElement(guestNames),
-                answers: {}
-        };
+	const state: GuestState = {
+		currentQuestion: getRandomElement(questionIds),
+		currentGuest: getRandomElement(guestNames),
+		answers: {}
+	};
 
-        await saveGuestState(env, guestName, state);
-        return state;
+	await saveGuestState(env, guestName, state);
+	return state;
 }
 
 async function getNextQuestion(env: Env, guestName: string, state: GuestState): Promise<boolean> {
-        const guests = await getGuests(env);
-        const questions = await getQuestions(env);
+	const guests = await getGuests(env);
+	const questions = await getQuestions(env);
 
-        const guestNames = Object.keys(guests).filter(name => name !== guestName);
-        const questionIds = Object.keys(questions);
+	const guestNames = Object.keys(guests).filter(name => name !== guestName);
+	const questionIds = Object.keys(questions);
 
-        if (guestNames.length === 0 || questionIds.length === 0) {
-                // Clear state when no questions/guests available
-                state.currentGuest = '';
-                state.currentQuestion = '';
-                return false;
-        }
+	if (guestNames.length === 0 || questionIds.length === 0) {
+		// Clear state when no questions/guests available
+		state.currentGuest = '';
+		state.currentQuestion = '';
+		return false;
+	}
 
-        // Find guests with unanswered questions
-        const guestsWithUnanswered: string[] = [];
-        for (const guest of guestNames) {
-                const answeredQuestions = state.answers[guest] || {};
-                const unansweredQuestions = questionIds.filter(qId => !answeredQuestions[qId]);
-                if (unansweredQuestions.length > 0) {
-                        guestsWithUnanswered.push(guest);
-                }
-        }
+	// Find guests with unanswered questions
+	const guestsWithUnanswered: string[] = [];
+	for (const guest of guestNames) {
+		const answeredQuestions = state.answers[guest] || {};
+		const unansweredQuestions = questionIds.filter(qId => !answeredQuestions[qId]);
+		if (unansweredQuestions.length > 0) {
+			guestsWithUnanswered.push(guest);
+		}
+	}
 
-        if (guestsWithUnanswered.length === 0) {
-                // All questions for all guests have been answered - clear state
-                state.currentGuest = '';
-                state.currentQuestion = '';
-                return false;
-        }
+	if (guestsWithUnanswered.length === 0) {
+		// All questions for all guests have been answered - clear state
+		state.currentGuest = '';
+		state.currentQuestion = '';
+		return false;
+	}
 
-        // Pick a random guest with unanswered questions
-        const targetGuest = getRandomElement(guestsWithUnanswered);
-        const answeredQuestions = state.answers[targetGuest] || {};
-        const availableQuestions = questionIds.filter(qId => !answeredQuestions[qId]);
+	// Pick a random guest with unanswered questions
+	const targetGuest = getRandomElement(guestsWithUnanswered);
+	const answeredQuestions = state.answers[targetGuest] || {};
+	const availableQuestions = questionIds.filter(qId => !answeredQuestions[qId]);
 
-        state.currentGuest = targetGuest;
-        state.currentQuestion = getRandomElement(availableQuestions);
+	state.currentGuest = targetGuest;
+	state.currentQuestion = getRandomElement(availableQuestions);
 
-        return true;
+	return true;
 }
 
 async function handleGuestsAPI(request: Request, env: Env): Promise<Response> {
-        const guests = await getGuests(env);
+	const guests = await getGuests(env);
 
-        if (request.method === 'GET') {
-                const guestNames = Object.keys(guests);
-                return new Response(JSON.stringify(guestNames), {
-                        headers: { 'Content-Type': 'application/json' },
-                });
-        } else if (request.method === 'POST') {
-                const body = await request.json() as { name?: string; password?: string };
+	if (request.method === 'GET') {
+		const guestNames = Object.keys(guests);
+		return new Response(JSON.stringify(guestNames), {
+			headers: { 'Content-Type': 'application/json' },
+		});
+	} else if (request.method === 'POST') {
+		const body = await request.json() as { name?: string; password?: string };
 
-                if (!body.name || !body.password) {
-                        return new Response(JSON.stringify({ error: 'Both name and password are required' }), {
-                                status: 400,
-                                headers: { 'Content-Type': 'application/json' },
-                        });
-                }
+		if (!body.name || !body.password) {
+			return new Response(JSON.stringify({ error: 'Both name and password are required' }), {
+				status: 400,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
 
-                const name = body.name.trim();
-                if (guests[name]) {
-                        return new Response(JSON.stringify({ error: 'Guest already exists' }), {
-                                status: 400,
-                                headers: { 'Content-Type': 'application/json' },
-                        });
-                }
+		const name = body.name.trim();
+		if (guests[name]) {
+			return new Response(JSON.stringify({ error: 'Guest already exists' }), {
+				status: 400,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
 
-                const hashedPassword = await sha256(body.password);
-                guests[name] = hashedPassword;
+		const hashedPassword = await sha256(body.password);
+		guests[name] = hashedPassword;
 
-                await saveGuests(env, guests);
+		await saveGuests(env, guests);
 
-                const guestNames = Object.keys(guests);
-                return new Response(JSON.stringify(guestNames), {
-                        headers: { 'Content-Type': 'application/json' },
-                });
-        } else if (request.method === 'PUT') {
-                const body = await request.json() as { name?: string; password?: string };
+		const guestNames = Object.keys(guests);
+		return new Response(JSON.stringify(guestNames), {
+			headers: { 'Content-Type': 'application/json' },
+		});
+	} else if (request.method === 'PUT') {
+		const body = await request.json() as { name?: string; password?: string };
 
-                if (!body.name || !body.password) {
-                        return new Response(JSON.stringify({ error: 'Both name and password are required' }), {
-                                status: 400,
-                                headers: { 'Content-Type': 'application/json' },
-                        });
-                }
+		if (!body.name || !body.password) {
+			return new Response(JSON.stringify({ error: 'Both name and password are required' }), {
+				status: 400,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
 
-                const name = body.name.trim();
-                if (!guests[name]) {
-                        console.log(guests);
-                        return new Response(JSON.stringify({ error: 'Guest not found' }), {
-                                status: 404,
-                                headers: { 'Content-Type': 'application/json' },
-                        });
-                }
+		const name = body.name.trim();
+		if (!guests[name]) {
+			console.log(guests);
+			return new Response(JSON.stringify({ error: 'Guest not found' }), {
+				status: 404,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
 
-                const hashedPassword = await sha256(body.password);
-                guests[name] = hashedPassword;
+		const hashedPassword = await sha256(body.password);
+		guests[name] = hashedPassword;
 
-                await saveGuests(env, guests);
+		await saveGuests(env, guests);
 
-                const guestNames = Object.keys(guests);
-                return new Response(JSON.stringify(guestNames), {
-                        headers: { 'Content-Type': 'application/json' },
-                });
-        } else if (request.method === 'DELETE') {
-                const body = await request.json() as { name?: string };
+		const guestNames = Object.keys(guests);
+		return new Response(JSON.stringify(guestNames), {
+			headers: { 'Content-Type': 'application/json' },
+		});
+	} else if (request.method === 'DELETE') {
+		const body = await request.json() as { name?: string };
 
-                if (!body.name) {
-                        return new Response(JSON.stringify({ error: 'Guest name is required' }), {
-                                status: 400,
-                                headers: { 'Content-Type': 'application/json' },
-                        });
-                }
+		if (!body.name) {
+			return new Response(JSON.stringify({ error: 'Guest name is required' }), {
+				status: 400,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
 
-                const name = body.name.trim();
-                if (!guests[name]) {
-                        return new Response(JSON.stringify({ error: 'Guest not found' }), {
-                                status: 404,
-                                headers: { 'Content-Type': 'application/json' },
-                        });
-                }
+		const name = body.name.trim();
+		if (!guests[name]) {
+			return new Response(JSON.stringify({ error: 'Guest not found' }), {
+				status: 404,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
 
-                delete guests[name];
-                await saveGuests(env, guests);
+		delete guests[name];
+		await saveGuests(env, guests);
 
-                const guestNames = Object.keys(guests);
-                return new Response(JSON.stringify(guestNames), {
-                        headers: { 'Content-Type': 'application/json' },
-                });
-        }
+		const guestNames = Object.keys(guests);
+		return new Response(JSON.stringify(guestNames), {
+			headers: { 'Content-Type': 'application/json' },
+		});
+	}
 
-        return new Response('Method Not Allowed', { status: 405 });
+	return new Response('Method Not Allowed', { status: 405 });
 }
 
 async function handleQuestionsAPI(request: Request, env: Env): Promise<Response> {
-        const questions = await getQuestions(env);
+	const questions = await getQuestions(env);
 
-        if (request.method === 'GET') {
-                return new Response(JSON.stringify({ questions }), {
-                        headers: { 'Content-Type': 'application/json' },
-                });
-        } else if (request.method === 'POST') {
-                const body = await request.json() as { id?: string; question?: string };
+	if (request.method === 'GET') {
+		return new Response(JSON.stringify({ questions }), {
+			headers: { 'Content-Type': 'application/json' },
+		});
+	} else if (request.method === 'POST') {
+		const body = await request.json() as { id?: string; question?: string };
 
-                if (!body.id || !body.question) {
-                        return new Response(JSON.stringify({ error: 'Both id and question are required' }), {
-                                status: 400,
-                                headers: { 'Content-Type': 'application/json' },
-                        });
-                }
+		if (!body.id || !body.question) {
+			return new Response(JSON.stringify({ error: 'Both id and question are required' }), {
+				status: 400,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
 
-                if (questions[body.id]) {
-                        return new Response(JSON.stringify({ error: 'Question with this ID already exists' }), {
-                                status: 400,
-                                headers: { 'Content-Type': 'application/json' },
-                        });
-                }
+		if (questions[body.id]) {
+			return new Response(JSON.stringify({ error: 'Question with this ID already exists' }), {
+				status: 400,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
 
-                questions[body.id] = body.question;
-                await saveQuestions(env, questions);
+		questions[body.id] = body.question;
+		await saveQuestions(env, questions);
 
-                return new Response(JSON.stringify({ questions }), {
-                        headers: { 'Content-Type': 'application/json' },
-                });
-        } else if (request.method === 'PUT') {
-                const body = await request.json() as { id?: string; question?: string };
+		return new Response(JSON.stringify({ questions }), {
+			headers: { 'Content-Type': 'application/json' },
+		});
+	} else if (request.method === 'PUT') {
+		const body = await request.json() as { id?: string; question?: string };
 
-                if (!body.id || !body.question) {
-                        return new Response(JSON.stringify({ error: 'Both id and question are required' }), {
-                                status: 400,
-                                headers: { 'Content-Type': 'application/json' },
-                        });
-                }
+		if (!body.id || !body.question) {
+			return new Response(JSON.stringify({ error: 'Both id and question are required' }), {
+				status: 400,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
 
-                if (!questions[body.id]) {
-                        return new Response(JSON.stringify({ error: 'Question not found' }), {
-                                status: 404,
-                                headers: { 'Content-Type': 'application/json' },
-                        });
-                }
+		if (!questions[body.id]) {
+			return new Response(JSON.stringify({ error: 'Question not found' }), {
+				status: 404,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
 
-                questions[body.id] = body.question;
-                await saveQuestions(env, questions);
+		questions[body.id] = body.question;
+		await saveQuestions(env, questions);
 
-                return new Response(JSON.stringify({ questions }), {
-                        headers: { 'Content-Type': 'application/json' },
-                });
-        } else if (request.method === 'DELETE') {
-                const body = await request.json() as { id?: string };
+		return new Response(JSON.stringify({ questions }), {
+			headers: { 'Content-Type': 'application/json' },
+		});
+	} else if (request.method === 'DELETE') {
+		const body = await request.json() as { id?: string };
 
-                if (!body.id) {
-                        return new Response(JSON.stringify({ error: 'Question ID is required' }), {
-                                status: 400,
-                                headers: { 'Content-Type': 'application/json' },
-                        });
-                }
+		if (!body.id) {
+			return new Response(JSON.stringify({ error: 'Question ID is required' }), {
+				status: 400,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
 
-                if (!questions[body.id]) {
-                        return new Response(JSON.stringify({ error: 'Question not found' }), {
-                                status: 404,
-                                headers: { 'Content-Type': 'application/json' },
-                        });
-                }
+		if (!questions[body.id]) {
+			return new Response(JSON.stringify({ error: 'Question not found' }), {
+				status: 404,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
 
-                delete questions[body.id];
-                await saveQuestions(env, questions);
+		delete questions[body.id];
+		await saveQuestions(env, questions);
 
-                return new Response(JSON.stringify({ questions }), {
-                        headers: { 'Content-Type': 'application/json' },
-                });
-        }
+		return new Response(JSON.stringify({ questions }), {
+			headers: { 'Content-Type': 'application/json' },
+		});
+	}
 
-        return new Response('Method Not Allowed', { status: 405 });
+	return new Response('Method Not Allowed', { status: 405 });
 }
 
 async function handleGuestAuthAPI(request: Request, env: Env): Promise<Response> {
-        if (request.method !== 'POST') {
-                return new Response('Method Not Allowed', { status: 405 });
-        }
+	if (request.method !== 'POST') {
+		return new Response('Method Not Allowed', { status: 405 });
+	}
 
-        const body = await request.json() as { name?: string; password?: string };
+	const body = await request.json() as { name?: string; password?: string };
 
-        if (!body.name || !body.password) {
-                return new Response(JSON.stringify({ error: 'Both name and password are required' }), {
-                        status: 400,
-                        headers: { 'Content-Type': 'application/json' },
-                });
-        }
+	if (!body.name || !body.password) {
+		return new Response(JSON.stringify({ error: 'Both name and password are required' }), {
+			status: 400,
+			headers: { 'Content-Type': 'application/json' },
+		});
+	}
 
-        const guests = await getGuests(env);
-        const hashedPassword = await sha256(body.password);
+	const guests = await getGuests(env);
+	const hashedPassword = await sha256(body.password);
 
-        if (!guests[body.name] || guests[body.name] !== hashedPassword) {
-                return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
-                        status: 401,
-                        headers: { 'Content-Type': 'application/json' },
-                });
-        }
+	if (!guests[body.name] || guests[body.name] !== hashedPassword) {
+		return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
+			status: 401,
+			headers: { 'Content-Type': 'application/json' },
+		});
+	}
 
-        return new Response(JSON.stringify({ success: true, guestName: body.name }), {
-                headers: {
-                        'Content-Type': 'application/json',
-                },
-        });
+	return new Response(JSON.stringify({ success: true, guestName: body.name }), {
+		headers: {
+			'Content-Type': 'application/json',
+		},
+	});
 }
 
 async function handleGuestQuestionAPI(request: Request, env: Env): Promise<Response> {
-        // Authenticate the guest
-        const authenticatedGuest = await verifyGuestCookie(request, env);
+	// Authenticate the guest
+	const authenticatedGuest = await verifyGuestCookie(request, env);
 
-        if (!authenticatedGuest) {
-                return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-                        status: 401,
-                        headers: { 'Content-Type': 'application/json' },
-                });
-        }
+	if (!authenticatedGuest) {
+		return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+			status: 401,
+			headers: { 'Content-Type': 'application/json' },
+		});
+	}
 
-        const url = new URL(request.url);
+	const url = new URL(request.url);
 
-        if (request.method === 'GET') {
-                let state = await getGuestState(env, authenticatedGuest);
-                
-                if (!state) {
-                        state = await initializeGuestState(env, authenticatedGuest);
-                }
+	if (request.method === 'GET') {
+		let state = await getGuestState(env, authenticatedGuest);
 
-                // If currentQuestion or currentGuest is empty/null, get a new question
-                if (!state.currentQuestion || !state.currentGuest) {
-                        const hasMoreQuestions = await getNextQuestion(env, authenticatedGuest, state);
-                        await saveGuestState(env, authenticatedGuest, state);
-                        
-                        if (!hasMoreQuestions) {
-                                return new Response(JSON.stringify({
-                                        completed: true,
-                                        message: 'You have answered all questions for all guests! Please check back later for new questions.'
-                                }), {
-                                        headers: { 'Content-Type': 'application/json' },
-                                });
-                        }
-                }
+		if (!state) {
+			state = await initializeGuestState(env, authenticatedGuest);
+		}
 
-                const questions = await getQuestions(env);
-                const currentQuestionText = questions[state.currentQuestion] || 'Question not found';
+		// If currentQuestion or currentGuest is empty/null, get a new question
+		if (!state.currentQuestion || !state.currentGuest) {
+			const hasMoreQuestions = await getNextQuestion(env, authenticatedGuest, state);
+			await saveGuestState(env, authenticatedGuest, state);
 
-                return new Response(JSON.stringify({
-                        completed: false,
-                        currentQuestion: state.currentQuestion,
-                        currentQuestionText,
-                        currentGuest: state.currentGuest,
-                }), {
-                        headers: { 'Content-Type': 'application/json' },
-                });
-        } else if (request.method === 'POST') {
-                const body = await request.json() as { answer?: string };
+			if (!hasMoreQuestions) {
+				return new Response(JSON.stringify({
+					completed: true,
+					message: 'You have answered all questions for all guests! Please check back later for new questions.'
+				}), {
+					headers: { 'Content-Type': 'application/json' },
+				});
+			}
+		}
 
-                if (!body.answer) {
-                        return new Response(JSON.stringify({ error: 'Answer is required' }), {
-                                status: 400,
-                                headers: { 'Content-Type': 'application/json' },
-                        });
-                }
+		const questions = await getQuestions(env);
+		const currentQuestionText = questions[state.currentQuestion] || 'Question not found';
 
-                let state = await getGuestState(env, authenticatedGuest);
+		return new Response(JSON.stringify({
+			completed: false,
+			currentQuestion: state.currentQuestion,
+			currentQuestionText,
+			currentGuest: state.currentGuest,
+		}), {
+			headers: { 'Content-Type': 'application/json' },
+		});
+	} else if (request.method === 'POST') {
+		const body = await request.json() as { answer?: string };
 
-                if (!state) {
-                        return new Response(JSON.stringify({ error: 'Guest state not found' }), {
-                                status: 404,
-                                headers: { 'Content-Type': 'application/json' },
-                        });
-                }
+		if (!body.answer) {
+			return new Response(JSON.stringify({ error: 'Answer is required' }), {
+				status: 400,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
 
-                // Save the answer
-                if (!state.answers[state.currentGuest]) {
-                        state.answers[state.currentGuest] = {};
-                }
-                state.answers[state.currentGuest][state.currentQuestion] = body.answer;
+		let state = await getGuestState(env, authenticatedGuest);
 
-                // Get next question
-                const hasMoreQuestions = await getNextQuestion(env, authenticatedGuest, state);
+		if (!state) {
+			return new Response(JSON.stringify({ error: 'Guest state not found' }), {
+				status: 404,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
 
-                await saveGuestState(env, authenticatedGuest, state);
+		// Save the answer
+		if (!state.answers[state.currentGuest]) {
+			state.answers[state.currentGuest] = {};
+		}
+		state.answers[state.currentGuest][state.currentQuestion] = body.answer;
 
-                if (!hasMoreQuestions) {
-                        return new Response(JSON.stringify({
-                                completed: true,
-                                message: 'You have answered all questions for all guests! Please check back later for new questions.'
-                        }), {
-                                headers: { 'Content-Type': 'application/json' },
-                        });
-                }
+		// Get next question
+		const hasMoreQuestions = await getNextQuestion(env, authenticatedGuest, state);
 
-                const questions = await getQuestions(env);
-                const currentQuestionText = questions[state.currentQuestion] || 'Question not found';
+		await saveGuestState(env, authenticatedGuest, state);
 
-                return new Response(JSON.stringify({
-                        completed: false,
-                        currentQuestion: state.currentQuestion,
-                        currentQuestionText,
-                        currentGuest: state.currentGuest,
-                }), {
-                        headers: { 'Content-Type': 'application/json' },
-                });
-        }
+		if (!hasMoreQuestions) {
+			return new Response(JSON.stringify({
+				completed: true,
+				message: 'You have answered all questions for all guests! Please check back later for new questions.'
+			}), {
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
 
-        return new Response('Method Not Allowed', { status: 405 });
+		const questions = await getQuestions(env);
+		const currentQuestionText = questions[state.currentQuestion] || 'Question not found';
+
+		return new Response(JSON.stringify({
+			completed: false,
+			currentQuestion: state.currentQuestion,
+			currentQuestionText,
+			currentGuest: state.currentGuest,
+		}), {
+			headers: { 'Content-Type': 'application/json' },
+		});
+	}
+
+	return new Response('Method Not Allowed', { status: 405 });
 }
 
 async function handleLeaderboardAPI(request: Request, env: Env): Promise<Response> {
-        if (request.method !== 'GET') {
-                return new Response('Method Not Allowed', { status: 405 });
-        }
+	if (request.method !== 'GET') {
+		return new Response('Method Not Allowed', { status: 405 });
+	}
 
-        try {
-                const guests = await getGuests(env);
-                const guestNames = Object.keys(guests);
-                
-                const leaderboard = [];
+	try {
+		const guests = await getGuests(env);
+		const guestNames = Object.keys(guests);
 
-                for (const guestName of guestNames) {
-                        const state = await getGuestState(env, guestName);
-                        
-                        let guestsTalkedTo = 0;
-                        let totalAnswered = 0;
-                        
-                        if (state && state.answers) {
-                                // Count unique guests talked to
-                                guestsTalkedTo = Object.keys(state.answers).length;
-                                
-                                // Count total answered questions
-                                for (const guestAnswers of Object.values(state.answers)) {
-                                        totalAnswered += Object.keys(guestAnswers).length;
-                                }
-                        }
-                        
-                        leaderboard.push({
-                                name: guestName,
-                                guestsTalkedTo,
-                                totalAnswered
-                        });
-                }
+		const leaderboard = [];
 
-                // Sort by guests talked to (descending), then by total answered (descending)
-                leaderboard.sort((a, b) => {
-                        if (b.guestsTalkedTo !== a.guestsTalkedTo) {
-                                return b.guestsTalkedTo - a.guestsTalkedTo;
-                        }
-                        return b.totalAnswered - a.totalAnswered;
-                });
+		for (const guestName of guestNames) {
+			const state = await getGuestState(env, guestName);
 
-                return new Response(JSON.stringify({ leaderboard }), {
-                        headers: { 'Content-Type': 'application/json' },
-                });
-        } catch (error) {
-                return new Response(JSON.stringify({ error: 'Failed to load leaderboard' }), {
-                        status: 500,
-                        headers: { 'Content-Type': 'application/json' },
-                });
-        }
+			let guestsTalkedTo = 0;
+			let totalAnswered = 0;
+
+			if (state && state.answers) {
+				// Count unique guests talked to
+				guestsTalkedTo = Object.keys(state.answers).length;
+
+				// Count total answered questions
+				for (const guestAnswers of Object.values(state.answers)) {
+					totalAnswered += Object.keys(guestAnswers).length;
+				}
+			}
+
+			leaderboard.push({
+				name: guestName,
+				guestsTalkedTo,
+				totalAnswered
+			});
+		}
+
+		// Sort by guests talked to (descending), then by total answered (descending)
+		leaderboard.sort((a, b) => {
+			if (b.guestsTalkedTo !== a.guestsTalkedTo) {
+				return b.guestsTalkedTo - a.guestsTalkedTo;
+			}
+			return b.totalAnswered - a.totalAnswered;
+		});
+
+		return new Response(JSON.stringify({ leaderboard }), {
+			headers: { 'Content-Type': 'application/json' },
+		});
+	} catch (error) {
+		return new Response(JSON.stringify({ error: 'Failed to load leaderboard' }), {
+			status: 500,
+			headers: { 'Content-Type': 'application/json' },
+		});
+	}
 }
 
 async function handleGuestAnswersAPI(request: Request, env: Env): Promise<Response> {
-        if (request.method !== 'GET') {
-                return new Response('Method Not Allowed', { status: 405 });
-        }
+	if (request.method !== 'GET') {
+		return new Response('Method Not Allowed', { status: 405 });
+	}
 
-        const url = new URL(request.url);
-        const targetGuest = url.searchParams.get('guest');
+	const url = new URL(request.url);
+	const targetGuest = url.searchParams.get('guest');
 
-        if (!targetGuest) {
-                return new Response(JSON.stringify({ error: 'Guest name is required' }), {
-                        status: 400,
-                        headers: { 'Content-Type': 'application/json' },
-                });
-        }
+	if (!targetGuest) {
+		return new Response(JSON.stringify({ error: 'Guest name is required' }), {
+			status: 400,
+			headers: { 'Content-Type': 'application/json' },
+		});
+	}
 
-        try {
-                const guests = await getGuests(env);
-                const questions = await getQuestions(env);
-                const guestNames = Object.keys(guests);
+	try {
+		const guests = await getGuests(env);
+		const questions = await getQuestions(env);
+		const guestNames = Object.keys(guests);
 
-                // Collect all answers about the target guest
-                const answersByQuestion: Record<string, Array<{ answeredBy: string; answer: string }>> = {};
+		// Collect all answers about the target guest
+		const answersByQuestion: Record<string, Array<{ answeredBy: string; answer: string }>> = {};
 
-                for (const guestName of guestNames) {
-                        const state = await getGuestState(env, guestName);
+		for (const guestName of guestNames) {
+			const state = await getGuestState(env, guestName);
 
-                        if (state && state.answers && state.answers[targetGuest]) {
-                                const answersAboutTarget = state.answers[targetGuest];
+			if (state && state.answers && state.answers[targetGuest]) {
+				const answersAboutTarget = state.answers[targetGuest];
 
-                                for (const [questionId, answer] of Object.entries(answersAboutTarget)) {
-                                        if (!answersByQuestion[questionId]) {
-                                                answersByQuestion[questionId] = [];
-                                        }
+				for (const [questionId, answer] of Object.entries(answersAboutTarget)) {
+					if (!answersByQuestion[questionId]) {
+						answersByQuestion[questionId] = [];
+					}
 
-                                        answersByQuestion[questionId].push({
-                                                answeredBy: guestName,
-                                                answer: answer
-                                        });
-                                }
-                        }
-                }
+					answersByQuestion[questionId].push({
+						answeredBy: guestName,
+						answer: answer
+					});
+				}
+			}
+		}
 
-                // Build response with question text
-                const groupedAnswers = [];
-                for (const [questionId, answers] of Object.entries(answersByQuestion)) {
-                        groupedAnswers.push({
-                                questionId,
-                                questionText: questions[questionId] || 'Unknown Question',
-                                answers
-                        });
-                }
+		// Build response with question text
+		const groupedAnswers = [];
+		for (const [questionId, answers] of Object.entries(answersByQuestion)) {
+			groupedAnswers.push({
+				questionId,
+				questionText: questions[questionId] || 'Unknown Question',
+				answers
+			});
+		}
 
-                return new Response(JSON.stringify({
-                        guestName: targetGuest,
-                        questions: groupedAnswers
-                }), {
-                        headers: { 'Content-Type': 'application/json' },
-                });
-        } catch (error) {
-                return new Response(JSON.stringify({ error: 'Failed to load guest answers' }), {
-                        status: 500,
-                        headers: { 'Content-Type': 'application/json' },
-                });
-        }
+		return new Response(JSON.stringify({
+			guestName: targetGuest,
+			questions: groupedAnswers
+		}), {
+			headers: { 'Content-Type': 'application/json' },
+		});
+	} catch (error) {
+		return new Response(JSON.stringify({ error: 'Failed to load guest answers' }), {
+			status: 500,
+			headers: { 'Content-Type': 'application/json' },
+		});
+	}
+}
+
+function parseBasicAuth(authHeader: string | null): { username: string; password: string } | null {
+	if (!authHeader || !authHeader.startsWith('Basic ')) return null;
+	try {
+		const b64 = authHeader.slice(6);
+		const [username, password] = atob(b64).split(':');
+		if (!username || !password) return null;
+		return { username, password };
+	} catch {
+		return null;
+	}
+}
+
+async function handleBirthdayAuth(request: Request, env: Env): Promise<Response> {
+	// Get credentials from KV
+	const storedUsername = await env.BIRTHDAY_KV.get('auth_username');
+	const storedPassword = await env.BIRTHDAY_KV.get('auth_password');
+
+	if (!storedUsername || !storedPassword) {
+		return new Response('Fehler: Zugangsdaten nicht gesetzt.', { status: 500 });
+	}
+
+	// Parse Authorization header
+	const auth = parseBasicAuth(request.headers.get('Authorization'));
+
+	if (!auth || auth.username !== storedUsername || auth.password !== storedPassword) {
+		// Serve unauthorized.html
+		const unauthorizedResponse = await fetch(new Request(new URL('/unauthorized.html', request.url)));
+
+		return new Response(unauthorizedResponse.body, {
+			status: 401,
+			headers: {
+				'WWW-Authenticate': 'Basic realm="UserName: Mein Name, Passwort: Mein Geburtsdatum", charset="UTF-8"',
+				'Content-Type': 'text/html; charset=UTF-8',
+			},
+		});
+	}
+
+	// Authenticated: show the site with dynamic live location and list URL
+	const [liveLocation, listUrl, birthdayHtml] = await Promise.all([
+		env.BIRTHDAY_KV.get('live_location'),
+		env.BIRTHDAY_KV.get('list_url'),
+		fetch(new Request(new URL('/birthday.html', request.url)))
+	]);
+
+	let locationHtml = liveLocation
+		? `<div style="margin:1.5em 0">
+                        <a href="${liveLocation}" target="_blank" style="font-size:1.1em;color:#2563eb;word-break:break-all">
+                                🔗 Livestandort öffnen
+                        </a><br>
+                        <span style="color:#6b7280;font-size:0.95em">
+                                Falls der Link nicht funktioniert, bitte bei mir melden, damit ich ihn aktualisieren kann.
+                        </span>
+                </div>`
+		: `<div style="margin:1.5em 0;color:#eab308;font-size:1.05em">
+                        Livestandort-Link wird rechtzeitig hier erscheinen.
+                </div>`;
+
+	let listHtml = listUrl
+		? `<div style="margin:2em 0;padding-top:1em;border-top:1px solid #e5e7eb">
+                        <p style="color:#4f46e5;font-size:1.1em;margin-bottom:0.5em">📝 Mitbringliste</p>
+                        <a href="${listUrl}" target="_blank" style="color:#2563eb;text-decoration:none;display:inline-block;padding:0.5em 1em;background:#f0f9ff;border-radius:0.5em;margin-top:0.5em">
+                                Liste öffnen
+                        </a>
+                        <p style="color:#6b7280;font-size:0.95em;margin-top:0.5em">
+                                Hier könnt ihr eintragen, was ihr mitbringen möchtet! Ich werde hier hoffentlich auch eintragen, was ich da habe.
+                        </p>
+                </div>`
+		: '';
+
+	let html = await birthdayHtml.text();
+	html = html
+		.replace('<!-- LIVE_LOCATION_PLACEHOLDER -->', locationHtml)
+		.replace('<!-- LIST_URL_PLACEHOLDER -->', listHtml);
+
+	return new Response(html, {
+		headers: {
+			'Content-Type': 'text/html; charset=UTF-8',
+		},
+	});
 }
 
 export default {
-        async fetch(request, env, ctx): Promise<Response> {
-                const url = new URL(request.url);
+	async fetch(request, env, ctx): Promise<Response> {
+		const url = new URL(request.url);
 
-                // Handle login endpoint
-                if (url.pathname === '/login') {
-                        return handleLogin(request, env);
-                }
+		// Handle root path with birthday authentication
+		if (url.pathname === '/') {
+			return handleBirthdayAuth(request, env);
+		}
 
-                // Handle guest login endpoint
-                if (url.pathname === '/guest-login') {
-                        return handleGuestLogin(request, env);
-                }
+		// Handle login endpoint
+		if (url.pathname === '/login') {
+			return handleLogin(request, env);
+		}
 
-                // Handle guest authentication (no admin auth required)
-                if (url.pathname === '/api/guest-auth') {
-                        return handleGuestAuthAPI(request, env);
-                }
+		// Handle guest login endpoint
+		if (url.pathname === '/guest-login') {
+			return handleGuestLogin(request, env);
+		}
 
-                // Handle guest questions (no admin auth required)
-                if (url.pathname === '/api/guest-question') {
-                        return handleGuestQuestionAPI(request, env);
-                }
+		// Handle guest authentication (no admin auth required)
+		if (url.pathname === '/api/guest-auth') {
+			return handleGuestAuthAPI(request, env);
+		}
 
-                // Apply authentication middleware
-                return requireAuth(request, env, async () => {
-                        // Handle API routes
-                        if (url.pathname === '/api/guests') {
-                                return handleGuestsAPI(request, env);
-                        }
+		// Handle guest questions (no admin auth required)
+		if (url.pathname === '/api/guest-question') {
+			return handleGuestQuestionAPI(request, env);
+		}
 
-                        if (url.pathname === '/api/questions') {
-                                return handleQuestionsAPI(request, env);
-                        }
+		// Apply authentication middleware
+		return requireAuth(request, env, async () => {
+			// Handle API routes
+			if (url.pathname === '/api/guests') {
+				return handleGuestsAPI(request, env);
+			}
 
-                        if (url.pathname === '/api/leaderboard') {
-                                return handleLeaderboardAPI(request, env);
-                        }
+			if (url.pathname === '/api/questions') {
+				return handleQuestionsAPI(request, env);
+			}
 
-                        if (url.pathname === '/api/guest-answers') {
-                                return handleGuestAnswersAPI(request, env);
-                        }
+			if (url.pathname === '/api/leaderboard') {
+				return handleLeaderboardAPI(request, env);
+			}
 
-                        // Serve static assets
-                        return env.ASSETS.fetch(request);
-                });
-        },
+			if (url.pathname === '/api/guest-answers') {
+				return handleGuestAnswersAPI(request, env);
+			}
+
+			// Serve static assets
+			return env.ASSETS.fetch(request);
+		});
+	},
 } satisfies ExportedHandler<Env>;
 
