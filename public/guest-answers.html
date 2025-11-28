@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guest Answers</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .nav-buttons button {
+            flex: 1;
+            padding: 12px;
+            background-color: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .nav-buttons button:hover {
+            background-color: #5568d3;
+        }
+        .question-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .question-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .answer-item {
+            padding: 15px;
+            margin: 10px 0;
+            background-color: white;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .answer-by {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        .answer-text {
+            color: #333;
+            line-height: 1.5;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+        }
+        .error {
+            color: #f44336;
+            text-align: center;
+            padding: 20px;
+        }
+        .no-answers {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Answers About</h1>
+        <p class="subtitle" id="guestNameTitle">Loading...</p>
+        
+        <div class="nav-buttons">
+            <button onclick="window.location.href='/leaderboard.html'">← Back to Leaderboard</button>
+        </div>
+        
+        <div id="answersContent">
+            <div class="loading">Loading answers...</div>
+        </div>
+    </div>
+
+    <script>
+        async function loadAnswers() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const guestName = urlParams.get('guest');
+
+            if (!guestName) {
+                document.getElementById('answersContent').innerHTML = 
+                    '<div class="error">No guest specified</div>';
+                return;
+            }
+
+            const contentDiv = document.getElementById('answersContent');
+            contentDiv.innerHTML = '<div class="loading">Loading answers...</div>';
+
+            try {
+                const response = await fetch(`/api/guest-answers?guest=${encodeURIComponent(guestName)}`);
+
+                if (response.status === 401) {
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+                    return;
+                }
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to load answers');
+                }
+
+                const data = await response.json();
+                document.getElementById('guestNameTitle').textContent = data.guestName;
+                displayAnswers(data.questions);
+            } catch (error) {
+                contentDiv.innerHTML = `<div class="error">${error.message || 'Failed to load answers'}</div>`;
+            }
+        }
+
+        function displayAnswers(questions) {
+            const contentDiv = document.getElementById('answersContent');
+            
+            if (!questions || questions.length === 0) {
+                contentDiv.innerHTML = '<div class="no-answers">No answers about this guest yet.</div>';
+                return;
+            }
+
+            let html = '';
+
+            questions.forEach(question => {
+                html += `
+                    <div class="question-section">
+                        <div class="question-title">${escapeHtml(question.questionText)}</div>
+                `;
+
+                question.answers.forEach(answerData => {
+                    html += `
+                        <div class="answer-item">
+                            <div class="answer-by">→ ${escapeHtml(answerData.answeredBy)}</div>
+                            <div class="answer-text">${escapeHtml(answerData.answer)}</div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+            });
+
+            contentDiv.innerHTML = html;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Load answers on page load
+        loadAnswers();
+    </script>
+</body>
+</html>

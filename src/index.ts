@@ -489,6 +489,72 @@ async function handleLeaderboardAPI(request: Request, env: Env): Promise<Respons
         }
 }
 
+async function handleGuestAnswersAPI(request: Request, env: Env): Promise<Response> {
+        if (request.method !== 'GET') {
+                return new Response('Method Not Allowed', { status: 405 });
+        }
+
+        const url = new URL(request.url);
+        const targetGuest = url.searchParams.get('guest');
+
+        if (!targetGuest) {
+                return new Response(JSON.stringify({ error: 'Guest name is required' }), {
+                        status: 400,
+                        headers: { 'Content-Type': 'application/json' },
+                });
+        }
+
+        try {
+                const guests = await getGuests(env);
+                const questions = await getQuestions(env);
+                const guestNames = Object.keys(guests);
+
+                // Collect all answers about the target guest
+                const answersByQuestion: Record<string, Array<{ answeredBy: string; answer: string }>> = {};
+
+                for (const guestName of guestNames) {
+                        const state = await getGuestState(env, guestName);
+
+                        if (state && state.answers && state.answers[targetGuest]) {
+                                const answersAboutTarget = state.answers[targetGuest];
+
+                                for (const [questionId, answer] of Object.entries(answersAboutTarget)) {
+                                        if (!answersByQuestion[questionId]) {
+                                                answersByQuestion[questionId] = [];
+                                        }
+
+                                        answersByQuestion[questionId].push({
+                                                answeredBy: guestName,
+                                                answer: answer
+                                        });
+                                }
+                        }
+                }
+
+                // Build response with question text
+                const groupedAnswers = [];
+                for (const [questionId, answers] of Object.entries(answersByQuestion)) {
+                        groupedAnswers.push({
+                                questionId,
+                                questionText: questions[questionId] || 'Unknown Question',
+                                answers
+                        });
+                }
+
+                return new Response(JSON.stringify({
+                        guestName: targetGuest,
+                        questions: groupedAnswers
+                }), {
+                        headers: { 'Content-Type': 'application/json' },
+                });
+        } catch (error) {
+                return new Response(JSON.stringify({ error: 'Failed to load guest answers' }), {
+                        status: 500,
+                        headers: { 'Content-Type': 'application/json' },
+                });
+        }
+}
+
 export default {
         async fetch(request, env, ctx): Promise<Response> {
                 const url = new URL(request.url);
@@ -526,6 +592,10 @@ export default {
 
                         if (url.pathname === '/api/leaderboard') {
                                 return handleLeaderboardAPI(request, env);
+                        }
+
+                        if (url.pathname === '/api/guest-answers') {
+                                return handleGuestAnswersAPI(request, env);
                         }
 
                         // Serve static assets

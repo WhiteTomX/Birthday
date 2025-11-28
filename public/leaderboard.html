@@ -87,6 +87,13 @@
         .name {
             font-weight: 500;
         }
+        .name a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .name a:hover {
+            text-decoration: underline;
+        }
         .stat {
             text-align: center;
             font-weight: bold;
@@ -185,7 +192,7 @@
                 html += `
                     <tr>
                         <td class="${rankClass}">${rankDisplay}</td>
-                        <td class="name">${entry.name}</td>
+                        <td class="name"><a href="/guest-answers.html?guest=${encodeURIComponent(entry.name)}">${entry.name}</a></td>
                         <td class="stat">${entry.guestsTalkedTo}</td>
                         <td class="stat">${entry.totalAnswered}</td>
                     </tr>
