@@ -605,7 +605,7 @@ async function handleBirthdayAuth(request: Request, env: Env): Promise<Response>
                                 🔗 Livestandort öffnen
                         </a><br>
                         <span style="color:#6b7280;font-size:0.95em">
-                                Falls der Link nicht funktioniert, bitte bei mir melden, damit ich ihn aktualisieren kann.
+                                Ja, ich heiße dort xhuyNnPSgnJ3. Falls der Link nicht funktioniert, bitte bei mir melden, damit ich ihn aktualisieren kann.
                         </span>
                 </div>`
 		: `<div style="margin:1.5em 0;color:#eab308;font-size:1.05em">
