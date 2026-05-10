@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Password Hint Page
-status: complete
-stopped_at: Phase 5 complete — pending deploy
-last_updated: "2026-05-10T16:12:00.000Z"
-last_activity: 2026-05-10 — Phase 5 executed and verified (1 plan, commit 81f59cf)
+status: shipped
+stopped_at: Phase 5 shipped — PR #2
+last_updated: "2026-05-10"
+last_activity: 2026-05-10 — Phase 5 shipped — PR #2 (https://github.com/WhiteTomX/Birthday/pull/2)
 progress:
   total_phases: 1
   completed_phases: 1
