@@ -45,29 +45,18 @@ function unauthorizedResponse() {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Psst</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      font-size: 16px;
-      line-height: 1.6;
-      color: #2D1510;
-      background-color: #FDF4E8;
-      padding: 80px 16px;
-    }
-    .container { max-width: 600px; margin: 0 auto; }
-    h1 { font-size: 24px; font-weight: 700; line-height: 1.25; color: #2D1510; margin-bottom: 24px; }
-    p { font-size: 16px; color: #2D1510; }
-    @media (min-width: 600px) { body { padding: 80px 32px; } }
-  </style>
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <div class="container">
-    <h1>Psst — ein kleines Rätsel für dich</h1>
-    <p>Ich komme einmal im Jahr.<br>
-    Man bäckt mir einen Kuchen, zündet Kerzen an und singt für mich.<br>
-    Wer eingeladen ist, kennt mein Datum —<br>
-    und kennt damit auch das Passwort.</p>
+    <section class="save-the-date">
+      <h1>Psst — ein kleines Rätsel für dich</h1>
+      <p>Ich komme einmal im Jahr.<br>
+      Man bäckt mir einen Kuchen, zündet Kerzen an und singt für mich.<br>
+      Wer eingeladen ist, kennt mein Datum —<br>
+      und kennt damit auch das Passwort.</p>
+      <a href="/rsvp/" class="btn-hint">Nochmal versuchen →</a>
+    </section>
   </div>
 </body>
 </html>`;
