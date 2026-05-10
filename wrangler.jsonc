@@ -1,12 +1,12 @@
 {
-  "name": "birthday",
-  "compatibility_date": "2024-01-01",
-  "pages_build_output_dir": "public",
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "birthday-rsvps",
-      "database_id": "REPLACE_WITH_DATABASE_ID"
-    }
-  ]
+	"name": "birthday",
+	"compatibility_date": "2024-01-01",
+	"pages_build_output_dir": "public",
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "birthday-rsvps",
+			"database_id": "4e2e93ff-ea5b-4cc3-8c2f-d469c79c88f4"
+		}
+	]
 }
