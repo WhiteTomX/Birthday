@@ -33,6 +33,12 @@ Replace the plain-text "Unauthorized" response in `functions/_middleware.js` wit
 ### HTTP Response
 - **D-08:** The 401 response includes `Cache-Control: no-store` (per AUTH-07) and `Content-Type: text/html; charset=utf-8`.
 
+### Architecture (revised — 2026-05-10)
+- **D-09:** The hint page is served at `/` as a **200 response** (no auth challenge). Returning a 401 at the root causes browsers to show the native auth dialog *before* the page body, defeating the purpose.
+- **D-10:** `/rsvp/` is the new home for the RSVP page (current `public/index.html` moves to `public/rsvp/index.html` with absolute resource paths `/style.css` and `/script.js`).
+- **D-11:** `functions/_middleware.js` skips auth for `pathname === '/'` (and `'/index.html'`). All other unauthenticated routes still return 401 + `WWW-Authenticate: Basic` + hint page HTML as body (covers AUTH-04: wrong creds at `/rsvp/` → cancel → user sees hint page).
+- **D-12:** The hint page includes a call-to-action button linking to `/rsvp/` with text **"Zur Einladung →"**. Clicking it triggers the browser's Basic Auth dialog for `/rsvp/`.
+
 </decisions>
 
 <canonical_refs>
