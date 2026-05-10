@@ -22,53 +22,7 @@ created: 2026-05-10
 | Preset | not applicable |
 | Component library | none |
 | Icon library | none (CSS + Unicode decorative characters only) |
-| Display font | "Playfair Display" (Google Fonts CDN) |
-| Body font | "Lato" (Google Fonts CDN) |
-
-**Font hosting: self-hosted** — font files served from `public/fonts/` on Cloudflare Pages. No external CDN requests. No Google Fonts `<link>` tags.
-
-**Font files to download** (from [google-webfonts-helper](https://gwfh.mranftl.com/fonts) or the Google Fonts download button):
-
-| File | Format | Usage |
-|------|--------|-------|
-| `public/fonts/playfair-display-700.woff2` | woff2 | Display headings |
-| `public/fonts/lato-400.woff2` | woff2 | Body text |
-| `public/fonts/lato-700.woff2` | woff2 | Labels, bold |
-
-**`@font-face` declarations** (add at the top of `style.css`, before `:root`):
-```css
-@font-face {
-  font-family: 'Playfair Display';
-  src: url('/fonts/playfair-display-700.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Lato';
-  src: url('/fonts/lato-400.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Lato';
-  src: url('/fonts/lato-700.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-```
-
-**`public/index.html`:** No `<link>` tags needed for fonts — remove any Google Fonts preconnect/stylesheet links.
-
-**CSS variable declarations** (replace existing `--font` with two named variables):
-```css
---font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
---font-body:    'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-```
+| Font | System font stack — `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif` (unchanged) |
 
 ---
 
@@ -135,31 +89,22 @@ Exceptions to 4px grid: none.
 
 ## Typography
 
-| Role | Font | Size | Weight | Line Height | Letter Spacing | Notes |
-|------|------|------|--------|-------------|----------------|-------|
-| Eyebrow badge ("Save the Date") | Lato | 14px | 700 | 1.2 | 0.20em | Uppercase via `text-transform: uppercase` |
-| Display (h1 — "5. Dezember") | Playfair Display | 56px | 700 | 1.1 | normal | Mobile: 40px (see breakpoint) |
-| Section heading (h2 — "Anmeldung") | Playfair Display | 24px | 700 | 1.25 | normal | — |
-| Body | Lato | 16px | 400 | 1.65 | normal | All `<p>` content |
-| Label (form labels, deadline) | Lato | 14px | 700 | 1.4 | normal | `.field label`, `.deadline` |
+| Role | Size | Weight | Line Height | Letter Spacing | Notes |
+|------|------|--------|-------------|----------------|-------|
+| Eyebrow badge ("Save the Date") | 14px | 700 | 1.2 | 0.20em | Uppercase via `text-transform: uppercase` |
+| Display (h1 — "5. Dezember") | 56px | 700 | 1.1 | normal | Mobile: 40px (see breakpoint) |
+| Section heading (h2 — "Anmeldung") | 24px | 700 | 1.25 | normal | — |
+| Body | 16px | 400 | 1.65 | normal | All `<p>` content |
+| Label (form labels, deadline) | 14px | 700 | 1.4 | normal | `.field label`, `.deadline` |
 
-**Only two weights are used:** 400 (regular) and 700 (bold). No 600/semibold — the Lato+Playfair pairing is crisp without it.
+**Font:** System font stack unchanged (`--font` variable). No new fonts introduced.
+
+**Only two weights used:** 400 and 700.
 
 **Mobile breakpoint typography** (`max-width: 599px`):
 ```css
 .save-the-date h1 {
-  font-size: 40px;   /* was 56px on desktop */
-}
-```
-
-**Font assignment to CSS variables:**
-```css
-body {
-  font-family: var(--font-body);
-}
-.save-the-date h1,
-.rsvp-section h2 {
-  font-family: var(--font-display);
+  font-size: 40px;
 }
 ```
 
@@ -203,8 +148,7 @@ body {
   --muted:           #8A6258;
   --border:          #E8C9B0;
   --error:           #DC2626;
-  --font-display:    'Playfair Display', Georgia, 'Times New Roman', serif;
-  --font-body:       'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font:            -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --radius:          8px;
 }
 ```
@@ -218,7 +162,7 @@ The `.eyebrow` element is a pill badge rendered in festive gold.
 ```css
 .eyebrow {
   display: inline-block;
-  font-family: var(--font-body);
+  font-family: var(--font);
   font-size: 14px;
   font-weight: 700;
   line-height: 1.2;
@@ -303,7 +247,6 @@ All interaction behaviour from Phase 2 and Phase 3 is preserved without change:
 **Success message styling** (new CSS required — this element is created by JS):
 ```css
 .success-msg {
-  font-family: var(--font-display);
   font-size: 24px;
   font-weight: 700;
   line-height: 1.4;
@@ -321,10 +264,9 @@ All interaction behaviour from Phase 2 and Phase 3 is preserved without change:
 |----------|-------------|-------------|
 | shadcn official | none | not applicable — no shadcn |
 | npm registries | none | not applicable — no build step |
-| Google Fonts CDN | Playfair Display (wght 700), Lato (wght 400, 700) | **Self-hosted** — `public/fonts/*.woff2`, no CDN |
+| Web fonts | none | not applicable — system font, no external font loading |
 
-**Font hosting decision: self-hosted on Cloudflare Pages.**
-Font files (`*.woff2`) are committed to `public/fonts/` and served directly. No requests to Google servers — no IP/UA data sent to third parties. `@font-face` declarations in `style.css` reference local paths. `font-display: swap` ensures text remains visible during font load.
+**No external font requests.** The existing system font stack (`--font`) is retained unchanged. No `<link>` tags, no `@font-face`, no CDN. Zero font-related changes to `index.html` or `style.css`.
 
 ---
 
