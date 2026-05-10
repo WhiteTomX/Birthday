@@ -80,8 +80,49 @@
     }
 
     if (valid) {
-      // Phase 3: replace this block with actual form submission logic
-      // Future: fetch('/api/rsvp', { method: 'POST', body: new FormData(form) })
+      // Disable submit and show loading state (D-03)
+      var submitBtn = form.querySelector('.btn-submit');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '…';
+
+      // Build JSON payload (D-02)
+      // contact coerced to null when empty string (D-10 / RESEARCH gotcha #5)
+      // attendees parsed as integer (RESEARCH gotcha #6)
+      var payload = {
+        name: nameInput.value.trim(),
+        contact: form.elements['contact'].value || null,
+        attendees: parseInt(countHidden.value, 10)
+      };
+
+      fetch('/api/rsvp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+        .then(function (res) {
+          if (!res.ok) { throw new Error('Server error'); }
+          // Success: replace form section with personalised German confirmation (D-04, D-05)
+          // Use createElement + textContent — never innerHTML with user input (XSS prevention)
+          var section = document.querySelector('.rsvp-section');
+          var p = document.createElement('p');
+          p.className = 'success-msg';
+          p.textContent = 'Danke, ' + payload.name + '! Deine Anmeldung wurde gespeichert.';
+          section.innerHTML = '';
+          section.appendChild(p);
+        })
+        .catch(function () {
+          // Error: re-enable form and show inline error message (D-06, D-07)
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Anmelden';
+          var errEl = document.getElementById('submit-error');
+          if (!errEl) {
+            errEl = document.createElement('p');
+            errEl.id = 'submit-error';
+            errEl.className = 'error-msg visible';
+            form.appendChild(errEl);
+          }
+          errEl.textContent = 'Etwas ist schiefgelaufen. Bitte versuche es noch einmal.';
+        });
     }
   });
 
