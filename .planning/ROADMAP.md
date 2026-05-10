@@ -1,31 +1,33 @@
 # Roadmap: Birthday Website
 
-## Shipped Milestones
+## Milestones
 
-- **v1.0 RSVP Site** ✅ — 4 phases, 7 plans — [Archive](.planning/milestones/v1.0-ROADMAP.md)
+- ✅ **v1.0 RSVP Site** — Phases 1–4 (shipped 2026-05-10) · [Archive](.planning/milestones/v1.0-ROADMAP.md)
+- ✅ **v1.1 Password Hint Page** — Phase 5 (shipped 2026-05-10) · [Archive](.planning/milestones/v1.1-ROADMAP.md)
+- 📋 **v2.0 Full Invitation** — Phases 6+ (planned)
 
-## Current Milestone: v1.1 Password Hint Page
+## Phases
 
-### Phase 5: Password Hint Page
+<details>
+<summary>✅ v1.0 RSVP Site (Phases 1–4) — SHIPPED 2026-05-10</summary>
 
-**Goal:** Guests who need the password see a warm, festive HTML page with a German birthday riddle instead of a blank browser screen when they visit without credentials or enter the wrong password.
+- [x] Phase 1: Infrastructure & Auth (2/2 plans) — completed 2026-05-10
+- [x] Phase 2: Save the Date Page + RSVP Form (2/2 plans) — completed 2026-05-10
+- [x] Phase 3: RSVP Backend (2/2 plans) — completed 2026-05-10
+- [x] Phase 4: Design & Content Rework (1/1 plan) — completed 2026-05-10
 
-**Requirements:** AUTH-03, AUTH-04, AUTH-05, AUTH-06, AUTH-07
+</details>
 
-**Success criteria:**
-1. Visiting the site with no credentials shows the festive HTML page (after cancelling the browser auth dialog)
-2. Entering wrong credentials and cancelling shows the same page
-3. The hint page visually matches the main site's warm palette and typography
-4. The German birthday riddle is present and legible
-5. The 401 response includes `Cache-Control: no-store`
-6. Guests with correct credentials are not affected — site loads normally
+<details>
+<summary>✅ v1.1 Password Hint Page (Phase 5) — SHIPPED 2026-05-10</summary>
 
-**Depends on:** Phase 4 (design system established)
+- [x] Phase 5: Password Hint Page (1/1 plan) — completed 2026-05-10
 
-**Plans:** 1 plan
+</details>
 
-Plans:
-- [x] 05-01-PLAN.md — Replace `unauthorizedResponse()` with festive HTML riddle page + human visual verify
+### 📋 v2.0 Full Invitation (Planned)
+
+*To be defined when venue is confirmed.*
 
 ---
 
