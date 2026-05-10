@@ -26,7 +26,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Visiting the site URL without credentials shows a browser native login prompt
   2. Entering the correct password grants access (protected content loads)
   3. Entering a wrong password is rejected — the prompt re-appears or shows 401
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 01-PLAN-scaffold.md — Project scaffold: auth middleware, German placeholder page, .gitignore
+- [ ] 01-PLAN-deploy.md — Cloudflare Pages setup: connect GitHub, set SITE_PASSWORD secret, verify live auth
 
 ### Phase 2: Save-the-Date Page & RSVP Form
 **Goal**: Authenticated guests see a German save-the-date page and can fill out the RSVP form (frontend only — submission not yet wired)
