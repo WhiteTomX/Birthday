@@ -1,21 +1,36 @@
+---
+gsd_state_version: 1.0
+milestone: v2.0
+milestone_name: Full Invitation
+status: planning
+stopped_at: v1.1 milestone archived — ready for v2.0
+last_updated: "2026-05-10"
+last_activity: 2026-05-10 — v1.1 archived, PR #2 open
+progress:
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+---
+
 # Project State
 
 ## Project Reference
 
-**What This Is:** A personal 30th birthday celebration website — password-protected save-the-date RSVP collector evolving into a full event hub with venue details, photo uploads, games, and wishlist. Three milestones: v1.0 RSVP Site → v2.0 Full Invitation → v3.0 Event Day.
+See: .planning/PROJECT.md (updated 2026-05-10)
 
-**Core Value:** Enable frictionless guest RSVPs and participation via a centralized, beautiful site.
+**Core value:** Enable frictionless guest RSVPs via a password-protected, beautiful German site.
+**Current focus:** v2.0 Full Invitation — planning next milestone
 
 ## Current Position
 
-- **Milestone:** v2.0 Full Invitation (not yet started)
-- **Previous Milestone:** v1.0 RSVP Site ✅ Shipped 2026-05-10
-- **Status:** v1.0 archived — ready to plan v2.0
-- **Last activity:** 2026-05-10 — v1.0 milestone archived, git tag v1.0 created
+- **Milestone:** v2.0 Full Invitation (pending venue confirmation)
+- **Previous Milestone:** v1.1 Password Hint Page ✅ Shipped 2026-05-10
+- **Status:** Planning next milestone
 
 ## Progress
 
-`[██████████] 100%` — v1.0 RSVP Site shipped ✅ (4 phases, 7 plans, 12/12 requirements)
+v1.1 complete. v2.0 not yet started.
 
 ## Recent Decisions
 
@@ -27,23 +42,22 @@
 | Cloudflare stack | Free tier, globally distributed |
 | D1 for storage | Simple SQL, no external DB needed |
 | Unique ID per RSVP | All responses preserved |
-| ES Modules onRequest syntax | Required by Pages Functions (not Service Worker addEventListener) |
 | atob() for Base64 decode | Native in Workers runtime, no import needed |
 | Password from env.SITE_PASSWORD only | Never hardcoded in source |
-| Warm festive color tokens | `--bg: #FDF4E8`, `--accent: #C0395A`, `--festive: #C9900A` (Phase 4) |
-| "Save the Date" eyebrow badge | Visible on-page `<p class="eyebrow">` element (Phase 4) |
-| RSVP card styling | `.rsvp-section` with surface background + border-radius 12px (Phase 4) |
+| Warm festive color tokens | `--bg: #FDF4E8`, `--accent: #C0395A`, `--festive: #C9900A` |
+| Route restructure: RSVP to `/rsvp/` | Root `/` is public hint page, RSVP form at `/rsvp/` |
+| Public CSS exclusion from auth | `style.css` publicly accessible — loads correctly from 401 body |
+| `Cache-Control: no-store` on 401 | Prevents CDN-cached 401 loop for authenticated guests |
 
 ## Pending Todos
 
-None captured yet.
+None.
 
 ## Blockers / Concerns
 
-None.
+- v2.0 blocked on venue confirmation (expected weeks away)
 
 ## Session Continuity
 
-Last session: 2026-05-09
-Stopped at: Milestone v1.0 confirmed, gathering requirements.
-Resume file: N/A
+Last session: 2026-05-10
+Stopped at: v1.1 archived — ready to plan v2.0 when venue is confirmed

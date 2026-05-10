@@ -8,33 +8,19 @@ A personal 30th birthday celebration website serving as the single source of tru
 **Hosting:** Cloudflare (free tier)  
 **Event Date:** 5 December  
 
-## Current State: v1.0 RSVP Site ✅ Shipped 2026-05-10
+## Current State: v1.1 Password Hint Page ✅ Shipped 2026-05-10
 
-**What's live:** Password-protected Cloudflare Pages site at `birthday-4om.pages.dev` with a German save-the-date page, fully functional RSVP form, Worker backend storing unique records in D1, and a warm festive design.
+**What's live:** Password-protected Cloudflare Pages site at `birthday-4om.pages.dev` with a public festive hint page at `/`, a German birthday riddle shown to unauthenticated guests, and the RSVP form protected at `/rsvp/`.
 
-**Tech shipped:**
-- `functions/_middleware.js` — HTTP Basic Auth (every request protected)
-- `public/index.html` / `style.css` / `script.js` — German save-the-date + RSVP form UI
-- `functions/api/rsvp.js` — Worker endpoint: validates, stores RSVP with UUID in D1
-- `schema.sql` + D1 `birthday-rsvps` — RSVP storage (region WEUR)
+**Tech shipped in v1.1:**
+- `public/index.html` — replaced with festive hint page (200, no auth, German riddle, `#FDF4E8` palette)
+- `public/rsvp/index.html` — RSVP content moved here with absolute resource paths
+- `functions/_middleware.js` — public exclusions for `/`, `/index.html`, `/style.css`; 401 returns full riddle HTML with `Cache-Control: no-store`
 
-**Key patterns established:**
-- Auth: `Authorization` header → base64 decode → compare `env.SITE_PASSWORD` → `context.next()` or 401
-- D1: parameterized `.prepare().bind().run()` — no SQL injection
-- XSS prevention: `textContent` (not `innerHTML`) for user-supplied data in DOM
-- Secrets: `wrangler pages secret put` (never hardcoded; dashboard unreliable for Pages)
-
-## Next Milestone: v2.0 Full Invitation
-
-**Goal:** Update site with confirmed venue details and formal invitation information after venue decision.
-
-**Target features:**
-- Confirmed venue name and address
-- Parking information
-- Event timing (arrival, start, end)
-- Dress code (if applicable)
-
-*Start with `/gsd-new-milestone` to gather requirements and plan phases.*
+**Key patterns from v1.1:**
+- Public exclusions in middleware: `pathname === '/'` etc. → `context.next()` (no auth check)
+- 401 body: full HTML with `<link rel="stylesheet" href="/style.css">` (CSS publicly excluded, so links work from 401)
+- `Cache-Control: no-store` on all 401s — prevents CDN from caching unauthenticated responses
 
 ## Milestones
 
@@ -45,6 +31,12 @@ A personal 30th birthday celebration website serving as the single source of tru
 - Each RSVP gets unique ID (no overwrites/duplicates)
 - RSVP data stored in Cloudflare D1
 - Warm festive design with "Save the Date" eyebrow badge
+
+### v1.1: Password Hint Page ✅ Shipped 2026-05-10
+- Public festive HTML page at `/` with German birthday riddle (no auth dialog on first visit)
+- Same riddle shown in 401 body after wrong/cancelled credentials at `/rsvp/`
+- Matches warm festive design (`#FDF4E8` palette, same font stack)
+- `Cache-Control: no-store` on all 401s
 
 ### v2.0: Full Invitation (Post-Venue Decision — Weeks Away)
 - Update site with confirmed venue details
@@ -109,6 +101,10 @@ Requirements (all now validated):
 
 </details>
 
+| Route restructure: RSVP to `/rsvp/` | Move RSVP form to sub-path so root can be public | Cleaner public/private separation — `/` is hint page, `/rsvp/` is gated |
+| Public CSS exclusion | `style.css` excluded from auth so 401 body can load it | 401 page renders with full festive design |
+| `Cache-Control: no-store` on 401 | Prevents CDN caching unauthenticated responses | No "trapped in cached-401" loop for authenticated guests |
+
 ---
-*Last updated: 2026-05-10 — v1.0 milestone archived, v2.0 next*
+*Last updated: 2026-05-10 — v1.1 milestone shipped*
 
