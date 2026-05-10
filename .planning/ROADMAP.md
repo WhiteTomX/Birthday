@@ -13,7 +13,7 @@ Three phases deliver a password-protected save-the-date RSVP site on Cloudflare.
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Infrastructure & Auth** - Cloudflare Pages + Workers deployed, Basic Auth protecting a live URL
-- [ ] **Phase 2: Save-the-Date Page & RSVP Form** - German page with event info and fully functional RSVP form UI
+- [x] **Phase 2: Save-the-Date Page & RSVP Form** - German page with event info and fully functional RSVP form UI
 - [ ] **Phase 3: RSVP Backend** - Worker endpoint receives submissions and persists unique records in D1
 
 ## Phase Details
@@ -44,7 +44,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 02-01-PLAN.md — Replace placeholder page with German save-the-date content, RSVP form HTML/CSS/JS (frontend only)
+- [x] 02-01-PLAN.md — Replace placeholder page with German save-the-date content, RSVP form HTML/CSS/JS (frontend only)
 **UI hint**: yes
 
 ### Phase 3: RSVP Backend
@@ -66,5 +66,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Infrastructure & Auth | 2/2 | ✅ Complete | 2026-05-10 |
-| 2. Save-the-Date Page & RSVP Form | 0/TBD | Not started | - |
+| 2. Save-the-Date Page & RSVP Form | 1/1 | ✅ Complete | 2026-05-10 |
 | 3. RSVP Backend | 0/TBD | Not started | - |
