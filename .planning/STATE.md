@@ -9,14 +9,14 @@
 ## Current Position
 
 - **Milestone:** v1.0 RSVP Site
-- **Phase:** 1 of 3 (Infrastructure & Auth) — ready to plan
-- **Plan:** Not started
-- **Status:** Ready to plan
-- **Last activity:** 2026-05-09 — Roadmap created, 3 phases defined, 12/12 requirements mapped
+- **Phase:** 1 of 3 (Infrastructure & Auth) — in progress
+- **Plan:** 01-PLAN-scaffold ✅ complete | 01-PLAN-deploy ⏳ awaiting human action
+- **Status:** Wave 1 complete — awaiting Cloudflare Pages setup (human checkpoint)
+- **Last activity:** 2026-05-10 — Plan 01 scaffold executed; 3 files committed to main
 
 ## Progress
 
-`[░░░░░░░░░░] 0%` — Phase 1 ready to plan
+`[██░░░░░░░░] 17%` — Phase 1 Wave 1 complete (1/2 plans done)
 
 ## Recent Decisions
 
@@ -28,6 +28,9 @@
 | Cloudflare stack | Free tier, globally distributed |
 | D1 for storage | Simple SQL, no external DB needed |
 | Unique ID per RSVP | All responses preserved |
+| ES Modules onRequest syntax | Required by Pages Functions (not Service Worker addEventListener) |
+| atob() for Base64 decode | Native in Workers runtime, no import needed |
+| Password from env.SITE_PASSWORD only | Never hardcoded in source |
 
 ## Pending Todos
 

@@ -29,7 +29,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-PLAN-scaffold.md — Project scaffold: auth middleware, German placeholder page, .gitignore
+- [x] 01-PLAN-scaffold.md — Project scaffold: auth middleware, German placeholder page, .gitignore
 - [ ] 01-PLAN-deploy.md — Cloudflare Pages setup: connect GitHub, set SITE_PASSWORD secret, verify live auth
 
 ### Phase 2: Save-the-Date Page & RSVP Form
