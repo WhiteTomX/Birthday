@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Save the Date - 5. Dezember</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="container">
+
+    <section class="save-the-date">
+      <p class="eyebrow">Save the Date</p>
+      <h1>5. Dezember</h1>
+      <p>„Moin, Ich werde 30. Aus irgendwelchen Gründen ist das etwas Großes. Also reicht meine Wohnung vermutlich nicht. Daher möchte ich sammeln mit wie vielen ich rechnen muss, um eine Location zu finden. Meine aktuelle Idee ist ein gutes Buffet und anschließend feiern. Ich update die Seite, wenn ich mehr weiß und versuche euch zu informieren. Aber ich verspreche nichts :)."</p>
+      <p class="deadline">Bitte bis Ende Mai anmelden.</p>
+    </section>
+
+    <div class="divider" aria-hidden="true"></div>
+
+    <section class="rsvp-section">
+      <h2>Anmeldung</h2>
+
+      <!-- Phase 3: set action="/api/rsvp" method="POST" -->
+      <form id="rsvp-form" action="#" method="get" novalidate>
+
+        <!-- Name field (required) -->
+        <div class="field">
+          <label for="name">Name</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            placeholder="Dein Name"
+            required
+            autocomplete="given-name"
+          />
+          <span id="name-error" class="error-msg" role="alert">Bitte gib deinen Namen ein.</span>
+        </div>
+
+        <!-- Contact method (optional) -->
+        <div class="field">
+          <label for="contact">Bevorzugte Kontaktmethode <span class="optional">(optional)</span></label>
+          <select id="contact" name="contact">
+            <option value="">Bitte wählen</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="telegram">Telegram</option>
+            <option value="signal">Signal</option>
+            <option value="discord">Discord</option>
+            <option value="matrix">Matrix</option>
+            <option value="sms">SMS</option>
+            <option value="threema">Threema</option>
+          </select>
+        </div>
+
+        <!-- Attendee count stepper (required, pre-filled 1) -->
+        <div class="field">
+          <label for="attendee-count">Anzahl der Personen</label>
+          <div class="stepper">
+            <button type="button" id="btn-less" aria-label="Weniger" disabled>−</button>
+            <output id="attendee-count" aria-live="polite">1</output>
+            <button type="button" id="btn-more" aria-label="Mehr">+</button>
+          </div>
+          <input type="hidden" id="attendee-value" name="attendees" value="1" />
+        </div>
+
+        <button type="submit" class="btn-submit">Anmelden</button>
+
+      </form>
+    </section>
+
+  </div>
+  <script src="/script.js"></script>
+</body>
+</html>
