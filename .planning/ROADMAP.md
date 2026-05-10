@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Infrastructure & Auth** - Cloudflare Pages + Workers deployed, Basic Auth protecting a live URL
 - [x] **Phase 2: Save-the-Date Page & RSVP Form** - German page with event info and fully functional RSVP form UI
-- [ ] **Phase 3: RSVP Backend** - Worker endpoint receives submissions and persists unique records in D1
+- [x] **Phase 3: RSVP Backend** - Worker endpoint receives submissions and persists unique records in D1
 
 ## Phase Details
 
@@ -72,4 +72,4 @@ Phases execute in numeric order: 1 → 2 → 3
 |-------|----------------|--------|-----------|
 | 1. Infrastructure & Auth | 2/2 | ✅ Complete | 2026-05-10 |
 | 2. Save-the-Date Page & RSVP Form | 1/1 | ✅ Complete | 2026-05-10 |
-| 3. RSVP Backend | 0/3 | Not started | - |
+| 3. RSVP Backend | 3/3 | ✅ Complete | 2026-05-10 |

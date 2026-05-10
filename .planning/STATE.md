@@ -9,14 +9,14 @@
 ## Current Position
 
 - **Milestone:** v1.0 RSVP Site
-- **Phase:** 2 of 3 (Save-the-Date Page & RSVP Form) ✅ COMPLETE
-- **Plan:** All plans complete (1/1)
-- **Status:** Phase 2 done — ready to start Phase 3
-- **Last activity:** 2026-05-10 — German save-the-date page + RSVP form live at birthday-4om.pages.dev
+- **Phase:** 3 of 3 (RSVP Backend) ✅ COMPLETE
+- **Plan:** All plans complete (3/3)
+- **Status:** Phase 3 done — v1.0 milestone complete
+- **Last activity:** 2026-05-10 — RSVP backend live: D1 database, Worker endpoint, fetch wiring
 
 ## Progress
 
-`[██████░░░░] 67%` — Phase 2 complete (1/1 plans done)
+`[██████████] 100%` — Phase 3 complete (3/3 plans done)
 
 ## Recent Decisions
 
