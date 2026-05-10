@@ -66,24 +66,24 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | — | Pending |
-| AUTH-02 | — | Pending |
-| RSVP-01 | — | Pending |
-| RSVP-02 | — | Pending |
-| RSVP-03 | — | Pending |
-| RSVP-04 | — | Pending |
-| RSVP-05 | — | Pending |
-| RSVP-06 | — | Pending |
-| RSVP-07 | — | Pending |
-| PAGE-01 | — | Pending |
-| PAGE-02 | — | Pending |
-| PAGE-03 | — | Pending |
+| AUTH-01 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Pending |
+| RSVP-01 | Phase 2 | Pending |
+| RSVP-02 | Phase 2 | Pending |
+| RSVP-03 | Phase 2 | Pending |
+| RSVP-04 | Phase 2 | Pending |
+| RSVP-05 | Phase 3 | Pending |
+| RSVP-06 | Phase 3 | Pending |
+| RSVP-07 | Phase 3 | Pending |
+| PAGE-01 | Phase 2 | Pending |
+| PAGE-02 | Phase 2 | Pending |
+| PAGE-03 | Phase 2 | Pending |
 
 **Coverage:**
 - v1.0 requirements: 12 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 12 ⚠️
+- Mapped to phases: 12 ✓
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-05-09*
-*Last updated: 2026-05-09 — initial definition for milestone v1.0*
+*Last updated: 2026-05-09 — phase assignments added, 12/12 v1.0 requirements mapped*
