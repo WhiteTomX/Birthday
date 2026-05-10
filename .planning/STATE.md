@@ -31,7 +31,6 @@
 | ES Modules onRequest syntax | Required by Pages Functions (not Service Worker addEventListener) |
 | atob() for Base64 decode | Native in Workers runtime, no import needed |
 | Password from env.SITE_PASSWORD only | Never hardcoded in source |
-| wrangler pages secret put for secrets | Dashboard UI unreliable for Pages Functions — use Wrangler CLI |
 | Pages project name is "birthday" | Subdomain birthday-4om.pages.dev is auto-generated, differs from project name |
 
 ## Pending Todos

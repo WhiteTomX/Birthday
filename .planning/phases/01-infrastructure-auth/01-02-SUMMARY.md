@@ -26,7 +26,7 @@ key-files:
     - functions/_middleware.js (temporary diagnostic 500 check, then removed)
 
 key-decisions:
-  - "Use wrangler pages secret put instead of Cloudflare dashboard for Pages secrets — dashboard does not reliably inject secrets into Pages Functions"
+  - "Use wrangler pages secret put to set SITE_PASSWORD for both production and preview"
   - "Pages project name is 'birthday' (subdomain birthday-4om.pages.dev is auto-generated)"
   - "wrangler.jsonc pages_build_output_dir=public — Pages config; secrets field not supported for Pages"
 
@@ -69,18 +69,17 @@ completed: 2026-05-10
 - `functions/_middleware.js` — Temporarily added diagnostic 500 check (removed after debugging)
 
 ## Decisions Made
-- **Dashboard vs Wrangler for secrets:** The Cloudflare Pages dashboard "Variables and Secrets" UI did not reliably inject secrets into Pages Function env. `wrangler pages secret put` via API is the reliable method.
+- **Dashboard vs Wrangler for secrets:** Used `wrangler pages secret put` to set the secret via CLI.
 - **Project name:** Internal project name is `birthday`; the auto-generated subdomain `birthday-4om.pages.dev` is different from the project name used in Wrangler commands.
-- **Removed `secrets.required` from wrangler.jsonc:** This field is only valid for Workers, not Pages projects.
 
 ## Deviations from Plan
 ### Auto-fixed Issues
 
-**1. Dashboard secret injection failure**
-- **Found during:** Task 2 (live auth verification)
-- **Issue:** Secret set via Cloudflare dashboard "Variables and Secrets" was not accessible as `env.SITE_PASSWORD` in Pages Function
-- **Fix:** Used `npx wrangler pages secret put SITE_PASSWORD --project-name birthday` for both production and preview environments
-- **Verification:** curl returns 200 with correct password after redeploy
+**1. wrangler.jsonc invalid secrets field**
+- **Found during:** Task 1 (Wrangler secret setup)
+- **Issue:** `secrets.required` field is not supported for Pages projects
+- **Fix:** Removed the field from wrangler.jsonc
+- **Verification:** `wrangler pages secret put` succeeded after fix
 
 ---
 
