@@ -8,15 +8,14 @@
 
 ## Current Position
 
-- **Milestone:** v1.0 RSVP Site
-- **Phase:** 4 of 4 (Design & Content Rework) ✅ COMPLETE
-- **Plan:** All plans complete (1/1)
-- **Status:** Phase 4 done — v1.0 milestone fully complete
-- **Last activity:** 2026-05-10 — Phase 4 design rework executed (warm palette, eyebrow badge, divider)
+- **Milestone:** v2.0 Full Invitation (not yet started)
+- **Previous Milestone:** v1.0 RSVP Site ✅ Shipped 2026-05-10
+- **Status:** v1.0 archived — ready to plan v2.0
+- **Last activity:** 2026-05-10 — v1.0 milestone archived, git tag v1.0 created
 
 ## Progress
 
-`[██████████] 100%` — Phase 3 complete (3/3 plans done)
+`[██████████] 100%` — v1.0 RSVP Site shipped ✅ (4 phases, 7 plans, 12/12 requirements)
 
 ## Recent Decisions
 

@@ -8,32 +8,43 @@ A personal 30th birthday celebration website serving as the single source of tru
 **Hosting:** Cloudflare (free tier)  
 **Event Date:** 5 December  
 
-## Current Milestone: v1.0 RSVP Site
+## Current State: v1.0 RSVP Site ✅ Shipped 2026-05-10
 
-**Goal:** Get a password-protected save-the-date page live with working RSVP collection so guests can confirm attendance early.
+**What's live:** Password-protected Cloudflare Pages site at `birthday-4om.pages.dev` with a German save-the-date page, fully functional RSVP form, Worker backend storing unique records in D1, and a warm festive design.
+
+**Tech shipped:**
+- `functions/_middleware.js` — HTTP Basic Auth (every request protected)
+- `public/index.html` / `style.css` / `script.js` — German save-the-date + RSVP form UI
+- `functions/api/rsvp.js` — Worker endpoint: validates, stores RSVP with UUID in D1
+- `schema.sql` + D1 `birthday-rsvps` — RSVP storage (region WEUR)
+
+**Key patterns established:**
+- Auth: `Authorization` header → base64 decode → compare `env.SITE_PASSWORD` → `context.next()` or 401
+- D1: parameterized `.prepare().bind().run()` — no SQL injection
+- XSS prevention: `textContent` (not `innerHTML`) for user-supplied data in DOM
+- Secrets: `wrangler pages secret put` (never hardcoded; dashboard unreliable for Pages)
+
+## Next Milestone: v2.0 Full Invitation
+
+**Goal:** Update site with confirmed venue details and formal invitation information after venue decision.
 
 **Target features:**
-- Password protection via HTTP Basic Auth (Worker-enforced)
-- Save-the-date page with event description (German)
-- RSVP form: name, contact method preference, plus-one count
-- Form validation (required fields)
-- Worker endpoint to receive RSVP submissions
-- D1 database schema for RSVPs
-- Success message after submission
-- Responsive design (mobile/desktop)
+- Confirmed venue name and address
+- Parking information
+- Event timing (arrival, start, end)
+- Dress code (if applicable)
 
-## Core Value
-
-Enable frictionless guest RSVPs and participation by providing a centralized, beautiful site where guests can confirm attendance early (for venue planning) and stay engaged through the event lifecycle.
+*Start with `/gsd-new-milestone` to gather requirements and plan phases.*
 
 ## Milestones
 
-### v1.0: RSVP Site (Current — MVP, ASAP)
+### v1.0: RSVP Site ✅ Shipped 2026-05-10
 - Password-protected page (HTTP Basic Auth via Worker)
-- Save-the-date page with event description
-- RSVP form: name, contact method, plus-one count
+- Save-the-date page with event description and date (5 December)
+- RSVP form: name, contact method (7 options), plus-one count
 - Each RSVP gets unique ID (no overwrites/duplicates)
-- RSVP data stored in Cloudflare D1, not accessible via frontend
+- RSVP data stored in Cloudflare D1
+- Warm festive design with "Save the Date" eyebrow badge
 
 ### v2.0: Full Invitation (Post-Venue Decision — Weeks Away)
 - Update site with confirmed venue details
@@ -59,53 +70,45 @@ Enable frictionless guest RSVPs and participation by providing a centralized, be
 - **No edit links:** Assume guests don't change RSVPs
 - **No RSVP cap:** Unlimited plus-ones per person
 - **Private data:** RSVP data only queryable via D1 dashboard, not exposed on frontend
-- **Language:** All UI in German
+- **Language:** All UI in German (exception: "Save the Date" eyebrow — recognized international phrase)
 - **Free hosting:** Strictly Cloudflare free tier
-
-## Requirements
-
-### Validated
-(None yet — ship to validate)
-
-### Active
-- [ ] Password protection via HTTP Basic Auth (Worker-enforced)
-- [ ] Save-the-date page with event description
-- [ ] RSVP form (name, contact method, plus-one count)
-- [ ] Form validation (required fields)
-- [ ] Worker endpoint to receive RSVP submissions
-- [ ] D1 database schema for RSVPs
-- [ ] Success message after RSVP submission
-- [ ] German language support throughout
-- [ ] Responsive design for mobile/desktop
-
-### Out of Scope
-- User authentication/login
-- RSVP editing or deletion
-- Email confirmations (frontend only)
-- Complex analytics
-- Third-party integrations (beyond wishlist scraping)
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Basic Auth protection | Cloudflare Worker intercepts all requests, checks `Authorization` header against hashed password | Keeps site invite-only without paid access controls |
+| Basic Auth protection | Cloudflare Worker intercepts all requests, checks `Authorization` header against env password | Keeps site invite-only without paid access controls |
 | Plain HTML/CSS/JS | Simplest deployment model, no build step complexity | Faster Phase 1 delivery |
 | Cloudflare stack | Free tier, globally distributed, no separate backend needed | Cost-effective, performant |
 | D1 for storage | Simple SQL, integrated with Cloudflare, queryable for admin | No external database needed |
 | Manual redeployment | Dev-driven content updates, simple workflow | Avoids over-engineering for small project |
 | Unique ID per RSVP | Prevents accidental overwrites, simple audit trail | All responses preserved |
+| `crypto.randomUUID()` PK | Native Workers global, no import, collision-resistant | Clean implementation |
+| `textContent` not `innerHTML` | XSS prevention for user-supplied data (guest name) in DOM | Security pattern established |
 
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
 
-**After each phase transition** (via `/gsd-transition`):
-1. Requirements invalidated? → Move to Out of Scope with reason
-2. Requirements validated? → Move to Validated with phase reference
-3. New requirements emerged? → Add to Active
-4. Decisions to log? → Add to Key Decisions
-5. "What This Is" still accurate? → Update if drifted
+<details>
+<summary>v1.0 original project context (archived)</summary>
+
+*Original content before milestone close — preserved for reference.*
+
+**Current Milestone (v1.0):** Get a password-protected save-the-date page live with working RSVP collection so guests can confirm attendance early.
+
+Requirements (all now validated):
+- Password protection via HTTP Basic Auth ✅
+- Save-the-date page with event description ✅
+- RSVP form: name, contact method, plus-one count ✅
+- Form validation (required fields) ✅
+- Worker endpoint to receive RSVP submissions ✅
+- D1 database schema for RSVPs ✅
+- Success message after submission ✅
+- Responsive design (mobile/desktop) ✅
+
+</details>
 
 ---
-*Last updated: 2026-05-09 — Milestone v1.0 RSVP Site started*
+*Last updated: 2026-05-10 — v1.0 milestone archived, v2.0 next*
+
