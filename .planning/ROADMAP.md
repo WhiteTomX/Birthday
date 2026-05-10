@@ -15,6 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Infrastructure & Auth** - Cloudflare Pages + Workers deployed, Basic Auth protecting a live URL
 - [x] **Phase 2: Save-the-Date Page & RSVP Form** - German page with event info and fully functional RSVP form UI
 - [x] **Phase 3: RSVP Backend** - Worker endpoint receives submissions and persists unique records in D1
+- [ ] **Phase 4: Design & Content Rework** - Celebratory visual redesign + "Save the Date" made prominent throughout content
 
 ## Phase Details
 
@@ -63,13 +64,26 @@ Plans:
 - [ ] 03-02-PLAN.md — Worker endpoint: functions/api/rsvp.js with validation, D1 insert, JSON responses
 - [ ] 03-03-PLAN.md — Frontend wiring: script.js fetch submission, success/error states, end-to-end verification
 
+### Phase 4: Design & Content Rework
+**Goal**: Redesign the site with celebratory aesthetics and make "Save the Date" prominent throughout the content (not just the browser title)
+**Depends on**: Phase 3
+**Requirements**: PAGE-01, PAGE-02
+**Success Criteria** (what must be TRUE):
+  1. "Save the Date" appears visibly on the page as content (heading or prominent label) — not only in the `<title>`
+  2. The visual design is noticeably more festive/celebratory (warm or vibrant palette, celebration-oriented typography, less sparse layout)
+  3. All existing functionality (RSVP form, validation, submission, German copy) remains intact
+  4. Page is still responsive and usable on mobile and desktop
+**Plans**: TBD
+**UI hint**: yes
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3
+Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Infrastructure & Auth | 2/2 | ✅ Complete | 2026-05-10 |
 | 2. Save-the-Date Page & RSVP Form | 1/1 | ✅ Complete | 2026-05-10 |
 | 3. RSVP Backend | 3/3 | ✅ Complete | 2026-05-10 |
+| 4. Design & Content Rework | 0/? | Not started | - |
