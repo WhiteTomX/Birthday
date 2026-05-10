@@ -73,7 +73,10 @@ Plans:
   2. The visual design is noticeably more festive/celebratory (warm or vibrant palette, celebration-oriented typography, less sparse layout)
   3. All existing functionality (RSVP form, validation, submission, German copy) remains intact
   4. Page is still responsive and usable on mobile and desktop
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 04-01-PLAN.md — HTML DOM insertions (eyebrow badge + divider) + full CSS design system rework (festive palette, typography, spacing, new component styles)
 **UI hint**: yes
 
 ## Progress
