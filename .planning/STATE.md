@@ -10,8 +10,8 @@
 
 - **Milestone:** v1.1 Password Hint Page
 - **Previous Milestone:** v1.0 RSVP Site ✅ Shipped 2026-05-10
-- **Status:** Defining requirements
-- **Last activity:** 2026-05-10 — Milestone v1.1 started
+- **Status:** Ready to plan Phase 5
+- **Last activity:** 2026-05-10 — Milestone v1.1 roadmap created (1 phase)
 
 ## Progress
 
