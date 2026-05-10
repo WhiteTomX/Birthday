@@ -302,9 +302,11 @@ input[type="text"].error {
   font-weight: 700;
   color: #FFFFFF;
   background-color: var(--accent);
+  border: none;
   border-radius: var(--radius);
   padding: 12px 24px;
   text-decoration: none;
+  cursor: pointer;
   transition: background-color 0.15s ease;
 }
 

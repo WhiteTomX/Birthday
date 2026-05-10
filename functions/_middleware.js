@@ -55,7 +55,7 @@ function unauthorizedResponse() {
       Man bäckt mir einen Kuchen, zündet Kerzen an und singt für mich.<br>
       Wer eingeladen ist, kennt mein Datum —<br>
       und kennt damit auch das Passwort.</p>
-      <a href="/rsvp/" class="btn-hint">Nochmal versuchen →</a>
+      <button onclick="window.location.reload(true)" class="btn-hint">Nochmal versuchen →</button>
     </section>
   </div>
 </body>
