@@ -56,7 +56,12 @@ Plans:
   2. Each submission creates a new row in the D1 database with a unique ID (visible in the D1 dashboard)
   3. Submitting the same name twice results in two separate records — no overwrite occurs
   4. After a successful submission, the guest sees a confirmation message in German on the page
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — D1 infrastructure: schema.sql, wrangler.jsonc D1 binding, database creation checkpoint
+- [ ] 03-02-PLAN.md — Worker endpoint: functions/api/rsvp.js with validation, D1 insert, JSON responses
+- [ ] 03-03-PLAN.md — Frontend wiring: script.js fetch submission, success/error states, end-to-end verification
 
 ## Progress
 
@@ -67,4 +72,4 @@ Phases execute in numeric order: 1 → 2 → 3
 |-------|----------------|--------|-----------|
 | 1. Infrastructure & Auth | 2/2 | ✅ Complete | 2026-05-10 |
 | 2. Save-the-Date Page & RSVP Form | 1/1 | ✅ Complete | 2026-05-10 |
-| 3. RSVP Backend | 0/TBD | Not started | - |
+| 3. RSVP Backend | 0/3 | Not started | - |
