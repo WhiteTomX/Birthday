@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Infrastructure & Auth** - Cloudflare Pages + Workers deployed, Basic Auth protecting a live URL
 - [x] **Phase 2: Save-the-Date Page & RSVP Form** - German page with event info and fully functional RSVP form UI
 - [x] **Phase 3: RSVP Backend** - Worker endpoint receives submissions and persists unique records in D1
-- [ ] **Phase 4: Design & Content Rework** - Celebratory visual redesign + "Save the Date" made prominent throughout content
+- [x] **Phase 4: Design & Content Rework** - Celebratory visual redesign + "Save the Date" made prominent throughout content
 
 ## Phase Details
 
@@ -60,9 +60,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — D1 infrastructure: schema.sql, wrangler.jsonc D1 binding, database creation checkpoint
-- [ ] 03-02-PLAN.md — Worker endpoint: functions/api/rsvp.js with validation, D1 insert, JSON responses
-- [ ] 03-03-PLAN.md — Frontend wiring: script.js fetch submission, success/error states, end-to-end verification
+- [x] 03-01-PLAN.md — D1 infrastructure: schema.sql, wrangler.jsonc D1 binding, database creation checkpoint
+- [x] 03-02-PLAN.md — Worker endpoint: functions/api/rsvp.js with validation, D1 insert, JSON responses
+- [x] 03-03-PLAN.md — Frontend wiring: script.js fetch submission, success/error states, end-to-end verification
 
 ### Phase 4: Design & Content Rework
 **Goal**: Redesign the site with celebratory aesthetics and make "Save the Date" prominent throughout the content (not just the browser title)
@@ -76,7 +76,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 04-01-PLAN.md — HTML DOM insertions (eyebrow badge + divider) + full CSS design system rework (festive palette, typography, spacing, new component styles)
+- [x] 04-01-PLAN.md — HTML DOM insertions (eyebrow badge + divider) + full CSS design system rework (festive palette, typography, spacing, new component styles)
 **UI hint**: yes
 
 ## Progress
@@ -89,4 +89,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Infrastructure & Auth | 2/2 | ✅ Complete | 2026-05-10 |
 | 2. Save-the-Date Page & RSVP Form | 1/1 | ✅ Complete | 2026-05-10 |
 | 3. RSVP Backend | 3/3 | ✅ Complete | 2026-05-10 |
-| 4. Design & Content Rework | 0/? | Not started | - |
+| 4. Design & Content Rework | 1/1 | ✅ Complete | 2026-05-10 |
