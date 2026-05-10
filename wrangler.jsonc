@@ -1,8 +1,5 @@
 {
   "name": "birthday",
   "compatibility_date": "2024-01-01",
-  "pages_build_output_dir": "public",
-  "secrets": {
-    "required": ["SITE_PASSWORD"]
-  }
+  "pages_build_output_dir": "public"
 }
