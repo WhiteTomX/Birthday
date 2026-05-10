@@ -9,10 +9,10 @@
 ## Current Position
 
 - **Milestone:** v1.0 RSVP Site
-- **Phase:** 3 of 3 (RSVP Backend) ✅ COMPLETE
-- **Plan:** All plans complete (3/3)
-- **Status:** Phase 3 done — v1.0 milestone complete
-- **Last activity:** 2026-05-10 — Phase 4 UI design contract approved (Design & Content Rework)
+- **Phase:** 4 of 4 (Design & Content Rework) ✅ COMPLETE
+- **Plan:** All plans complete (1/1)
+- **Status:** Phase 4 done — v1.0 milestone fully complete
+- **Last activity:** 2026-05-10 — Phase 4 design rework executed (warm palette, eyebrow badge, divider)
 
 ## Progress
 
@@ -31,7 +31,9 @@
 | ES Modules onRequest syntax | Required by Pages Functions (not Service Worker addEventListener) |
 | atob() for Base64 decode | Native in Workers runtime, no import needed |
 | Password from env.SITE_PASSWORD only | Never hardcoded in source |
-| Pages project name is "birthday" | Subdomain birthday-4om.pages.dev is auto-generated, differs from project name |
+| Warm festive color tokens | `--bg: #FDF4E8`, `--accent: #C0395A`, `--festive: #C9900A` (Phase 4) |
+| "Save the Date" eyebrow badge | Visible on-page `<p class="eyebrow">` element (Phase 4) |
+| RSVP card styling | `.rsvp-section` with surface background + border-radius 12px (Phase 4) |
 
 ## Pending Todos
 
