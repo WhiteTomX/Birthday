@@ -19,10 +19,6 @@ export async function onRequest(context) {
   const colonIndex = credentials.indexOf(":");
   const password = credentials.slice(colonIndex + 1);
 
-  if (!env.SITE_PASSWORD) {
-    return new Response("Server misconfiguration: SITE_PASSWORD not set", { status: 500 });
-  }
-
   if (password !== env.SITE_PASSWORD) {
     return unauthorizedResponse();
   }
