@@ -8,14 +8,14 @@
 
 ## Current Position
 
-- **Milestone:** v2.0 Full Invitation (not yet started)
+- **Milestone:** v1.1 Password Hint Page
 - **Previous Milestone:** v1.0 RSVP Site ✅ Shipped 2026-05-10
-- **Status:** v1.0 archived — ready to plan v2.0
-- **Last activity:** 2026-05-10 — v1.0 milestone archived, git tag v1.0 created
+- **Status:** Defining requirements
+- **Last activity:** 2026-05-10 — Milestone v1.1 started
 
 ## Progress
 
-`[██████████] 100%` — v1.0 RSVP Site shipped ✅ (4 phases, 7 plans, 12/12 requirements)
+`[__________] 0%` — v1.1 Password Hint Page (0 phases, 0 plans)
 
 ## Recent Decisions
 

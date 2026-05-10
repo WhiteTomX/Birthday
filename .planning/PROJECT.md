@@ -24,17 +24,14 @@ A personal 30th birthday celebration website serving as the single source of tru
 - XSS prevention: `textContent` (not `innerHTML`) for user-supplied data in DOM
 - Secrets: `wrangler pages secret put` (never hardcoded; dashboard unreliable for Pages)
 
-## Next Milestone: v2.0 Full Invitation
+## Current Milestone: v1.1 Password Hint Page
 
-**Goal:** Update site with confirmed venue details and formal invitation information after venue decision.
+**Goal:** Guests who need the password see a warm, on-brand page with a German birthday riddle instead of a blank browser screen.
 
 **Target features:**
-- Confirmed venue name and address
-- Parking information
-- Event timing (arrival, start, end)
-- Dress code (if applicable)
-
-*Start with `/gsd-new-milestone` to gather requirements and plan phases.*
+- Custom HTML page returned on 401 (covers both: no auth provided on first visit, and wrong credentials)
+- Matches festive design (warm palette, same fonts as main site)
+- Short German riddle hinting at the password (Geburtstag theme)
 
 ## Milestones
 
@@ -45,6 +42,10 @@ A personal 30th birthday celebration website serving as the single source of tru
 - Each RSVP gets unique ID (no overwrites/duplicates)
 - RSVP data stored in Cloudflare D1
 - Warm festive design with "Save the Date" eyebrow badge
+
+### v1.1: Password Hint Page (Upcoming)
+- Custom 401 HTML page with German birthday riddle and festive design
+- Shown on both: first visit with no auth, and wrong credentials
 
 ### v2.0: Full Invitation (Post-Venue Decision — Weeks Away)
 - Update site with confirmed venue details
@@ -110,5 +111,5 @@ Requirements (all now validated):
 </details>
 
 ---
-*Last updated: 2026-05-10 — v1.0 milestone archived, v2.0 next*
+*Last updated: 2026-05-10 — v1.1 milestone started*
 
