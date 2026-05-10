@@ -25,7 +25,7 @@
 **Plans:** 1 plan
 
 Plans:
-- [ ] 05-01-PLAN.md — Replace `unauthorizedResponse()` with festive HTML riddle page + human visual verify
+- [x] 05-01-PLAN.md — Replace `unauthorizedResponse()` with festive HTML riddle page + human visual verify
 
 ---
 
