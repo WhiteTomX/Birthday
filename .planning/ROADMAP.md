@@ -41,7 +41,10 @@ Plans:
   2. Guest can enter their name, choose one of the 7 contact methods, and set a plus-one count (including zero)
   3. Submitting with empty required fields shows inline German error messages and does not proceed
   4. Page renders correctly and is comfortably usable on both a phone and a desktop browser
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 02-01-PLAN.md — Replace placeholder page with German save-the-date content, RSVP form HTML/CSS/JS (frontend only)
 **UI hint**: yes
 
 ### Phase 3: RSVP Backend
