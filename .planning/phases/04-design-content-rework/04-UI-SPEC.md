@@ -25,12 +25,44 @@ created: 2026-05-10
 | Display font | "Playfair Display" (Google Fonts CDN) |
 | Body font | "Lato" (Google Fonts CDN) |
 
-**Google Fonts import URL** (add as first `<link>` in `<head>`, before `style.css`):
-```html
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+**Font hosting: self-hosted** — font files served from `public/fonts/` on Cloudflare Pages. No external CDN requests. No Google Fonts `<link>` tags.
+
+**Font files to download** (from [google-webfonts-helper](https://gwfh.mranftl.com/fonts) or the Google Fonts download button):
+
+| File | Format | Usage |
+|------|--------|-------|
+| `public/fonts/playfair-display-700.woff2` | woff2 | Display headings |
+| `public/fonts/lato-400.woff2` | woff2 | Body text |
+| `public/fonts/lato-700.woff2` | woff2 | Labels, bold |
+
+**`@font-face` declarations** (add at the top of `style.css`, before `:root`):
+```css
+@font-face {
+  font-family: 'Playfair Display';
+  src: url('/fonts/playfair-display-700.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lato';
+  src: url('/fonts/lato-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lato';
+  src: url('/fonts/lato-700.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 ```
+
+**`public/index.html`:** No `<link>` tags needed for fonts — remove any Google Fonts preconnect/stylesheet links.
 
 **CSS variable declarations** (replace existing `--font` with two named variables):
 ```css
@@ -289,17 +321,10 @@ All interaction behaviour from Phase 2 and Phase 3 is preserved without change:
 |----------|-------------|-------------|
 | shadcn official | none | not applicable — no shadcn |
 | npm registries | none | not applicable — no build step |
-| Google Fonts CDN | Playfair Display (wght 700), Lato (wght 400, 700) | CDN link — no code execution, no dynamic imports, view passed |
+| Google Fonts CDN | Playfair Display (wght 700), Lato (wght 400, 700) | **Self-hosted** — `public/fonts/*.woff2`, no CDN |
 
-**Google Fonts privacy note:**
-Requesting fonts via `fonts.googleapis.com` sends the guest's IP address and browser User-Agent to Google servers. For this site:
-- The site is invite-only, protected by HTTP Basic Auth
-- Guests already have the password and are known to the host
-- No personally identifiable event details are exposed in the font request URL
-- **Decision:** Google Fonts CDN is acceptable for this personal, private-access site
-
-**Self-hosting alternative** (if privacy is a concern later):
-Download font files from [google-webfonts-helper](https://gwfh.mranftl.com/fonts) and serve from the `public/` directory on Cloudflare Pages. Reference with `@font-face` declarations in `style.css`. No build step required.
+**Font hosting decision: self-hosted on Cloudflare Pages.**
+Font files (`*.woff2`) are committed to `public/fonts/` and served directly. No requests to Google servers — no IP/UA data sent to third parties. `@font-face` declarations in `style.css` reference local paths. `font-display: swap` ensures text remains visible during font load.
 
 ---
 
