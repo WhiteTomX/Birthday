@@ -50,12 +50,13 @@ function unauthorizedResponse() {
 <body>
   <div class="container">
     <section class="save-the-date">
-      <h1>Psst — ein kleines Rätsel für dich</h1>
+      <h1>Falsches Passwort</h1>
+      <p>Das war leider nicht richtig. Das Rätsel hilft dir auf die Sprünge:</p>
       <p>Ich komme einmal im Jahr.<br>
       Man bäckt mir einen Kuchen, zündet Kerzen an und singt für mich.<br>
       Wer eingeladen ist, kennt mein Datum —<br>
       und kennt damit auch das Passwort.</p>
-      <button onclick="window.location.reload(true)" class="btn-hint">Nochmal versuchen →</button>
+      <p class="deadline">Seite neu laden, um es erneut zu versuchen.</p>
     </section>
   </div>
 </body>
