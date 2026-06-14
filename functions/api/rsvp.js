@@ -24,6 +24,9 @@ export async function onRequestPost(context) {
   if (!name || typeof name !== 'string' || name.trim().length === 0) {
     return Response.json({ ok: false, error: 'Name required' }, { status: 400 });
   }
+  if (name.trim().length > 200) {
+    return Response.json({ ok: false, error: 'Name too long' }, { status: 400 });
+  }
 
   const attendeesInt = parseInt(attendees, 10);
   if (isNaN(attendeesInt) || attendeesInt < 1) {

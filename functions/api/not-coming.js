@@ -24,6 +24,9 @@ export async function onRequestPost(context) {
   if (!name || typeof name !== 'string' || name.trim().length === 0) {
     return Response.json({ ok: false, error: 'Name required' }, { status: 400 });
   }
+  if (name.trim().length > 200) {
+    return Response.json({ ok: false, error: 'Name too long' }, { status: 400 });
+  }
 
   // Generate unique id — crypto.randomUUID() is native in Workers runtime, no import needed
   const id = crypto.randomUUID();
