@@ -124,19 +124,25 @@
         body: JSON.stringify(payload)
       })
         .then(function (res) {
-          if (!res.ok) { throw new Error('Server error'); }
-          // Success: replace form section with personalised German confirmation (D-04, D-05)
-          // Use createElement + textContent — never innerHTML with user input (XSS prevention)
-          var section = document.querySelector('.rsvp-section');
-          var p = document.createElement('p');
-          p.className = 'success-msg';
-          p.textContent = notComing
-            ? 'Schade, ' + payload.name + '! Wir werden dich vermissen.'
-            : 'Danke, ' + payload.name + '! Deine Anmeldung wurde gespeichert.';
-          section.innerHTML = '';
-          section.appendChild(p);
+          return res.json().then(function (data) {
+            if (!res.ok) {
+              var err = new Error(data.error || 'Server error');
+              err.status = res.status;
+              throw err;
+            }
+            // Success: replace form section with personalised German confirmation (D-04, D-05)
+            // Use createElement + textContent — never innerHTML with user input (XSS prevention)
+            var section = document.querySelector('.rsvp-section');
+            var p = document.createElement('p');
+            p.className = 'success-msg';
+            p.textContent = notComing
+              ? 'Schade, ' + payload.name + '! Wir werden dich vermissen.'
+              : 'Danke, ' + payload.name + '! Deine Anmeldung wurde gespeichert.';
+            section.innerHTML = '';
+            section.appendChild(p);
+          });
         })
-        .catch(function () {
+        .catch(function (err) {
           // Error: re-enable form and show inline error message (D-06, D-07)
           submitBtn.disabled = false;
           submitBtn.textContent = notComing ? 'Abmelden' : 'Anmelden';
@@ -147,7 +153,10 @@
             errEl.className = 'error-msg visible';
             form.appendChild(errEl);
           }
-          errEl.textContent = 'Etwas ist schiefgelaufen. Bitte versuche es noch einmal.';
+          // Show server-provided message for 4xx, generic message for 5xx / network errors
+          errEl.textContent = (err.status && err.status < 500 && err.message)
+            ? err.message
+            : 'Etwas ist schiefgelaufen. Bitte versuche es noch einmal.';
         });
     }
   });
