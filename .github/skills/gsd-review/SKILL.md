@@ -1,7 +1,7 @@
 ---
 name: gsd-review
 description: "Request cross-AI peer review of phase plans from external AI CLIs"
-argument-hint: "--phase N [--gemini] [--claude] [--codex] [--opencode] [--qwen] [--cursor] [--all]"
+argument-hint: "--phase N [--gemini] [--claude] [--codex] [--opencode] [--qwen] [--cursor] [--agy] [--all]"
 allowed-tools: Read, Write, Bash, Glob, Grep
 ---
 
@@ -15,7 +15,7 @@ planning via /gsd-plan-phase --reviews.
 </objective>
 
 <execution_context>
-@.github/get-shit-done/workflows/review.md
+@~/.copilot/gsd-core/workflows/review.md
 </execution_context>
 
 <context>
@@ -28,6 +28,7 @@ Phase number: extracted from $ARGUMENTS (required)
 - `--opencode` — Include OpenCode review (uses model from user's OpenCode config)
 - `--qwen` — Include Qwen Code review (Alibaba Qwen models)
 - `--cursor` — Include Cursor agent review
+- `--agy` / `--antigravity` — Include Antigravity CLI review
 - `--all` — Include all available CLIs
 </context>
 

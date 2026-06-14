@@ -28,10 +28,10 @@ Mode routing:
 </routing>
 
 <execution_context>
-@.github/get-shit-done/workflows/add-phase.md
-@.github/get-shit-done/workflows/insert-phase.md
-@.github/get-shit-done/workflows/remove-phase.md
-@.github/get-shit-done/workflows/edit-phase.md
+@~/.copilot/gsd-core/workflows/add-phase.md
+@~/.copilot/gsd-core/workflows/insert-phase.md
+@~/.copilot/gsd-core/workflows/remove-phase.md
+@~/.copilot/gsd-core/workflows/edit-phase.md
 </execution_context>
 
 <context>
