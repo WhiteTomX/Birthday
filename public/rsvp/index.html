@@ -28,6 +28,12 @@
       <!-- Phase 3: set action="/api/rsvp" method="POST" -->
       <form id="rsvp-form" action="#" method="get" novalidate>
 
+        <!-- Attendance selection (Phase 6) -->
+        <div class="field">
+          <label><input type="radio" name="attendance" value="coming" checked /> Ich komme</label>
+          <label><input type="radio" name="attendance" value="not-coming" /> Ich komme leider nicht</label>
+        </div>
+
         <!-- Name field (required) -->
         <div class="field">
           <label for="name">Name</label>
@@ -43,7 +49,7 @@
         </div>
 
         <!-- Contact method (optional) -->
-        <div class="field">
+        <div class="field" id="contact-field">
           <label for="contact">Bevorzugte Kontaktmethode <span class="optional">(optional)</span></label>
           <select id="contact" name="contact">
             <option value="">Bitte wählen</option>
@@ -58,7 +64,7 @@
         </div>
 
         <!-- Attendee count stepper (required, pre-filled 1) -->
-        <div class="field">
+        <div class="field" id="stepper-field">
           <label for="attendee-count">Anzahl der Personen</label>
           <div class="stepper">
             <button type="button" id="btn-less" aria-label="Weniger" disabled>−</button>
