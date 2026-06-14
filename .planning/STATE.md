@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: Full Invitation
+milestone: v1.2
+milestone_name: Not Coming
 status: planning
-stopped_at: v1.1 milestone archived — ready for v2.0
-last_updated: "2026-05-10"
-last_activity: 2026-05-10 — v1.1 archived, PR #2 open
+stopped_at: todo promoted to milestone v1.2
+last_updated: "2026-06-14"
+last_activity: 2026-06-14 — v1.2 Not Coming milestone created, Phase 6 defined
 progress:
   total_phases: 0
   completed_phases: 0
@@ -24,13 +24,13 @@ See: .planning/PROJECT.md (updated 2026-05-10)
 
 ## Current Position
 
-- **Milestone:** v2.0 Full Invitation (pending venue confirmation)
+- **Milestone:** v1.2 Not Coming (Phase 6)
 - **Previous Milestone:** v1.1 Password Hint Page ✅ Shipped 2026-05-10
-- **Status:** Planning next milestone
+- **Status:** Planning Phase 6
 
 ## Progress
 
-v1.1 complete. v2.0 not yet started.
+v1.1 complete. v1.2 Phase 6 not yet planned.
 
 ## Recent Decisions
 
@@ -51,13 +51,13 @@ v1.1 complete. v2.0 not yet started.
 
 ## Pending Todos
 
-1. Add "not coming" RSVP selection phase (ui)
+None.
 
 ## Blockers / Concerns
 
-- v2.0 blocked on venue confirmation (expected weeks away)
+- v2.0 still blocked on venue confirmation (expected weeks away)
 
 ## Session Continuity
 
-Last session: 2026-05-10
-Stopped at: v1.1 archived — ready to plan v2.0 when venue is confirmed
+Last session: 2026-06-14
+Stopped at: v1.2 Not Coming milestone created — ready to plan Phase 6

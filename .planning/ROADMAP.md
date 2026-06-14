@@ -4,7 +4,8 @@
 
 - ✅ **v1.0 RSVP Site** — Phases 1–4 (shipped 2026-05-10) · [Archive](.planning/milestones/v1.0-ROADMAP.md)
 - ✅ **v1.1 Password Hint Page** — Phase 5 (shipped 2026-05-10) · [Archive](.planning/milestones/v1.1-ROADMAP.md)
-- 📋 **v2.0 Full Invitation** — Phases 6+ (planned)
+- ◆ **v1.2 Not Coming** — Phase 6 (in progress)
+- 📋 **v2.0 Full Invitation** — Phases 7+ (planned)
 
 ## Phases
 
@@ -24,6 +25,10 @@
 - [x] Phase 5: Password Hint Page (1/1 plan) — completed 2026-05-10
 
 </details>
+
+### ◆ v1.2 Not Coming (Phase 6 — In Progress)
+
+- [ ] Phase 6: Not Coming RSVP Selection (0 plans)
 
 ### 📋 v2.0 Full Invitation (Planned)
 
