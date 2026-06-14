@@ -51,7 +51,7 @@ v1.1 complete. v2.0 not yet started.
 
 ## Pending Todos
 
-None.
+1. Add "not coming" RSVP selection phase (ui)
 
 ## Blockers / Concerns
 
