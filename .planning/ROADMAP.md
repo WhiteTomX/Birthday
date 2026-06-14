@@ -30,11 +30,12 @@
 
 **Goal:** Add a "not coming" path to the RSVP form — attendance radio buttons, field visibility logic, dynamic submit label, a new `/api/not-coming` endpoint storing declines as `attendees = 0`, and a warm German decline confirmation.
 
-- [ ] Phase 6: Not Coming RSVP Selection (2 plans)
+- [x] Phase 6: Not Coming RSVP Selection (2 plans) (completed 2026-06-14)
 
 Plans:
-- [ ] 06-01-PLAN.md — Backend: `/api/not-coming` Pages Function storing declines with `attendees = 0`
-- [ ] 06-02-PLAN.md — Frontend: attendance radio group, field visibility, dynamic label, decline routing + confirmation
+
+- [x] 06-01-PLAN.md — Backend: `/api/not-coming` Pages Function storing declines with `attendees = 0`
+- [x] 06-02-PLAN.md — Frontend: attendance radio group, field visibility, dynamic label, decline routing + confirmation
 
 ### 📋 v2.0 Full Invitation (Planned)
 

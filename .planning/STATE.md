@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Not Coming
-status: planning
+status: executing
 stopped_at: Phase 6 context gathered
-last_updated: "2026-06-14T19:02:56.254Z"
+last_updated: "2026-06-14T19:17:59.714Z"
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 7
+  total_plans: 9
   completed_plans: 7
-  percent: 80
+  percent: 78
 ---
 
 # Project State
@@ -20,13 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-10)
 
 **Core value:** Enable frictionless guest RSVPs via a password-protected, beautiful German site.
-**Current focus:** v2.0 Full Invitation — planning next milestone
+**Current focus:** Phase 06 — not-coming-rsvp-selection
 
 ## Current Position
 
+Phase: 06 (not-coming-rsvp-selection) — EXECUTING
+Plan: 1 of 2
+
 - **Milestone:** v1.2 Not Coming (Phase 6)
 - **Previous Milestone:** v1.1 Password Hint Page ✅ Shipped 2026-05-10
-- **Status:** Planning Phase 6
+- **Status:** Executing Phase 06
 
 ## Progress
 
