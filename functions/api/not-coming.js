@@ -13,6 +13,11 @@ export async function onRequestPost(context) {
     return Response.json({ ok: false, error: 'Invalid JSON' }, { status: 400 });
   }
 
+  // Guard against valid-but-non-object JSON (null, array, string, number)
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return Response.json({ ok: false, error: 'Invalid JSON' }, { status: 400 });
+  }
+
   const { name } = body;
 
   // Server-side validation — name is required for decline submissions (D-04)
