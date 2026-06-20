@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: Not Coming
-status: shipped
-stopped_at: Phase 6 shipped — PR #5
-last_updated: "2026-06-20T00:00:00Z"
+milestone: v1.3
+milestone_name: Joint Birthday
+status: planning
+last_updated: "2026-06-20T11:22:54.390Z"
+last_activity: 2026-06-20
 progress:
-  total_phases: 5
-  completed_phases: 4
-  total_plans: 9
-  completed_plans: 7
-  percent: 78
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -24,11 +24,10 @@ See: .planning/PROJECT.md (updated 2026-05-10)
 
 ## Current Position
 
-Phase: 06 (not-coming-rsvp-selection) — SHIPPED ✅ PR #5
-
-- **Milestone:** v1.2 Not Coming (Phase 6)
-- **Previous Milestone:** v1.1 Password Hint Page ✅ Shipped 2026-05-10
-- **Status:** Phase 06 shipped — awaiting PR merge
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-06-20 — Milestone v1.3 started
 
 ## Progress
 
