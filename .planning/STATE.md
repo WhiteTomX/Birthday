@@ -53,7 +53,7 @@ v1.1 complete. v1.2 Phase 6 complete — PR #5 open for review/merge.
 
 ## Pending Todos
 
-None.
+1. Support two passwords for joint 30th birthday party — `2026-06-20-support-two-passwords-for-joint-30th-birthday-party.md`
 
 ## Blockers / Concerns
 
