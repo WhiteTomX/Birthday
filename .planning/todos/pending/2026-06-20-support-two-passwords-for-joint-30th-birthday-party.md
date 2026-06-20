@@ -2,6 +2,7 @@
 created: 2026-06-20T11:11:56.217Z
 title: Support two passwords for joint 30th birthday party
 area: general
+resolves_phase: 7
 files:
   - functions/_middleware.js
   - public/index.html
