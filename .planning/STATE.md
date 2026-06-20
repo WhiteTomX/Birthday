@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Not Coming
-status: executing
-stopped_at: Phase 6 context gathered
-last_updated: "2026-06-14T19:17:59.714Z"
+status: shipped
+stopped_at: Phase 6 shipped — PR #5
+last_updated: "2026-06-20T00:00:00Z"
 progress:
   total_phases: 5
   completed_phases: 4
@@ -24,16 +24,15 @@ See: .planning/PROJECT.md (updated 2026-05-10)
 
 ## Current Position
 
-Phase: 06 (not-coming-rsvp-selection) — EXECUTING
-Plan: 1 of 2
+Phase: 06 (not-coming-rsvp-selection) — SHIPPED ✅ PR #5
 
 - **Milestone:** v1.2 Not Coming (Phase 6)
 - **Previous Milestone:** v1.1 Password Hint Page ✅ Shipped 2026-05-10
-- **Status:** Executing Phase 06
+- **Status:** Phase 06 shipped — awaiting PR merge
 
 ## Progress
 
-v1.1 complete. v1.2 Phase 6 not yet planned.
+v1.1 complete. v1.2 Phase 6 complete — PR #5 open for review/merge.
 
 ## Recent Decisions
 
