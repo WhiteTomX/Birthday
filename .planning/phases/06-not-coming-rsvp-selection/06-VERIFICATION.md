@@ -1,7 +1,7 @@
 ---
 phase: 06-not-coming-rsvp-selection
-verified: 2026-06-14T00:00:00Z
-status: human_needed
+verified: 2026-06-20T00:00:00Z
+status: passed
 score: 11/11 must-haves verified
 overrides_applied: 0
 human_verification:
@@ -29,8 +29,8 @@ human_verification:
 
 **Phase Goal:** Allow guests to decline via a "not coming" option — radio toggle on the RSVP form routes declines to a new /api/not-coming endpoint that stores attendees=0 in the existing rsvps table.
 **Verified:** 2026-06-14
-**Status:** human_needed
-**Re-verification:** No — initial verification
+**Status:** passed (UAT complete — 6/6 tests passed 2026-06-20)
+**Re-verification:** Yes — UAT completed all human verification items
 
 ## Goal Achievement
 
