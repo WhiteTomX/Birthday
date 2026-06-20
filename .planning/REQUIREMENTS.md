@@ -44,4 +44,4 @@
 
 ---
 *Requirements defined: 2026-06-20*
-*Last updated: 2026-06-20 after initial definition*
+*Last updated: 2026-06-20 — phase assignments confirmed (Phase 7: AUTH-07, AUTH-08, RSVP-07, RSVP-08; Phase 8: CONT-01)*

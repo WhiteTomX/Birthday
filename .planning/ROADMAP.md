@@ -4,8 +4,9 @@
 
 - ✅ **v1.0 RSVP Site** — Phases 1–4 (shipped 2026-05-10) · [Archive](.planning/milestones/v1.0-ROADMAP.md)
 - ✅ **v1.1 Password Hint Page** — Phase 5 (shipped 2026-05-10) · [Archive](.planning/milestones/v1.1-ROADMAP.md)
-- ◆ **v1.2 Not Coming** — Phase 6 (in progress)
-- 📋 **v2.0 Full Invitation** — Phases 7+ (planned)
+- ✅ **v1.2 Not Coming** — Phase 6 (shipped 2026-06-14)
+- ◆ **v1.3 Joint Birthday** — Phases 7–8 (in progress)
+- 📋 **v2.0 Full Invitation** — Phases 9+ (planned)
 
 ## Phases
 
@@ -26,19 +27,55 @@
 
 </details>
 
-### ◆ v1.2 Not Coming (Phase 6 — In Progress)
+<details>
+<summary>✅ v1.2 Not Coming (Phase 6) — SHIPPED 2026-06-14</summary>
 
-**Goal:** Add a "not coming" path to the RSVP form — attendance radio buttons, field visibility logic, dynamic submit label, a new `/api/not-coming` endpoint storing declines as `attendees = 0`, and a warm German decline confirmation.
+- [x] Phase 6: Not Coming RSVP Selection (2/2 plans) — completed 2026-06-14
 
-- [x] Phase 6: Not Coming RSVP Selection (2 plans) (completed 2026-06-14)
+</details>
 
-Plans:
+### ◆ v1.3 Joint Birthday (Phases 7–8 — In Progress)
 
-- [x] 06-01-PLAN.md — Backend: `/api/not-coming` Pages Function storing declines with `attendees = 0`
-- [x] 06-02-PLAN.md — Frontend: attendance radio group, field visibility, dynamic label, decline routing + confirmation
+**Goal:** Adapt the site for a joint 30th birthday celebration — two guest-facing passwords, RSVP records tagged by host, and updated German copy.
+
+- [ ] **Phase 7: Dual-Password Auth & RSVP Backend** - One-line description
+- [ ] **Phase 8: German Content Update** - Update all site copy to reflect joint celebration
 
 ### 📋 v2.0 Full Invitation (Planned)
 
 *To be defined when venue is confirmed.*
 
 ---
+
+## Phase Details
+
+### Phase 7: Dual-Password Auth & RSVP Backend
+**Goal**: Guests from either host's circle can access the site, and every RSVP is tagged with which host they belong to
+**Depends on**: Phase 6
+**Requirements**: AUTH-07, AUTH-08, RSVP-07, RSVP-08
+**Success Criteria** (what must be TRUE):
+  1. A guest using `SITE_PASSWORD__0` can reach `/rsvp/` and is granted access
+  2. A guest using `SITE_PASSWORD__1` can reach `/rsvp/` and is granted access
+  3. A submitted RSVP record in D1 contains a `host_ref` column with value `0` or `1` matching which password was used — the password itself is never stored
+  4. Requests with an invalid or absent password are still rejected with 401
+**Plans**: TBD
+
+### Phase 8: German Content Update
+**Goal**: All visible site text reflects a shared celebration by two hosts, in German
+**Depends on**: Phase 7
+**Requirements**: CONT-01
+**Success Criteria** (what must be TRUE):
+  1. The hint page riddle refers to both hosts and a joint celebration (no single-host phrasing)
+  2. The save-the-date copy on `/rsvp/` reads as a joint birthday invitation in German
+  3. All other user-visible strings (labels, confirmations, decline page) are consistent with the joint-birthday framing
+**Plans**: TBD
+**UI hint**: yes
+
+---
+
+## Progress Table
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 7. Dual-Password Auth & RSVP Backend | 0/? | Not started | - |
+| 8. German Content Update | 0/? | Not started | - |

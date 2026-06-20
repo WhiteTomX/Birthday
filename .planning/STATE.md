@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Joint Birthday
 status: planning
-last_updated: "2026-06-20T11:22:54.390Z"
+last_updated: "2026-06-20"
 last_activity: 2026-06-20
 progress:
-  total_phases: 0
+  total_phases: 2
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,21 +17,27 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-10)
+See: .planning/PROJECT.md (updated 2026-06-20)
 
 **Core value:** Enable frictionless guest RSVPs via a password-protected, beautiful German site.
-**Current focus:** Phase 06 — not-coming-rsvp-selection
+**Current focus:** Phase 7 — Dual-Password Auth & RSVP Backend
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-06-20 — Milestone v1.3 started
+Phase: 7 — Dual-Password Auth & RSVP Backend
+Plan: Not started
+Status: Roadmap defined, ready to plan Phase 7
+Last activity: 2026-06-20 — v1.3 roadmap created (Phases 7–8)
 
 ## Progress
 
-v1.1 complete. v1.2 Phase 6 complete — PR #5 open for review/merge.
+```
+v1.3 Joint Birthday
+Phase 7 [          ] 0%  Not started
+Phase 8 [          ] 0%  Not started
+```
+
+v1.0 complete. v1.1 complete. v1.2 Phase 6 complete (shipped 2026-06-14).
 
 ## Recent Decisions
 
@@ -49,10 +55,12 @@ v1.1 complete. v1.2 Phase 6 complete — PR #5 open for review/merge.
 | Route restructure: RSVP to `/rsvp/` | Root `/` is public hint page, RSVP form at `/rsvp/` |
 | Public CSS exclusion from auth | `style.css` publicly accessible — loads correctly from 401 body |
 | `Cache-Control: no-store` on 401 | Prevents CDN-cached 401 loop for authenticated guests |
+| Dual passwords for joint birthday | `SITE_PASSWORD__0` and `SITE_PASSWORD__1` in env; only index stored, never value |
+| host_ref in D1 | RSVP records carry `host_ref` (0 or 1) to identify which host's circle |
 
 ## Pending Todos
 
-1. Support two passwords for joint 30th birthday party — `2026-06-20-support-two-passwords-for-joint-30th-birthday-party.md`
+*(none)*
 
 ## Blockers / Concerns
 
@@ -60,5 +68,5 @@ v1.1 complete. v1.2 Phase 6 complete — PR #5 open for review/merge.
 
 ## Session Continuity
 
-Last session: 2026-06-14T19:02:56.221Z
-Stopped at: Phase 6 context gathered
+Last session: 2026-06-20
+Stopped at: Roadmap created — Phase 7 ready to plan
