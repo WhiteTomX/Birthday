@@ -6,7 +6,8 @@
 		{
 			"binding": "DB",
 			"database_name": "birthday-rsvps",
-			"database_id": "4e2e93ff-ea5b-4cc3-8c2f-d469c79c88f4"
+			"database_id": "4e2e93ff-ea5b-4cc3-8c2f-d469c79c88f4",
+			"migrations_dir": "migrations"
 		}
 	]
 }
