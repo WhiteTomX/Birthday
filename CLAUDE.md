@@ -3,11 +3,12 @@
 ## Local Dev Server
 
 Start the local dev server with:
+
 ```
 wrangler pages dev --port 8788
 ```
 
-The server serves on `http://localhost:8788`. Auth is Basic Auth — credentials come from `.dev.vars` (`SITE_PASSWORD=geburtstag1`). Use `Authorization: Basic <base64(user:password)>` or navigate via browser (it will prompt).
+The server serves on `http://localhost:8788`. Auth is Basic Auth — credentials come from `.dev.vars` (`SITE_PASSWORD__0=geburtstag1`, `SITE_PASSWORD__1=geburtstag2` — either password grants access). Use `Authorization: Basic <base64(user:password)>` or navigate via browser (it will prompt).
 
 The RSVP form is at `http://localhost:8788/rsvp/`.
 
@@ -26,19 +27,40 @@ Only ask the user to verify manually for things that require physical access or 
 
 ## Auth for Local Testing
 
-The site uses Basic Auth enforced by `functions/_middleware.js`. Password: `geburtstag1` (from `.dev.vars`). Username can be anything.
+The site uses Basic Auth enforced by `functions/_middleware.js`. Passwords (from `.dev.vars`): `SITE_PASSWORD__0=geburtstag1` or `SITE_PASSWORD__1=geburtstag2`. Either password grants access. Username can be anything.
 
 **CRITICAL — Chrome DevTools MCP auth pattern:**
 
 Do NOT navigate directly to authenticated pages with credentials embedded in the URL (e.g. `http://x:geburtstag1@localhost:8788/rsvp/`). Chrome blocks all `fetch()` calls from pages loaded that way — relative URLs resolve to include the credentials, and Chrome throws `"Request cannot be constructed from a URL that includes credentials"`.
 
 Correct two-step pattern:
+
 ```
-1. navigate_page(url: 'http://x:geburtstag1@localhost:8788/style.css')  // authenticate — stores credentials in Chrome
+1. navigate_page(url: 'http://x:geburtstag1@localhost:8788/rsvp/')  // authenticate — stores credentials in Chrome
 2. navigate_page(url: 'http://localhost:8788/rsvp/')                    // load page cleanly — Chrome sends stored credentials, fetch works
 ```
 
 This pattern works because Chrome stores the Basic Auth credentials for `localhost:8788` after step 1, then uses them automatically for the page load in step 2 — and fetch calls from a clean URL page are unrestricted.
+
+Note: `geburtstag2` works equally as the password in step 1.
+
+## D1 Migrations
+
+The `migrations/` directory contains versioned SQL migrations managed by Wrangler (`migrations_dir` is set in `wrangler.jsonc`).
+
+**Apply migrations locally** (against the local D1 replica used by `wrangler pages dev`):
+
+```
+wrangler d1 migrations apply birthday-rsvps --local
+```
+
+**Apply migrations to production** (Cloudflare D1 — requires `wrangler login`):
+
+```
+wrangler d1 migrations apply birthday-rsvps
+```
+
+Run the local migration command whenever you create a new migration file or set up a fresh local environment. Run the production command as part of every production deployment that includes schema changes.
 
 ## Stack
 
