@@ -31,11 +31,25 @@ export async function onRequest(context) {
   const colonIndex = credentials.indexOf(":");
   const password = credentials.slice(colonIndex + 1);
 
-  if (password !== env.SITE_PASSWORD) {
+  // Dual-password check; matched index drives X-Host-Ref value (D-08).
+  let hostRef;
+  if (password === env.SITE_PASSWORD__0) {
+    hostRef = 0;
+  } else if (password === env.SITE_PASSWORD__1) {
+    hostRef = 1;
+  } else {
     return unauthorizedResponse();
   }
 
-  return next();
+  // Inject host identity into the forwarded request via a header.
+  // RSVP API reads X-Host-Ref; do not expose it to the browser (D-07).
+  const modifiedRequest = new Request(request, {
+    headers: new Headers({
+      ...Object.fromEntries(request.headers),
+      'X-Host-Ref': String(hostRef),
+    }),
+  });
+  return next({ request: modifiedRequest });
 }
 
 function unauthorizedResponse() {
