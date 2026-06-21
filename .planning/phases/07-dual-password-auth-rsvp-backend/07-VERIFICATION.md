@@ -1,22 +1,22 @@
 ---
 phase: 07-dual-password-auth-rsvp-backend
-verified: 2026-06-21T14:45:00Z
-status: human_needed
+verified: 2026-06-21T16:45:00Z
+status: passed
 score: 8/8 must-haves verified
 overrides_applied: 0
 human_verification:
   - test: "Authenticate with SITE_PASSWORD__0 (geburtstag1), submit RSVP, verify host_ref=0 in D1"
     expected: "Row inserted with host_ref=0; X-Host-Ref header flows end-to-end from middleware through next(modifiedRequest) to rsvp.js"
-    why_human: "Static analysis cannot confirm Cloudflare Pages Functions runtime honors next(Request) argument; live server needed to confirm X-Host-Ref reaches the RSVP handler"
+    result: pass
   - test: "Authenticate with SITE_PASSWORD__1 (geburtstag2), submit RSVP, verify host_ref=1 in D1"
     expected: "Row inserted with host_ref=1"
-    why_human: "Same as above — end-to-end runtime confirmation of dual-password path"
+    result: pass
   - test: "Submit RSVP with wrong password"
     expected: "401 response; no row inserted"
-    why_human: "Runtime behavior confirmation"
+    result: pass
   - test: "Submit RSVP with no Authorization header"
     expected: "401 response"
-    why_human: "Runtime behavior confirmation"
+    result: pass
 ---
 
 # Phase 7: Dual-Password Auth & RSVP Backend Verification Report
