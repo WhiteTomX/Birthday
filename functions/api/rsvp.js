@@ -13,11 +13,19 @@ export async function onRequestPost(context) {
     return Response.json({ ok: false, error: 'Invalid JSON' }, { status: 400 });
   }
 
+  // Guard against valid-but-non-object JSON (null, array, string, number)
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return Response.json({ ok: false, error: 'Invalid JSON' }, { status: 400 });
+  }
+
   const { name, contact, attendees } = body;
 
   // Server-side validation (frontend validates too, but Worker is the last gate)
   if (!name || typeof name !== 'string' || name.trim().length === 0) {
     return Response.json({ ok: false, error: 'Name required' }, { status: 400 });
+  }
+  if (name.trim().length > 200) {
+    return Response.json({ ok: false, error: 'Name too long' }, { status: 400 });
   }
 
   const attendeesInt = parseInt(attendees, 10);

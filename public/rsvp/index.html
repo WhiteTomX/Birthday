@@ -25,10 +25,9 @@
     <section class="rsvp-section">
       <h2>Anmeldung</h2>
 
-      <!-- Phase 3: set action="/api/rsvp" method="POST" -->
-      <form id="rsvp-form" action="#" method="get" novalidate>
+      <form id="rsvp-form" novalidate>
 
-        <!-- Name field (required) -->
+        <!-- Name field — always visible -->
         <div class="field">
           <label for="name">Name</label>
           <input
@@ -42,33 +41,48 @@
           <span id="name-error" class="error-msg" role="alert">Bitte gib deinen Namen ein.</span>
         </div>
 
-        <!-- Contact method (optional) -->
-        <div class="field">
-          <label for="contact">Bevorzugte Kontaktmethode <span class="optional">(optional)</span></label>
-          <select id="contact" name="contact">
-            <option value="">Bitte wählen</option>
-            <option value="whatsapp">WhatsApp</option>
-            <option value="telegram">Telegram</option>
-            <option value="signal">Signal</option>
-            <option value="discord">Discord</option>
-            <option value="matrix">Matrix</option>
-            <option value="sms">SMS</option>
-            <option value="threema">Threema</option>
-          </select>
+        <!-- Attendance choice — two buttons -->
+        <div class="attendance-choice">
+          <button type="button" id="btn-not-coming" class="btn-attendance btn-attendance--secondary">
+            Ich komme leider nicht
+          </button>
+          <button type="button" id="btn-coming" class="btn-attendance btn-attendance--primary">
+            Ich komme
+          </button>
         </div>
 
-        <!-- Attendee count stepper (required, pre-filled 1) -->
-        <div class="field">
-          <label for="attendee-count">Anzahl der Personen</label>
-          <div class="stepper">
-            <button type="button" id="btn-less" aria-label="Weniger" disabled>−</button>
-            <output id="attendee-count" aria-live="polite">1</output>
-            <button type="button" id="btn-more" aria-label="Mehr">+</button>
+        <!-- Extra fields revealed when "Ich komme" is selected -->
+        <div id="coming-fields" hidden>
+
+          <!-- Contact method (optional) -->
+          <div class="field" id="contact-field">
+            <label for="contact">Bevorzugte Kontaktmethode <span class="optional">(optional)</span></label>
+            <select id="contact" name="contact">
+              <option value="">Bitte wählen</option>
+              <option value="whatsapp">WhatsApp</option>
+              <option value="telegram">Telegram</option>
+              <option value="signal">Signal</option>
+              <option value="discord">Discord</option>
+              <option value="matrix">Matrix</option>
+              <option value="sms">SMS</option>
+              <option value="threema">Threema</option>
+            </select>
           </div>
-          <input type="hidden" id="attendee-value" name="attendees" value="1" />
-        </div>
 
-        <button type="submit" class="btn-submit">Anmelden</button>
+          <!-- Attendee count stepper -->
+          <div class="field" id="stepper-field">
+            <label for="attendee-count">Anzahl der Personen</label>
+            <div class="stepper">
+              <button type="button" id="btn-less" aria-label="Weniger" disabled>−</button>
+              <output id="attendee-count" aria-live="polite">1</output>
+              <button type="button" id="btn-more" aria-label="Mehr">+</button>
+            </div>
+            <input type="hidden" id="attendee-value" name="attendees" value="1" />
+          </div>
+
+          <button type="button" id="btn-submit-coming" class="btn-submit">Anmelden</button>
+
+        </div>
 
       </form>
     </section>

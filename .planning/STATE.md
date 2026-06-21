@@ -1,36 +1,43 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: Full Invitation
+milestone: v1.3
+milestone_name: Joint Birthday
 status: planning
-stopped_at: v1.1 milestone archived — ready for v2.0
-last_updated: "2026-05-10"
-last_activity: 2026-05-10 — v1.1 archived, PR #2 open
+last_updated: "2026-06-20"
+last_activity: 2026-06-20
 progress:
-  total_phases: 0
+  total_phases: 2
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-10)
+See: .planning/PROJECT.md (updated 2026-06-20)
 
 **Core value:** Enable frictionless guest RSVPs via a password-protected, beautiful German site.
-**Current focus:** v2.0 Full Invitation — planning next milestone
+**Current focus:** Phase 7 — Dual-Password Auth & RSVP Backend
 
 ## Current Position
 
-- **Milestone:** v2.0 Full Invitation (pending venue confirmation)
-- **Previous Milestone:** v1.1 Password Hint Page ✅ Shipped 2026-05-10
-- **Status:** Planning next milestone
+Phase: 7 — Dual-Password Auth & RSVP Backend
+Plan: Not started
+Status: Roadmap defined, ready to plan Phase 7
+Last activity: 2026-06-20 — v1.3 roadmap created (Phases 7–8)
 
 ## Progress
 
-v1.1 complete. v2.0 not yet started.
+```
+v1.3 Joint Birthday
+Phase 7 [          ] 0%  Not started
+Phase 8 [          ] 0%  Not started
+```
+
+v1.0 complete. v1.1 complete. v1.2 Phase 6 complete (shipped 2026-06-14).
 
 ## Recent Decisions
 
@@ -48,16 +55,18 @@ v1.1 complete. v2.0 not yet started.
 | Route restructure: RSVP to `/rsvp/` | Root `/` is public hint page, RSVP form at `/rsvp/` |
 | Public CSS exclusion from auth | `style.css` publicly accessible — loads correctly from 401 body |
 | `Cache-Control: no-store` on 401 | Prevents CDN-cached 401 loop for authenticated guests |
+| Dual passwords for joint birthday | `SITE_PASSWORD__0` and `SITE_PASSWORD__1` in env; only index stored, never value |
+| host_ref in D1 | RSVP records carry `host_ref` (0 or 1) to identify which host's circle |
 
 ## Pending Todos
 
-None.
+*(none)*
 
 ## Blockers / Concerns
 
-- v2.0 blocked on venue confirmation (expected weeks away)
+- v2.0 still blocked on venue confirmation (expected weeks away)
 
 ## Session Continuity
 
-Last session: 2026-05-10
-Stopped at: v1.1 archived — ready to plan v2.0 when venue is confirmed
+Last session: 2026-06-20
+Stopped at: Roadmap created — Phase 7 ready to plan

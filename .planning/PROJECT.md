@@ -2,7 +2,11 @@
 
 ## What This Is
 
-A personal 30th birthday celebration website serving as the single source of truth for the event. Starts with a password-protected save-the-date RSVP collector, then evolves into a full event information hub with venue details, photo uploads, games, and a wishlist. Delivered across three milestones.
+A joint 30th birthday celebration website for two friends sharing the same birthday event, serving as the single source of truth. Password-protected RSVP collection supports two separate guest circles (each with their own password) while all guests join one shared party. Evolves into a full event information hub with venue details, photo uploads, games, and a wishlist.
+
+## Current Milestone: v1.3 Joint Birthday
+
+**Goal:** Adapt the site to host a joint 30th birthday celebration — two passwords (`SITE_PASSWORD__0`, `SITE_PASSWORD__1`), RSVP records tagged with `0` or `1` indicating which host's circle the guest belongs to, and updated German copy reflecting a shared celebration.
 
 **Language:** German  
 **Hosting:** Cloudflare (free tier)  
@@ -106,5 +110,5 @@ Requirements (all now validated):
 | `Cache-Control: no-store` on 401 | Prevents CDN caching unauthenticated responses | No "trapped in cached-401" loop for authenticated guests |
 
 ---
-*Last updated: 2026-05-10 — v1.1 milestone shipped*
+*Last updated: 2026-06-20 — v1.3 Joint Birthday milestone started*
 

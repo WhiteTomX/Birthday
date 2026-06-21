@@ -12,8 +12,8 @@ Output: {phase_num}-UI-REVIEW.md
 </objective>
 
 <execution_context>
-@.github/get-shit-done/workflows/ui-review.md
-@.github/get-shit-done/references/ui-brand.md
+@~/.copilot/gsd-core/workflows/ui-review.md
+@~/.copilot/gsd-core/references/ui-brand.md
 </execution_context>
 
 <context>

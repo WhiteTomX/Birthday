@@ -13,7 +13,7 @@ doesn't belong to any specific phase.
 </objective>
 
 <execution_context>
-@.github/get-shit-done/workflows/thread.md
+@~/.copilot/gsd-core/workflows/thread.md
 </execution_context>
 
 <process>
