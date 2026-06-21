@@ -26,7 +26,12 @@ export async function onRequest(context) {
   }
 
   const base64Credentials = authHeader.slice("Basic ".length);
-  const credentials = atob(base64Credentials);
+  let credentials;
+  try {
+    credentials = atob(base64Credentials);
+  } catch {
+    return unauthorizedResponse();
+  }
   // Use indexOf + slice (not split) to handle colons in the password safely.
   const colonIndex = credentials.indexOf(":");
   const password = credentials.slice(colonIndex + 1);
@@ -49,7 +54,7 @@ export async function onRequest(context) {
       'X-Host-Ref': String(hostRef),
     }),
   });
-  return next({ request: modifiedRequest });
+  return next(modifiedRequest);
 }
 
 function unauthorizedResponse() {
