@@ -74,8 +74,10 @@
   2. The save-the-date copy on `/rsvp/` reads as a joint birthday invitation in German
   3. All other user-visible strings (labels, confirmations, decline page) are consistent with the joint-birthday framing
 
-**Plans**: TBD
-**UI hint**: yes
+**Plans**: 1 plan (1 wave)
+**Wave 1**
+
+- [ ] 08-01-PLAN.md — Update hint page riddle, 401 inline riddle, and save-the-date body copy [Wave 1]
 
 ### 📋 v2.0 Full Invitation (Planned)
 
@@ -88,4 +90,4 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 7. Dual-Password Auth & RSVP Backend | 2/3 | In Progress|  |
-| 8. German Content Update | 0/? | Not started | - |
+| 8. German Content Update | 0/1 | Not started | - |
