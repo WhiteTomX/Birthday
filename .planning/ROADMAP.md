@@ -54,8 +54,13 @@
   4. Requests with an invalid or absent password are still rejected with 401
 
 **Plans**: 3 plans (2 waves)
-- [ ] 07-01-PLAN.md — D1 migration infrastructure + add host_ref column [Wave 1]
-- [ ] 07-02-PLAN.md — Dual-password auth middleware + X-Host-Ref injection [Wave 1]
+**Wave 1**
+
+- [x] 07-01-PLAN.md — D1 migration infrastructure + add host_ref column [Wave 1]
+- [x] 07-02-PLAN.md — Dual-password auth middleware + X-Host-Ref injection [Wave 1]
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 07-03-PLAN.md — RSVP API reads/validates X-Host-Ref and stores host_ref [Wave 2]
 
 ### Phase 8: German Content Update
@@ -82,5 +87,5 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 7. Dual-Password Auth & RSVP Backend | 0/3 | Not started | - |
+| 7. Dual-Password Auth & RSVP Backend | 2/3 | In Progress|  |
 | 8. German Content Update | 0/? | Not started | - |
