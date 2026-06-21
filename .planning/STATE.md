@@ -67,7 +67,14 @@ v1.0 complete. v1.1 complete. v1.2 Phase 6 complete (shipped 2026-06-14).
 
 - v2.0 still blocked on venue confirmation (expected weeks away)
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260621-kyk | update workflow to include migration step from phase 7 | 2026-06-21 | e987480 | [260621-kyk-update-workflow-to-include-migration-ste](./quick/260621-kyk-update-workflow-to-include-migration-ste/) |
+
 ## Session Continuity
 
 Last session: 2026-06-21T12:13:11.719Z
 Stopped at: Phase 8 UI-SPEC approved
+Last activity: 2026-06-21 - Completed quick task 260621-kyk: update workflow to include migration step from phase 7
