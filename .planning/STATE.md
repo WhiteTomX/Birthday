@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Joint Birthday
-status: completed
+status: "Phases 7-8 shipped — PR #6"
 stopped_at: Phase 8 UI-SPEC approved
-last_updated: "2026-06-21T14:01:03.280Z"
-last_activity: 2026-06-21 -- Phase 08 marked complete
+last_updated: "2026-06-21T20:05:00.000Z"
+last_activity: 2026-06-21
 progress:
   total_phases: 2
   completed_phases: 2
@@ -27,8 +27,8 @@ See: .planning/PROJECT.md (updated 2026-06-20)
 
 Phase: 08 — COMPLETE
 Plan: 1 of 1
-Status: Phase 08 complete
-Last activity: 2026-06-21 -- Phase 08 marked complete
+Status: Phases 7-8 shipped — PR #6
+Last activity: 2026-06-21
 
 ## Progress
 
@@ -72,9 +72,10 @@ v1.0 complete. v1.1 complete. v1.2 Phase 6 complete (shipped 2026-06-14).
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260621-kyk | update workflow to include migration step from phase 7 | 2026-06-21 | e987480 | [260621-kyk-update-workflow-to-include-migration-ste](./quick/260621-kyk-update-workflow-to-include-migration-ste/) |
+| 260621-u1z | insert host names into RSVP invitation text | 2026-06-21 | cd4d90c | [260621-u1z-i-want-to-insert-the-names-to-the-invita](./quick/260621-u1z-i-want-to-insert-the-names-to-the-invita/) |
 
 ## Session Continuity
 
-Last session: 2026-06-21T12:13:11.719Z
+Last session: 2026-06-21T20:05:00.000Z
 Stopped at: Phase 8 UI-SPEC approved
-Last activity: 2026-06-21 - Completed quick task 260621-kyk: update workflow to include migration step from phase 7
+Last activity: 2026-06-21 - Completed quick task 260621-u1z: insert host names into RSVP invitation text
