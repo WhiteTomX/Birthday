@@ -72,9 +72,10 @@ function unauthorizedResponse() {
       <h1>Falsches Passwort</h1>
       <p>Das war leider nicht richtig. Das Rätsel hilft dir auf die Sprünge:</p>
       <p>Ich komme einmal im Jahr.<br>
-      Man bäckt mir einen Kuchen, zündet Kerzen an und singt für mich.<br>
-      Wer eingeladen ist, kennt mein Datum —<br>
-      und kennt damit auch das Passwort.</p>
+      Man bäckt einen Kuchen, zündet Kerzen an und singt für.<br>
+      Dieses Jahr feiern wir ihn zu zweit.<br>
+      Wer das Datum kennt —<br>
+      kennt damit auch das Passwort.</p>
       <p class="deadline">Seite neu laden, um es erneut zu versuchen.</p>
     </section>
   </div>
