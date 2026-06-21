@@ -54,13 +54,7 @@ The `migrations/` directory contains versioned SQL migrations managed by Wrangle
 wrangler d1 migrations apply birthday-rsvps --local
 ```
 
-**Apply migrations to production** (Cloudflare D1 — requires `wrangler login`):
-
-```
-wrangler d1 migrations apply birthday-rsvps
-```
-
-Run the local migration command whenever you create a new migration file or set up a fresh local environment. Run the production command as part of every production deployment that includes schema changes.
+Run this whenever you create a new migration file or set up a fresh local environment. Production migrations are applied automatically as part of the PR deploy process — no manual production command needed.
 
 ## Stack
 
