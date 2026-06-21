@@ -38,7 +38,7 @@
 
 **Goal:** Adapt the site for a joint 30th birthday celebration — two guest-facing passwords, RSVP records tagged by host, and updated German copy.
 
-- [ ] **Phase 7: Dual-Password Auth & RSVP Backend** - Dual-password middleware, host_ref propagation, and D1 migration
+- [x] **Phase 7: Dual-Password Auth & RSVP Backend** - Dual-password middleware, host_ref propagation, and D1 migration (completed 2026-06-21)
 - [ ] **Phase 8: German Content Update** - Update all site copy to reflect joint celebration
 
 ### Phase 7: Dual-Password Auth & RSVP Backend
@@ -61,7 +61,7 @@
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 07-03-PLAN.md — RSVP API reads/validates X-Host-Ref and stores host_ref [Wave 2]
+- [x] 07-03-PLAN.md — RSVP API reads/validates X-Host-Ref and stores host_ref [Wave 2]
 
 ### Phase 8: German Content Update
 
@@ -89,5 +89,5 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 7. Dual-Password Auth & RSVP Backend | 2/3 | In Progress|  |
+| 7. Dual-Password Auth & RSVP Backend | 3/3 | Complete   | 2026-06-21 |
 | 8. German Content Update | 0/1 | Not started | - |
