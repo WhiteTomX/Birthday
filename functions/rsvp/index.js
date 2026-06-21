@@ -2,9 +2,8 @@
 // Pages Function — intercepts GET /rsvp/ and personalises the invitation text.
 //
 // Reads the static public/rsvp/index.html via the ASSETS binding, replaces the
-// first occurrence of ">Wir werden 30." with ">{name} werden 30." based on
-// the X-Host-Ref header injected by the auth middleware, then returns the
-// modified HTML with Cache-Control: no-store.
+// first occurrence of ">Wir werden 30." with ">{name} werden 30." using the
+// single INVITE_NAME env var. Falls back to "Wir" if the var is absent.
 
 export async function onRequestGet(context) {
   const { request, env } = context;
@@ -12,20 +11,8 @@ export async function onRequestGet(context) {
   // Fetch the static asset — uses the Pages ASSETS binding so no extra hop.
   const assetResponse = await env.ASSETS.fetch(request);
 
-  // Determine which host this request belongs to (0 or 1).
-  const hostRefHeader = request.headers.get('X-Host-Ref');
-  const hostRef = hostRefHeader !== null ? parseInt(hostRefHeader, 10) : 0;
-
-  // Resolve the personalised name, falling back to "Wir" if absent/empty.
-  let name;
-  if (hostRef === 1) {
-    name = (env.INVITE_NAME__1 || '').trim();
-  } else {
-    name = (env.INVITE_NAME__0 || '').trim();
-  }
-  if (!name) {
-    name = 'Wir';
-  }
+  // Resolve the name, falling back to "Wir" if absent/empty.
+  const name = (env.INVITE_NAME || '').trim() || 'Wir';
 
   // Read the HTML body.
   const html = await assetResponse.text();
