@@ -38,8 +38,46 @@
 
 **Goal:** Adapt the site for a joint 30th birthday celebration — two guest-facing passwords, RSVP records tagged by host, and updated German copy.
 
-- [ ] **Phase 7: Dual-Password Auth & RSVP Backend** - One-line description
-- [ ] **Phase 8: German Content Update** - Update all site copy to reflect joint celebration
+- [x] **Phase 7: Dual-Password Auth & RSVP Backend** - Dual-password middleware, host_ref propagation, and D1 migration (completed 2026-06-21)
+- [x] **Phase 8: German Content Update** - Update all site copy to reflect joint celebration (completed 2026-06-21)
+
+### Phase 7: Dual-Password Auth & RSVP Backend
+
+**Goal**: Guests from either host's circle can access the site, and every RSVP is tagged with which host they belong to
+**Depends on**: Phase 6
+**Requirements**: AUTH-07, AUTH-08, RSVP-07, RSVP-08
+**Success Criteria** (what must be TRUE):
+
+  1. A guest using `SITE_PASSWORD__0` can reach `/rsvp/` and is granted access
+  2. A guest using `SITE_PASSWORD__1` can reach `/rsvp/` and is granted access
+  3. A submitted RSVP record in D1 contains a `host_ref` column with value `0` or `1` matching which password was used — the password itself is never stored
+  4. Requests with an invalid or absent password are still rejected with 401
+
+**Plans**: 3 plans (2 waves)
+**Wave 1**
+
+- [x] 07-01-PLAN.md — D1 migration infrastructure + add host_ref column [Wave 1]
+- [x] 07-02-PLAN.md — Dual-password auth middleware + X-Host-Ref injection [Wave 1]
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [x] 07-03-PLAN.md — RSVP API reads/validates X-Host-Ref and stores host_ref [Wave 2]
+
+### Phase 8: German Content Update
+
+**Goal**: All visible site text reflects a shared celebration by two hosts, in German
+**Depends on**: Phase 7
+**Requirements**: CONT-01
+**Success Criteria** (what must be TRUE):
+
+  1. The hint page riddle refers to both hosts and a joint celebration (no single-host phrasing)
+  2. The save-the-date copy on `/rsvp/` reads as a joint birthday invitation in German
+  3. All other user-visible strings (labels, confirmations, decline page) are consistent with the joint-birthday framing
+
+**Plans**: 1 plan (1 wave)
+**Wave 1**
+
+- [x] 08-01-PLAN.md — Update hint page riddle, 401 inline riddle, and save-the-date body copy [Wave 1]
 
 ### 📋 v2.0 Full Invitation (Planned)
 
@@ -47,35 +85,9 @@
 
 ---
 
-## Phase Details
-
-### Phase 7: Dual-Password Auth & RSVP Backend
-**Goal**: Guests from either host's circle can access the site, and every RSVP is tagged with which host they belong to
-**Depends on**: Phase 6
-**Requirements**: AUTH-07, AUTH-08, RSVP-07, RSVP-08
-**Success Criteria** (what must be TRUE):
-  1. A guest using `SITE_PASSWORD__0` can reach `/rsvp/` and is granted access
-  2. A guest using `SITE_PASSWORD__1` can reach `/rsvp/` and is granted access
-  3. A submitted RSVP record in D1 contains a `host_ref` column with value `0` or `1` matching which password was used — the password itself is never stored
-  4. Requests with an invalid or absent password are still rejected with 401
-**Plans**: TBD
-
-### Phase 8: German Content Update
-**Goal**: All visible site text reflects a shared celebration by two hosts, in German
-**Depends on**: Phase 7
-**Requirements**: CONT-01
-**Success Criteria** (what must be TRUE):
-  1. The hint page riddle refers to both hosts and a joint celebration (no single-host phrasing)
-  2. The save-the-date copy on `/rsvp/` reads as a joint birthday invitation in German
-  3. All other user-visible strings (labels, confirmations, decline page) are consistent with the joint-birthday framing
-**Plans**: TBD
-**UI hint**: yes
-
----
-
 ## Progress Table
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 7. Dual-Password Auth & RSVP Backend | 0/? | Not started | - |
-| 8. German Content Update | 0/? | Not started | - |
+| 7. Dual-Password Auth & RSVP Backend | 3/3 | Complete   | 2026-06-21 |
+| 8. German Content Update | 1/1 | Complete   | 2026-06-21 |

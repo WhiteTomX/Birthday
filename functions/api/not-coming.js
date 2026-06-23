@@ -32,12 +32,19 @@ export async function onRequestPost(context) {
   const id = crypto.randomUUID();
   const now = new Date().toISOString();
 
+  // Read host identity set by middleware — same pattern as rsvp.js (D-06).
+  const hostRefHeader = request.headers.get('X-Host-Ref');
+  const hostRef = parseInt(hostRefHeader, 10);
+  if (hostRefHeader === null || (hostRef !== 0 && hostRef !== 1)) {
+    return Response.json({ ok: false, error: 'Missing host context' }, { status: 400 });
+  }
+
   // Insert decline record — attendees hardcoded to 0, contact_method to null (D-06, D-08)
   // Every submission is a new record, no upsert
   try {
     await env.DB.prepare(
-      'INSERT INTO rsvps (id, name, contact_method, attendees, submitted_at) VALUES (?, ?, ?, ?, ?)'
-    ).bind(id, name.trim(), null, 0, now).run();
+      'INSERT INTO rsvps (id, name, contact_method, attendees, submitted_at, host_ref) VALUES (?, ?, ?, ?, ?, ?)'
+    ).bind(id, name.trim(), null, 0, now, hostRef).run();
   } catch (err) {
     // Do not expose internal error details to the client
     return Response.json({ ok: false, error: 'Database error' }, { status: 500 });

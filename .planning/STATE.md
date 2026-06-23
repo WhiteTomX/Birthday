@@ -2,15 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Joint Birthday
-status: planning
-last_updated: "2026-06-20"
-last_activity: 2026-06-20
+status: "Phases 7-8 shipped — PR #6"
+stopped_at: Phase 8 UI-SPEC approved
+last_updated: "2026-06-21T20:05:00.000Z"
+last_activity: 2026-06-21
 progress:
   total_phases: 2
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  completed_phases: 2
+  total_plans: 4
+  completed_plans: 4
+  percent: 100
 ---
 
 # Project State
@@ -20,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-20)
 
 **Core value:** Enable frictionless guest RSVPs via a password-protected, beautiful German site.
-**Current focus:** Phase 7 — Dual-Password Auth & RSVP Backend
+**Current focus:** Phase 08 — german-content-update
 
 ## Current Position
 
-Phase: 7 — Dual-Password Auth & RSVP Backend
-Plan: Not started
-Status: Roadmap defined, ready to plan Phase 7
-Last activity: 2026-06-20 — v1.3 roadmap created (Phases 7–8)
+Phase: 08 — COMPLETE
+Plan: 1 of 1
+Status: Phases 7-8 shipped — PR #6
+Last activity: 2026-06-21
 
 ## Progress
 
@@ -66,7 +67,15 @@ v1.0 complete. v1.1 complete. v1.2 Phase 6 complete (shipped 2026-06-14).
 
 - v2.0 still blocked on venue confirmation (expected weeks away)
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260621-kyk | update workflow to include migration step from phase 7 | 2026-06-21 | e987480 | [260621-kyk-update-workflow-to-include-migration-ste](./quick/260621-kyk-update-workflow-to-include-migration-ste/) |
+| 260621-u1z | insert host names into RSVP invitation text | 2026-06-21 | cd4d90c | [260621-u1z-i-want-to-insert-the-names-to-the-invita](./quick/260621-u1z-i-want-to-insert-the-names-to-the-invita/) |
+
 ## Session Continuity
 
-Last session: 2026-06-20
-Stopped at: Roadmap created — Phase 7 ready to plan
+Last session: 2026-06-21T20:05:00.000Z
+Stopped at: Phase 8 UI-SPEC approved
+Last activity: 2026-06-21 - Completed quick task 260621-u1z: insert host names into RSVP invitation text

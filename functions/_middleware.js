@@ -26,16 +26,35 @@ export async function onRequest(context) {
   }
 
   const base64Credentials = authHeader.slice("Basic ".length);
-  const credentials = atob(base64Credentials);
+  let credentials;
+  try {
+    credentials = atob(base64Credentials);
+  } catch {
+    return unauthorizedResponse();
+  }
   // Use indexOf + slice (not split) to handle colons in the password safely.
   const colonIndex = credentials.indexOf(":");
   const password = credentials.slice(colonIndex + 1);
 
-  if (password !== env.SITE_PASSWORD) {
+  // Dual-password check; matched index drives X-Host-Ref value (D-08).
+  let hostRef;
+  if (password === env.SITE_PASSWORD__0) {
+    hostRef = 0;
+  } else if (password === env.SITE_PASSWORD__1) {
+    hostRef = 1;
+  } else {
     return unauthorizedResponse();
   }
 
-  return next();
+  // Inject host identity into the forwarded request via a header.
+  // RSVP API reads X-Host-Ref; do not expose it to the browser (D-07).
+  const modifiedRequest = new Request(request, {
+    headers: new Headers({
+      ...Object.fromEntries(request.headers),
+      'X-Host-Ref': String(hostRef),
+    }),
+  });
+  return next(modifiedRequest);
 }
 
 function unauthorizedResponse() {
@@ -53,9 +72,10 @@ function unauthorizedResponse() {
       <h1>Falsches Passwort</h1>
       <p>Das war leider nicht richtig. Das Rätsel hilft dir auf die Sprünge:</p>
       <p>Ich komme einmal im Jahr.<br>
-      Man bäckt mir einen Kuchen, zündet Kerzen an und singt für mich.<br>
-      Wer eingeladen ist, kennt mein Datum —<br>
-      und kennt damit auch das Passwort.</p>
+      Man bäckt einen Kuchen, zündet Kerzen an und singt.<br>
+      Dieses Jahr feiern wir ihn zu zweit.<br>
+      Wer das Datum kennt —<br>
+      kennt damit auch das Passwort.</p>
       <p class="deadline">Seite neu laden, um es erneut zu versuchen.</p>
     </section>
   </div>
