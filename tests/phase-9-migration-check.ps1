@@ -117,11 +117,15 @@ function Assert-Constraints {
 
   $null = Invoke-D1 -PersistencePath $PersistencePath -Sql @"
 INSERT INTO fresh_rsvps (id, name, attendance, group_size, submitted_at, host_ref)
-VALUES ('phase9-max-group', 'Maximum group', 'coming', 10, '2026-01-01T00:00:00Z', 0);
+VALUES ('phase9-max-group', 'Maximum group', 'coming', 10, '2026-01-01T00:00:00Z', 1);
 "@
   $null = Invoke-D1 -PersistencePath $PersistencePath -Sql @"
 INSERT INTO fresh_rsvps (id, name, attendance, group_size, submitted_at, host_ref)
 VALUES ('phase9-over-limit', 'Too many people', 'coming', 11, '2026-01-01T00:00:00Z', 0);
+"@ -ExpectFailure -ExpectedError 'CHECK constraint failed'
+  $null = Invoke-D1 -PersistencePath $PersistencePath -Sql @"
+INSERT INTO fresh_rsvps (id, name, attendance, group_size, submitted_at, host_ref)
+VALUES ('phase9-invalid-host', 'Invalid host', 'coming', 1, '2026-01-01T00:00:00Z', 2);
 "@ -ExpectFailure -ExpectedError 'CHECK constraint failed'
   $null = Invoke-D1 -PersistencePath $PersistencePath -Sql @"
 INSERT INTO fresh_rsvps (id, name, attendance, group_size, submitted_at, host_ref)
@@ -144,6 +148,17 @@ VALUES ('phase9-max-group', 'missing-option');
 INSERT INTO fresh_rsvp_drink_selections (fresh_rsvp_id, drink_option_id)
 VALUES ('phase9-max-group', 'bier');
 "@
+  $null = Invoke-D1 -PersistencePath $PersistencePath -Sql @"
+INSERT INTO fresh_rsvp_drink_selections (fresh_rsvp_id, drink_option_id)
+VALUES ('phase9-max-group', 'wein');
+"@
+  $selectionRows = Get-D1Rows -PersistencePath $PersistencePath -Sql @"
+SELECT COUNT(*) AS selection_count
+FROM fresh_rsvp_drink_selections WHERE fresh_rsvp_id = 'phase9-max-group';
+"@
+  if ($selectionRows.Count -ne 1 -or $selectionRows[0].selection_count -ne 2) {
+    throw 'A coming group could not associate multiple drink options with one RSVP.'
+  }
   $null = Invoke-D1 -PersistencePath $PersistencePath -Sql @"
 UPDATE fresh_rsvps SET attendance = 'not_coming', group_size = 0 WHERE id = 'phase9-max-group';
 "@ -ExpectFailure -ExpectedError 'declining RSVP cannot have drink selections'
