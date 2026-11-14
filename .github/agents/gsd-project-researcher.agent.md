@@ -1,7 +1,7 @@
 ---
 name: gsd-project-researcher
 description: "Researches domain ecosystem before roadmap creation. Produces files in .planning/research/ consumed during roadmap creation. Spawned by /gsd-new-project or /gsd-new-milestone orchestrators."
-tools: ['read', 'edit', 'execute', 'search', 'web', 'io.github.upstash/context7/*', 'mcp__firecrawl__*', 'mcp__exa__*', 'mcp__tavily__*', 'mcp__ref__*', 'mcp__jina__*']
+tools: ['read', 'edit', 'execute', 'search', 'skill', 'web', 'io.github.upstash/context7/*', 'mcp__plugin_context7_context7__*', 'mcp__firecrawl__*', 'mcp__exa__*', 'mcp__tavily__*', 'mcp__ref__*', 'mcp__jina__*', 'mcp__perplexity__*']
 color: cyan
 ---
 
@@ -26,6 +26,10 @@ Your files feed the roadmap:
 
 **Be comprehensive but opinionated.** "Use X because Y" not "Options are X, Y, Z."
 </role>
+
+@.github/gsd-core/references/untrusted-input-boundary.md
+
+**agent_skills:** self-load per @.github/gsd-core/references/agent-skills-bootstrap.md (agent type: `gsd-project-researcher`)
 
 <documentation_lookup>
 @.github/gsd-core/references/research-documentation-lookup.md
@@ -71,7 +75,8 @@ Construct a JSON file at a temp path (e.g. `/tmp/research-plan-input.json`):
 ### Step B — Obtain the fetch plan
 
 ```bash
-gsd-tools query research-plan --input /tmp/research-plan-input.json
+_GSD_SHIM_NAME="gsd-tools.cjs"; _GSD_RUNTIME_ROOT="${RUNTIME_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"; GSD_TOOLS="${_GSD_RUNTIME_ROOT}/gsd-core/bin/${_GSD_SHIM_NAME}"; _gsd_at() { for _p; do if [ -f "$_p" ]; then GSD_TOOLS="$_p"; return 0; fi; done; return 1; }; _gsd_id_ok() { case "$("$1" runtime-identity --raw 2>/dev/null || true)" in '{"packageName":"@opengsd/gsd-core"'*'}') return 0;; *) return 1;; esac; }; _gsd_homes() { set -- "${CLAUDE_CONFIG_DIR:-.github}" "${ANTIGRAVITY_CONFIG_DIR:-$HOME/.gemini/antigravity}" "$HOME/.gemini/antigravity-ide" "$HOME/.gemini/antigravity-cli" "${AUGMENT_CONFIG_DIR:-$HOME/.augment}" "${CLINE_CONFIG_DIR:-$HOME/.cline}" "${CODEBUDDY_CONFIG_DIR:-$HOME/.codebuddy}" "${CODEX_HOME:-$HOME/.codex}" "${COPILOT_CONFIG_DIR:-${COPILOT_HOME:-$HOME/.copilot}}" "${CURSOR_CONFIG_DIR:-$HOME/.cursor}" "${HERMES_HOME:-$HOME/.hermes}" "${KILO_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/kilo}" "${KIMI_CONFIG_DIR:-$HOME/.config/agents}" "$HOME/.agents" "${KIMI_CODE_HOME:-$HOME/.kimi-code}" "${OPENCODE_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/opencode}" "${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}" "${QWEN_CONFIG_DIR:-$HOME/.qwen}" "${TRAE_CONFIG_DIR:-$HOME/.trae}" "${WINDSURF_CONFIG_DIR:-$HOME/.codeium/windsurf}" "${ZCODE_CONFIG_DIR:-$HOME/.zcode}" "${GROK_AGENTS_HOME:-$HOME/.agents}"; for _h; do _gsd_at "$_h/gsd-core/bin/${_GSD_SHIM_NAME}" && return 0; done; return 1; }; if _gsd_at "${_GSD_RUNTIME_ROOT}/gsd-core/bin/${_GSD_SHIM_NAME}" "${_GSD_RUNTIME_ROOT}/.github/gsd-core/bin/${_GSD_SHIM_NAME}" "${_GSD_RUNTIME_ROOT}/.codex/gsd-core/bin/${_GSD_SHIM_NAME}"; then gsd_run() { node "$GSD_TOOLS" "$@"; }; elif _gsd_homes; then gsd_run() { node "$GSD_TOOLS" "$@"; }; elif unset -f gsd_run; _G="$(command -v gsd_run)"; [ -n "$_G" ] && _gsd_id_ok "$_G"; then GSD_TOOLS="$_G"; gsd_run() { "$GSD_TOOLS" "$@"; }; else echo "ERROR: gsd-tools.cjs not found at $GSD_TOOLS and no identity-proving gsd_run is on PATH. Run: npx -y @opengsd/gsd-core@latest --claude --local" >&2; exit 1; fi; GSD_IDENTITY_STATUS=unverified; _gsd_id_ok gsd_run && GSD_IDENTITY_STATUS=ok; export GSD_IDENTITY_STATUS; [ "$GSD_IDENTITY_STATUS" = ok ] || echo "WARNING: \"$GSD_TOOLS\" did not prove it is @opengsd/gsd-core - it is either a different package or an @opengsd/gsd-core older than the runtime-identity verb. See docs/how-to/diagnose-a-foreign-gsd-tools.md" >&2; if [ -n "${CLAUDE_ENV_FILE:-}" ] && [ -n "${GSD_TOOLS:-}" ]; then printf "export PATH='%s':\"\$PATH\"\n" "${GSD_TOOLS%/*}" >> "$CLAUDE_ENV_FILE" 2>/dev/null || true; fi
+gsd_run query research-plan --input /tmp/research-plan-input.json
 ```
 
 Returns `{ "items": [ { "question": "...", "key": "<sha256>", "cache": { "hit": true/false, "stale": false }, "fetch": { "provider": "context7", "query": "..." } } ] }`.
@@ -92,7 +97,7 @@ For each item where `fetch` is present, invoke the MCP tool matching `fetch.prov
 | `exa` | `mcp__exa__web_search_exa` with `fetch.query` |
 | `tavily` | `mcp__tavily__search` with `fetch.query` |
 | `perplexity` | `mcp__perplexity__*` (use the appropriate perplexity MCP tool for the query) |
-| `brave` | `gsd-tools query websearch "<fetch.query>"` (Brave-backed) or built-in `WebSearch` |
+| `brave` | `gsd_run query websearch "<fetch.query>"` (Brave-backed) or built-in `WebSearch` |
 | `firecrawl` | `mcp__firecrawl__scrape` with url (scrape kind) or `mcp__firecrawl__search` |
 | `websearch` | built-in `WebSearch` tool |
 | `webfetch` | built-in `WebFetch` tool |
@@ -106,7 +111,7 @@ For any other provider id `X` not listed above: use `mcp__X__*` if available, el
 After digesting a source, persist it so future runs can reuse it:
 
 ```bash
-gsd-tools query research-store put <key> \
+gsd_run query research-store put <key> \
   --content "<one-paragraph digest>" \
   --source <curated|web> \
   --provider <provider-id> \
@@ -123,9 +128,9 @@ gsd-tools query research-store put <key> \
 Obtain the confidence tier from code — do not hard-code tiers in your reasoning:
 
 ```bash
-gsd-tools query classify-confidence --provider <provider-id>
+gsd_run query classify-confidence --provider <provider-id>
 # for cross-checked findings, add --verified:
-gsd-tools query classify-confidence --provider <provider-id> --verified
+gsd_run query classify-confidence --provider <provider-id> --verified
 ```
 
 Returns `HIGH`, `MEDIUM`, or `LOW`. Use that value when tagging claims and when calling `research-store put --confidence <value>`.
@@ -480,7 +485,7 @@ Orchestrator provides: project name/description, research mode, project context,
 
 ## Step 3: Execute Research
 
-For each domain, use the `<tool_strategy>` seam (Steps A–D): build questions JSON, call `gsd-tools query research-plan`, run the indicated provider per item, then cache each digest. Document findings with confidence levels as you go (use `gsd-tools query classify-confidence --provider <id>` to obtain the tier).
+For each domain, use the `<tool_strategy>` seam (Steps A–D): build questions JSON, call `gsd_run query research-plan`, run the indicated provider per item, then cache each digest. Document findings with confidence levels as you go (use `gsd_run query classify-confidence --provider <id>` to obtain the tier).
 
 ## Step 4: Quality Check
 
