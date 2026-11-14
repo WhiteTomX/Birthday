@@ -3,40 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Save the Date - 5. Dezember</title>
+  <title>Einladung - 5. Dezember</title>
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
   <div class="container">
 
-    <section class="save-the-date">
-      <p class="eyebrow">Save the Date</p>
+    <section class="save-the-date invitation-layout">
+      <p class="eyebrow">Einladung</p>
       <h1>5. Dezember</h1>
-      <div class="save-the-date__content">
-        <div>
-          <p>Moin</p>
-          <p>Wir werden 30. Aus irgendwelchen Gründen ist das etwas Großes — und wir feiern das zusammen. Mit euch.</p>
-          <p>Der Plan ist: gutes Buffet und danach richtig feiern. Wir halten euch auf dem Laufenden, sobald wir mehr wissen.</p>
-          <p>Wenn wir jemanden vergessen haben — einfach den Link weitergeben!</p>
-          <p class="deadline">Je früher ihr euch anmeldet, desto besser — dann können wir besser planen.</p>
-          <p>P.S. Wer uns vorher ein besonderes großed Geschenk machen möchte nimmt uns die Planung ab.</p>
-        </div>
-        <aside class="venue-note" aria-labelledby="venue-note-title">
-          <p class="venue-note__title" id="venue-note-title">Voraussichtlicher Veranstaltungsort</p>
-          <p>Der Vertrag steht noch aus, deshalb ist der Ort noch nicht endgültig bestätigt.</p>
-          <!-- VENUE_DETAILS -->
-        </aside>
+      <div class="invitation-copy">
+        <p>Liebe Freunde,</p>
+        <p>wir feiern am 5. Dezember um 17:00 Uhr gemeinsam unseren Geburtstag. Und genau deshalb wollen wir mit euch ein besonderes Fest feiern.</p>
+        <p>Wir freuen uns auf einen Nachmittag mit gutem Essen, Gesprächen, Musik und viel gemeinsamem Feiern.</p>
+        <p>Bitte meldet euch an und gebt uns kurz Bescheid, ob ihr dabei seid. Wenn ihr mitkommt, könnt ihr eure Getränkewünsche angeben — das sind Wünsche, keine Garantie.</p>
+        <p><strong>Ort & Anfahrt:</strong> Wir freuen uns auf euch im Park.</p>
+        <!-- VENUE_DETAILS -->
+        <!-- PARK_ENTRY_DIRECTIONS -->
+        <!-- BUFFET_LINK -->
       </div>
     </section>
 
     <div class="divider" aria-hidden="true"></div>
 
     <section class="rsvp-section">
-      <h2>Anmeldung</h2>
+      <h2>Bitte meldet euch an</h2>
 
       <form id="rsvp-form" novalidate>
-
-        <!-- Name field — always visible -->
         <div class="field">
           <label for="name">Name</label>
           <input
@@ -45,40 +38,21 @@
             name="name"
             placeholder="Dein Name"
             required
-            autocomplete="given-name"
+            autocomplete="name"
           />
           <span id="name-error" class="error-msg" role="alert">Bitte gib deinen Namen ein.</span>
         </div>
 
-        <!-- Attendance choice — two buttons -->
         <div class="attendance-choice">
           <button type="button" id="btn-not-coming" class="btn-attendance btn-attendance--secondary">
-            Ich komme leider nicht
+            Ich kann leider nicht
           </button>
           <button type="button" id="btn-coming" class="btn-attendance btn-attendance--primary">
             Ich komme
           </button>
         </div>
 
-        <!-- Extra fields revealed when "Ich komme" is selected -->
         <div id="coming-fields" hidden>
-
-          <!-- Contact method (optional) -->
-          <div class="field" id="contact-field">
-            <label for="contact">Bevorzugte Kontaktmethode <span class="optional">(optional)</span></label>
-            <select id="contact" name="contact">
-              <option value="">Bitte wählen</option>
-              <option value="whatsapp">WhatsApp</option>
-              <option value="telegram">Telegram</option>
-              <option value="signal">Signal</option>
-              <option value="discord">Discord</option>
-              <option value="matrix">Matrix</option>
-              <option value="sms">SMS</option>
-              <option value="threema">Threema</option>
-            </select>
-          </div>
-
-          <!-- Attendee count stepper -->
           <div class="field" id="stepper-field">
             <label for="attendee-count">Anzahl der Personen</label>
             <div class="stepper">
@@ -89,10 +63,23 @@
             <input type="hidden" id="attendee-value" name="attendees" value="1" />
           </div>
 
-          <button type="button" id="btn-submit-coming" class="btn-submit">Anmelden</button>
+          <div class="field" id="drink-field">
+            <label>Getränkewünsche <span class="optional">(mehrfach möglich)</span></label>
+            <div id="drink-options" class="drink-options" aria-live="polite"></div>
+            <p class="helper-text">Die Getränkewünsche sind nur Wünsche — keine Garantie.</p>
+          </div>
 
+          <div class="field" id="drink-suggestion-field">
+            <label for="drink-suggestion">Getränk vorschlagen</label>
+            <div class="suggestion-row">
+              <input type="text" id="drink-suggestion" name="drink-suggestion" placeholder="z. B. Apfelsaft" />
+              <button type="button" id="btn-drink-suggestion" class="btn-secondary">Vorschlagen</button>
+            </div>
+            <span id="drink-suggestion-error" class="error-msg" role="alert">Bitte gib ein Getränk ein.</span>
+          </div>
+
+          <button type="button" id="btn-submit-coming" class="btn-submit">Anmeldung senden</button>
         </div>
-
       </form>
     </section>
 
