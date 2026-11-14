@@ -9,5 +9,17 @@
 			"database_id": "4e2e93ff-ea5b-4cc3-8c2f-d469c79c88f4",
 			"migrations_dir": "migrations"
 		}
-	]
+	],
+	"env": {
+		"preview": {
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "birthday-rsvps-preview",
+					"database_id": "c7914541-2b3f-41b4-a312-b4f97f4d5270",
+					"migrations_dir": "migrations"
+				}
+			]
+		}
+	}
 }
