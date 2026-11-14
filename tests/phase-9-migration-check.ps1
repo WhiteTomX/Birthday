@@ -205,19 +205,22 @@ VALUES ('$sentinel', 'Historical guest', 'email', 4, '2025-11-30T12:34:56.000Z')
   Assert-NewSchema -PersistencePath $populatedPersistence
 
   $historicalRows = Get-D1Rows -PersistencePath $populatedPersistence -Sql @"
-SELECT id, name, contact_method, attendees, submitted_at, host_ref
+SELECT id, name, contact_method, attendees, hex(submitted_at) AS submitted_at_hex, host_ref
 FROM rsvps WHERE id = '$sentinel';
 "@
   if ($historicalRows.Count -ne 1) {
     throw "Expected one historical RSVP sentinel, found $($historicalRows.Count)"
   }
   $historical = $historicalRows[0]
+  $expectedTimestampHex = [BitConverter]::ToString(
+    [System.Text.Encoding]::UTF8.GetBytes('2025-11-30T12:34:56.000Z')
+  ).Replace('-', '')
   if (
     $historical.id -ne $sentinel -or
     $historical.name -ne 'Historical guest' -or
     $historical.contact_method -ne 'email' -or
     $historical.attendees -ne 4 -or
-    $historical.submitted_at -ne '2025-11-30T12:34:56.000Z' -or
+    $historical.submitted_at_hex -ne $expectedTimestampHex -or
     $historical.host_ref -ne 0
   ) {
     throw "Historical RSVP changed during migration: $($historical | ConvertTo-Json -Compress)"
