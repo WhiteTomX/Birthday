@@ -7,6 +7,10 @@ const invitationTemplate = await readFile(
   new URL('../public/rsvp/index.html', import.meta.url),
   'utf8',
 );
+const publicTemplate = await readFile(
+  new URL('../public/index.html', import.meta.url),
+  'utf8',
+);
 
 function makeContext(values = {}) {
   const request = new Request('https://birthday.test/rsvp/');
@@ -112,4 +116,30 @@ test('does not invent logistics when environment values are absent', async () =>
 
   assert.doesNotMatch(html, /event-directions|event-callout|OpenStreetMap ansehen/);
   assert.doesNotMatch(html, /Musterstraße|Berlin|2026/);
+});
+
+test('keeps venue and arrival details in the integrated invitation flow', () => {
+  const invitationSection = invitationTemplate.match(
+    /<section class="save-the-date invitation-layout">([\s\S]*?)<\/section>/,
+  )?.[1];
+
+  assert.ok(invitationSection);
+  assert.ok(invitationSection.includes('<div class="invitation-copy">'));
+  assert.equal(invitationSection.includes('<aside class="venue-note"'), false);
+
+  const venueIndex = invitationSection.indexOf('<!-- VENUE_DETAILS -->');
+  const directionsIndex = invitationSection.indexOf('<!-- PARK_ENTRY_DIRECTIONS -->');
+  const buffetIndex = invitationSection.indexOf('<!-- BUFFET_LINK -->');
+  assert.ok(venueIndex >= 0);
+  assert.ok(directionsIndex > venueIndex);
+  assert.ok(buffetIndex > directionsIndex);
+});
+
+test('keeps private logistics out of the public root and the date free of an invented year', () => {
+  assert.doesNotMatch(
+    publicTemplate,
+    /Ort & Anfahrt|Anreise:|OpenStreetMap ansehen|BUFFET_LIST_URL|PARK_ENTRY_DIRECTIONS|<div class="event-callout"/,
+  );
+  assert.match(invitationTemplate, /5\. Dezember um 17:00 Uhr/);
+  assert.doesNotMatch(invitationTemplate, /\b20\d{2}\b|Musterstraße|Hauptstraße/);
 });
