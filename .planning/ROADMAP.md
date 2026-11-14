@@ -57,7 +57,7 @@
   3. Guests can submit either a coming or not-coming confirmation to a separate fresh-round D1 table; declines have no drink selection, and all historical RSVP rows remain unchanged after the additive migration.
   4. A coming group can select multiple fixed drinks (Bier, Wein, Sekt, Kola, Spezi, Fruchtlimonaden, Wasser, alkoholfreies Bier) or catalogued suggestions, while a separate suggestion form lets guests submit a drink that is safely displayed and selectable immediately and by later respondents.
   5. The drink form offers no “Keine Präferenz” choice and clearly explains that drink preferences are requests, not guarantees.
-**Plans**: 2/5 plans executed (dependency-ordered)
+**Plans**: 3/5 plans executed (dependency-ordered)
 
 Plans:
 **Wave 1**
@@ -67,7 +67,7 @@ Plans:
 - [x] 09-02: Add authenticated RSVP and drink-option endpoints, including decline-without-drinks behavior, safe validation, and unique reusable suggestions.
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 09-03: Add authenticated invitation personalization for venue/map values, `PARK_ENTRY_DIRECTIONS`, and the optional `BUFFET_LIST_URL`.
+- [x] 09-03: Add authenticated invitation personalization for venue/map values, `PARK_ENTRY_DIRECTIONS`, and the optional `BUFFET_LIST_URL`.
 
 **Wave 4** *(blocked on Wave 3 completion)*
 - [ ] 09-04: Complete the German invitation, accessible fresh RSVP form, multi-select drink control, separate suggestion form, and immediate selector updates.
@@ -88,4 +88,4 @@ Plans:
 |-------|----------------|--------|-----------|
 | 7. Dual-Password Auth & RSVP Backend | 3/3 | Complete   | 2026-06-21 |
 | 8. German Content Update | 1/1 | Complete   | 2026-06-21 |
-| 9. Actual Invitation, Fresh RSVP & Drinks | 2/5 | In Progress | - |
+| 9. Actual Invitation, Fresh RSVP & Drinks | 3/5 | In Progress | - |
