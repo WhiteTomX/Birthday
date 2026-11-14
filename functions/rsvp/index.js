@@ -6,45 +6,39 @@
 export async function onRequestGet(context) {
   const { request, env } = context;
 
-  // Fetch the static asset — uses the Pages ASSETS binding so no extra hop.
   const assetResponse = await env.ASSETS.fetch(request);
-
-  // Resolve the name, falling back to "Wir" if absent/empty.
-  const name = (env.INVITE_NAME || '').trim() || 'Wir';
-
-  // Read the HTML body.
   const html = await assetResponse.text();
 
   const venueName = (env.VENUE_NAME || '').trim();
   const venueMapUrl = (env.VENUE_MAP_URL || '').trim();
+  const parkDirections = (env.PARK_ENTRY_DIRECTIONS || '').trim();
+  const buffetUrl = (env.BUFFET_LIST_URL || '').trim();
+
   let venueDetails = '';
-
-  if (venueName && venueMapUrl) {
-    let parsedMapUrl;
-    try {
-      parsedMapUrl = new URL(venueMapUrl);
-    } catch {
-      console.error('VENUE_MAP_URL must be a valid HTTPS URL.');
+  const parsedMapUrl = parseHttpsUrl(venueMapUrl);
+  if (venueName) {
+    venueDetails = `<p><strong>${escapeHtml(venueName)}</strong></p>`;
+    if (parsedMapUrl) {
+      venueDetails += `
+        <a href="${escapeHtml(parsedMapUrl.href)}" target="_blank" rel="noopener noreferrer">Auf OpenStreetMap ansehen</a>`;
     }
-
-    if (parsedMapUrl?.protocol === 'https:') {
-      venueDetails = `<p><strong>${escapeHtml(venueName)}</strong></p>
-          <a href="${escapeHtml(parsedMapUrl.href)}" target="_blank" rel="noopener noreferrer">Auf OpenStreetMap ansehen</a>`;
-    } else if (parsedMapUrl) {
-      console.error('VENUE_MAP_URL must use HTTPS.');
-    }
-  } else {
-    console.warn('Set both VENUE_NAME and VENUE_MAP_URL to display venue details.');
   }
 
-  // The marker is absent from the source response unless both values are
-  // configured and the map URL passes HTTPS validation.
+  const directionsMarkup = parkDirections
+    ? `<p class="event-directions"><strong>Anreise:</strong> ${escapeHtml(parkDirections)}</p>`
+    : '';
+
+  const parsedBuffetUrl = parseHttpsUrl(buffetUrl);
+  const buffetMarkup = parsedBuffetUrl
+    ? `<p class="event-callout"><strong>Buffetbeitrag</strong><br><a href="${escapeHtml(parsedBuffetUrl.href)}" target="_blank" rel="noopener noreferrer">Zum Buffetbeitrag</a></p>`
+    : '';
+
   const modified = html
     .replace('<!-- VENUE_DETAILS -->', venueDetails)
-    .replace('>Wir werden 30.', `>${name} werden 30.`);
+    .replace('<!-- PARK_ENTRY_DIRECTIONS -->', directionsMarkup)
+    .replace('<!-- BUFFET_LINK -->', buffetMarkup)
+    .replace(/>Wir werden 30\./, '>Wir feiern zusammen.');
 
-  // Preserve Content-Type from the asset, force no-store to prevent CDN caching
-  // personalised responses (T-u1z-02).
   const contentType =
     assetResponse.headers.get('Content-Type') || 'text/html; charset=utf-8';
 
@@ -65,4 +59,20 @@ function escapeHtml(value) {
     '"': '&quot;',
     "'": '&#39;',
   })[character]);
+}
+
+function parseHttpsUrl(value) {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:' || !url.hostname || url.username || url.password) {
+      return null;
+    }
+    return url;
+  } catch {
+    return null;
+  }
 }
