@@ -4,18 +4,18 @@ milestone: v2.0
 milestone_name: Actual Invitation (Phase 9 — Planned)
 current_phase: 09
 current_phase_name: Actual Invitation, Fresh RSVP & Drinks
-status: executing
-stopped_at: Completed 09-04-PLAN.md
-last_updated: "2026-11-14T20:24:57.822Z"
+status: blocked
+stopped_at: 09-05 halted at the production authorization checkpoint; local verification passed and production remains untouched
+last_updated: "2026-11-14T20:40:11.150Z"
 last_activity: 2026-11-14
 last_activity_desc: Phase 09 execution started
-state_head: 9a5c18133b8964f5052575da94853986ca90470a
+state_head: 2a257889bc90206af9a6811f3ec4f74450c3f49e
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 5
   completed_plans: 4
-  percent: 0
+  percent: 80
 ---
 
 # Project State
@@ -29,18 +29,18 @@ See: .planning/PROJECT.md (updated 2026-11-14)
 
 ## Current Position
 
-Phase: 09 (Actual Invitation, Fresh RSVP & Drinks) — EXECUTING
+Phase: 09 (Actual Invitation, Fresh RSVP & Drinks) — BLOCKED
 Plan: 5 of 5
-Status: Ready to execute
-Last activity: 2026-11-14 — Phase 09 execution started
+Status: Waiting for explicit production authorization and merged-schema preconditions
+Last activity: 2026-11-14 — Local Plan 09-05 verification passed; production actions halted
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [████████░░] 80%
 
 ## Progress
 
 ```
 v2.0 Actual Invitation
-Phase 9 [          ] 0%  Ready to plan
+Phase 9 [████████  ] 80%  Blocked at production authorization gate
 ```
 
 v1.0 complete. v1.1 complete. v1.2 complete. v1.3 complete (shipped 2026-06-21).
@@ -87,8 +87,8 @@ v1.0 complete. v1.1 complete. v1.2 complete. v1.3 complete (shipped 2026-06-21).
 
 ## Session Continuity
 
-Last session: 2026-11-14T20:24:57.499Z
-Stopped at: Completed 09-04-PLAN.md
+Last session: 2026-11-14T20:40:10.956Z
+Stopped at: 09-05 halted at the production authorization checkpoint; local verification passed and production remains untouched
 Resume file: None
 Last activity: 2026-11-14 - Confirmed invitation, fresh RSVP, and drink preference scope
 
@@ -100,9 +100,14 @@ Last activity: 2026-11-14 - Confirmed invitation, fresh RSVP, and drink preferen
 | Phase 09 P02 | 5 | 2 tasks | 5 files |
 | Phase 09 P03 | 5min | 2 tasks | 5 files |
 | Phase 09 P04 | 5min | 2 tasks | 5 files |
+| Phase 09 P05 | 15min | 1 of 3 tasks | 3 files |
 
 ## Decisions
 
 - [Phase 09]: Treat only drink label uniqueness conflicts as existing suggestions. — Concurrent duplicates should resolve to the canonical option without hiding unrelated D1 failures.
 - [Phase 09]: Accept only absolute HTTPS map and buffet URLs with no embedded credentials. — Reject unsafe destinations and avoid active links from untrusted environment values.
 - [Phase 09]: Keep suggestions in a separate form and associate the RSVP submit button with the RSVP form. — This preserves one submit action for RSVP responses without nesting forms.
+
+### Blockers
+
+- Plan 09-05 is halted at the production gate: explicit owner authorization and the merged-schema preconditions are not confirmed; no remote action was run.

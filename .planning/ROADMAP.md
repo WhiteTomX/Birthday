@@ -41,7 +41,7 @@
 - [x] **Phase 7: Dual-Password Auth & RSVP Backend** - Dual-password middleware, host_ref propagation, and D1 migration (completed 2026-06-21)
 - [x] **Phase 8: German Content Update** - Update all site copy to reflect joint celebration (completed 2026-06-21)
 
-### ◆ v2.0 Actual Invitation (Phase 9 — Planned)
+### ◆ v2.0 Actual Invitation (Phase 9 — Blocked at production gate)
 
 **Milestone Goal:** Turn the authenticated RSVP page into the formal German invitation, collect a fresh attendance confirmation and group drink preferences, and preserve the existing RSVP history on the current Cloudflare Pages/Pages Functions, D1, and plain HTML/CSS/JavaScript stack.
 
@@ -57,7 +57,7 @@
   3. Guests can submit either a coming or not-coming confirmation to a separate fresh-round D1 table; declines have no drink selection, and all historical RSVP rows remain unchanged after the additive migration.
   4. A coming group can select multiple fixed drinks (Bier, Wein, Sekt, Kola, Spezi, Fruchtlimonaden, Wasser, alkoholfreies Bier) or catalogued suggestions, while a separate suggestion form lets guests submit a drink that is safely displayed and selectable immediately and by later respondents.
   5. The drink form offers no “Keine Präferenz” choice and clearly explains that drink preferences are requests, not guarantees.
-**Plans**: 4/5 plans executed (dependency-ordered)
+**Plans**: 4/5 plans complete; Plan 09-05 local verification passed, production gate halted (dependency-ordered)
 
 Plans:
 **Wave 1**
@@ -73,7 +73,7 @@ Plans:
 - [x] 09-04: Complete the German invitation, accessible fresh RSVP form, multi-select drink control, separate suggestion form, and immediate selector updates.
 
 **Wave 5** *(blocked on Wave 4 completion)*
-- [ ] 09-05: Verify public/authenticated behavior, both host credentials, populated and clean D1 migration outcomes, yes/no submissions, and drink suggestion reuse; apply the migration to the intended production database.
+- [ ] 09-05: Local Pages/D1 and migration verification passed. Production configuration and migration are halted pending merged-schema and explicit owner-authorization gates.
 **UI hint**: yes
 
 ### 📋 v3.0 Event Day Experience (Planned)
@@ -88,4 +88,4 @@ Plans:
 |-------|----------------|--------|-----------|
 | 7. Dual-Password Auth & RSVP Backend | 3/3 | Complete   | 2026-06-21 |
 | 8. German Content Update | 1/1 | Complete   | 2026-06-21 |
-| 9. Actual Invitation, Fresh RSVP & Drinks | 4/5 | In Progress | - |
+| 9. Actual Invitation, Fresh RSVP & Drinks | 4/5 | Blocked | - |
