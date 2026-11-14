@@ -44,7 +44,8 @@ test('uses one accessible RSVP form and a separate suggestion form', () => {
   assert.match(rsvpForm, /<div[^>]*id="coming-fields"[^>]*hidden/);
   assert.match(rsvpForm, /role="alert"/);
   assert.match(rsvpForm, /id="drink-options-status"[^>]*role="status"[^>]*aria-live="polite"/);
-  assert.match(suggestionForm, /<label[^>]*for="drink-suggestion"/);
+  assert.match(suggestionForm, /<label[^>]*for="drink-suggestion">Anderes Getränk<\/label>/);
+  assert.match(suggestionForm, /<button[^>]*id="btn-drink-suggestion"[^>]*>Hinzufügen<\/button>/);
   assert.match(suggestionForm, /role="status"[^>]*aria-live="polite"/);
   assert.doesNotMatch(invitation, /id="contact"|Keine Präferenz/);
 
@@ -221,7 +222,7 @@ async function createRsvpHarness({ options = [], postRequest = async () => jsonR
   elements['btn-drink-suggestion'].tagName = 'BUTTON';
   elements['btn-submit-coming'].tagName = 'BUTTON';
   elements['btn-submit-coming'].textContent = 'Anmeldung senden';
-  elements['btn-drink-suggestion'].textContent = 'Vorschlagen';
+  elements['btn-drink-suggestion'].textContent = 'Hinzufügen';
   elements['coming-fields'].hidden = true;
   elements['attendee-value'].value = '1';
   elements['attendee-count'].textContent = '1';
@@ -361,6 +362,6 @@ test('keeps the form usable and reports a useful status after request failures',
   elements['drink-suggestion'].value = 'Kakao';
   await elements['drink-suggestion-form'].dispatch('submit');
   assert.equal(elements['btn-drink-suggestion'].disabled, false);
-  assert.equal(elements['btn-drink-suggestion'].textContent, 'Vorschlagen');
+  assert.equal(elements['btn-drink-suggestion'].textContent, 'Hinzufügen');
   assert.equal(elements['drink-suggestion-error'].hidden, false);
 });

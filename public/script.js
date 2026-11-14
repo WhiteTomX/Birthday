@@ -210,7 +210,7 @@
       setFeedback(drinkSuggestionError, 'Das Getränk konnte nicht gespeichert werden. Bitte versuche es erneut.', true);
     } finally {
       btnDrinkSuggestion.disabled = false;
-      btnDrinkSuggestion.textContent = 'Vorschlagen';
+      btnDrinkSuggestion.textContent = 'Hinzufügen';
     }
   });
 
