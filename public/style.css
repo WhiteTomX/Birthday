@@ -41,7 +41,7 @@ body {
 }
 
 .container {
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
 }
 
@@ -49,6 +49,38 @@ body {
 
 .save-the-date {
   margin-bottom: 56px; /* extra breathing room before decorative divider */
+}
+
+.save-the-date__content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.65fr);
+  gap: 32px;
+  align-items: start;
+}
+
+.venue-note {
+  padding: 20px;
+  background-color: var(--festive-light);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--festive);
+  border-radius: var(--radius);
+}
+
+.venue-note p {
+  margin-bottom: 12px;
+}
+
+.save-the-date .venue-note__title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.venue-note a {
+  color: var(--accent);
+  font-weight: 700;
 }
 
 .save-the-date h1 {
@@ -105,6 +137,8 @@ body {
 /* ── RSVP card ───────────────────────────────────────────────────────────── */
 
 .rsvp-section {
+  max-width: 600px;
+  margin: 0 auto;
   background-color: var(--surface);
   border-radius: 12px;
   padding: 32px;
@@ -391,5 +425,10 @@ input[type="text"].error {
 @media (max-width: 599px) {
   .save-the-date h1 {
     font-size: 40px;
+  }
+
+  .save-the-date__content {
+    grid-template-columns: 1fr;
+    gap: 24px;
   }
 }
