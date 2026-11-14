@@ -5,8 +5,8 @@
 - ✅ **v1.0 RSVP Site** — Phases 1–4 (shipped 2026-05-10) · [Archive](.planning/milestones/v1.0-ROADMAP.md)
 - ✅ **v1.1 Password Hint Page** — Phase 5 (shipped 2026-05-10) · [Archive](.planning/milestones/v1.1-ROADMAP.md)
 - ✅ **v1.2 Not Coming** — Phase 6 (shipped 2026-06-14)
-- ◆ **v1.3 Joint Birthday** — Phases 7–8 (in progress)
-- 📋 **v2.0 Full Invitation** — Phases 9+ (planned)
+- ✅ **v1.3 Joint Birthday** — Phases 7–8 (shipped 2026-06-21)
+- ◆ **v2.0 Actual Invitation** — Phase 9 (planned)
 
 ## Phases
 
@@ -34,54 +34,42 @@
 
 </details>
 
-### ◆ v1.3 Joint Birthday (Phases 7–8 — In Progress)
+### ✅ v1.3 Joint Birthday (Phases 7–8 — SHIPPED 2026-06-21)
 
 **Goal:** Adapt the site for a joint 30th birthday celebration — two guest-facing passwords, RSVP records tagged by host, and updated German copy.
 
 - [x] **Phase 7: Dual-Password Auth & RSVP Backend** - Dual-password middleware, host_ref propagation, and D1 migration (completed 2026-06-21)
 - [x] **Phase 8: German Content Update** - Update all site copy to reflect joint celebration (completed 2026-06-21)
 
-### Phase 7: Dual-Password Auth & RSVP Backend
+### ◆ v2.0 Actual Invitation (Phase 9 — Planned)
 
-**Goal**: Guests from either host's circle can access the site, and every RSVP is tagged with which host they belong to
-**Depends on**: Phase 6
-**Requirements**: AUTH-07, AUTH-08, RSVP-07, RSVP-08
+**Milestone Goal:** Turn the authenticated RSVP page into the formal German invitation, collect a fresh attendance confirmation and group drink preferences, and preserve the existing RSVP history on the current Cloudflare Pages/Pages Functions, D1, and plain HTML/CSS/JavaScript stack.
+
+- [ ] **Phase 9: Actual Invitation, Fresh RSVP & Drinks** - Deliver the authenticated invitation, fresh RSVP round, and reusable drink-option catalog as one coherent guest workflow.
+
+### Phase 9: Actual Invitation, Fresh RSVP & Drinks
+**Goal**: Guests can read the complete invitation and submit a fresh attendance response with group drink preferences, while existing RSVP data remains intact on the current Cloudflare Pages/Pages Functions, D1, and plain HTML/CSS/JavaScript stack.
+**Depends on**: Phase 8
+**Requirements**: AUTH-09, INV-01, INV-02, INV-03, INV-04, RSVP-09, RSVP-10, DRINK-01, DRINK-02, DRINK-03, DRINK-04
 **Success Criteria** (what must be TRUE):
+  1. Authenticated guests see a natural German joint-birthday invitation for 5 December at 17:00, the configured venue name and map link, and park-entry directions from `PARK_ENTRY_DIRECTIONS`; no street address or year is invented.
+  2. Venue, arrival, buffet, and RSVP details remain behind the existing authentication; the public page reveals none of these private logistics, and the optional link from `BUFFET_LIST_URL` appears only when configured.
+  3. Guests can submit either a coming or not-coming confirmation to a separate fresh-round D1 table; declines have no drink selection, and all historical RSVP rows remain unchanged after the additive migration.
+  4. A coming group can select multiple fixed drinks (Bier, Wein, Sekt, Kola, Spezi, Fruchtlimonaden, Wasser, alkoholfreies Bier) or catalogued suggestions, while a separate suggestion form lets guests submit a drink that is safely displayed and selectable immediately and by later respondents.
+  5. The drink form offers no “Keine Präferenz” choice and clearly explains that drink preferences are requests, not guarantees.
+**Plans**: 5 plans (dependency-ordered)
 
-  1. A guest using `SITE_PASSWORD__0` can reach `/rsvp/` and is granted access
-  2. A guest using `SITE_PASSWORD__1` can reach `/rsvp/` and is granted access
-  3. A submitted RSVP record in D1 contains a `host_ref` column with value `0` or `1` matching which password was used — the password itself is never stored
-  4. Requests with an invalid or absent password are still rejected with 401
+Plans:
+- [ ] 09-01: Add an additive D1 migration for the fresh yes/no RSVP table and a separate drink-options catalog; seed fixed options without changing historical RSVP rows.
+- [ ] 09-02: Add authenticated RSVP and drink-option endpoints, including decline-without-drinks behavior, safe validation, and unique reusable suggestions.
+- [ ] 09-03: Add authenticated invitation personalization for venue/map values, `PARK_ENTRY_DIRECTIONS`, and the optional `BUFFET_LIST_URL`.
+- [ ] 09-04: Complete the German invitation, accessible fresh RSVP form, multi-select drink control, separate suggestion form, and immediate selector updates.
+- [ ] 09-05: Verify public/authenticated behavior, both host credentials, populated and clean D1 migration outcomes, yes/no submissions, and drink suggestion reuse; apply the migration to the intended production database.
+**UI hint**: yes
 
-**Plans**: 3 plans (2 waves)
-**Wave 1**
+### 📋 v3.0 Event Day Experience (Planned)
 
-- [x] 07-01-PLAN.md — D1 migration infrastructure + add host_ref column [Wave 1]
-- [x] 07-02-PLAN.md — Dual-password auth middleware + X-Host-Ref injection [Wave 1]
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
-- [x] 07-03-PLAN.md — RSVP API reads/validates X-Host-Ref and stores host_ref [Wave 2]
-
-### Phase 8: German Content Update
-
-**Goal**: All visible site text reflects a shared celebration by two hosts, in German
-**Depends on**: Phase 7
-**Requirements**: CONT-01
-**Success Criteria** (what must be TRUE):
-
-  1. The hint page riddle refers to both hosts and a joint celebration (no single-host phrasing)
-  2. The save-the-date copy on `/rsvp/` reads as a joint birthday invitation in German
-  3. All other user-visible strings (labels, confirmations, decline page) are consistent with the joint-birthday framing
-
-**Plans**: 1 plan (1 wave)
-**Wave 1**
-
-- [x] 08-01-PLAN.md — Update hint page riddle, 401 inline riddle, and save-the-date body copy [Wave 1]
-
-### 📋 v2.0 Full Invitation (Planned)
-
-*To be defined when venue is confirmed.*
+*To be defined after the invitation milestone is complete.*
 
 ---
 
@@ -91,3 +79,4 @@
 |-------|----------------|--------|-----------|
 | 7. Dual-Password Auth & RSVP Backend | 3/3 | Complete   | 2026-06-21 |
 | 8. German Content Update | 1/1 | Complete   | 2026-06-21 |
+| 9. Actual Invitation, Fresh RSVP & Drinks | 0/5 | Not started | - |

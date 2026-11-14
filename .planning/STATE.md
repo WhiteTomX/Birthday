@@ -2,13 +2,13 @@
 gsd_state_version: "1.0"
 milestone: v2.0
 milestone_name: Actual Invitation
-status: "Creating roadmap"
-last_updated: "2026-11-14T14:55:00.000Z"
+status: "Ready to plan"
+last_updated: "2026-11-14T15:44:00.000Z"
 last_activity: 2026-11-14
 progress:
-  total_phases: 0
+  total_phases: 1
   completed_phases: 0
-  total_plans: 0
+  total_plans: 5
   completed_plans: 0
   percent: 0
 ---
@@ -20,20 +20,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-11-14)
 
 **Core value:** Enable frictionless guest RSVPs via a password-protected, beautiful German site.
-**Current focus:** Phase 09 — actual-invitation
+**Current focus:** Phase 9 — Actual Invitation, Fresh RSVP & Drinks
 
 ## Current Position
 
-Phase: Not started (creating roadmap)
-Plan: —
-Status: Creating roadmap
-Last activity: 2026-11-14 — v2.0 scope and requirements confirmed; research complete
+Phase: 9 of 9 (Actual Invitation, Fresh RSVP & Drinks)
+Plan: 0 of 5
+Status: Ready to plan
+Last activity: 2026-11-14 — v2.0 roadmap created with all 11 requirements mapped
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Progress
 
 ```
 v2.0 Actual Invitation
-Phase 9 [          ] 0%  Not started
+Phase 9 [          ] 0%  Ready to plan
 ```
 
 v1.0 complete. v1.1 complete. v1.2 complete. v1.3 complete (shipped 2026-06-21).
@@ -59,8 +61,9 @@ v1.0 complete. v1.1 complete. v1.2 complete. v1.3 complete (shipped 2026-06-21).
 | Venue and event time confirmed | 5 December at 17:00; use the park map pin and entry directions, not a street address |
 | Fresh RSVP round uses a separate D1 table | Preserve the earlier RSVP history without rewriting it |
 | Group drink preferences are multi-select | Track one set of drink preferences per RSVP group, not per attendee |
-| Drink suggestions use a separate form | New suggestions become selectable options immediately and for later respondents |
-| Logistics values use environment configuration | Keep venue and map values as-is; load park directions and buffet URL from environment values |
+| Drink suggestions use a separate form and D1 catalog | Valid unique suggestions become selectable immediately and for later respondents |
+| Logistics values use environment configuration | Keep venue and map values as-is; load park directions and optional buffet URL from environment values |
+| v2.0 roadmap is one delivery phase with five dependency-ordered plans | Phase 9 covers all 11 v2.0 requirements while retaining continuous phase numbering |
 
 ## Pending Todos
 
@@ -79,6 +82,6 @@ v1.0 complete. v1.1 complete. v1.2 complete. v1.3 complete (shipped 2026-06-21).
 
 ## Session Continuity
 
-Last session: 2026-11-14T14:55:00.000Z
-Stopped at: v2.0 requirements confirmed; creating roadmap
+Last session: 2026-11-14T15:44:00.000Z
+Stopped at: v2.0 Phase 9 roadmap and requirement traceability created; ready to plan
 Last activity: 2026-11-14 - Confirmed invitation, fresh RSVP, and drink preference scope

@@ -46,12 +46,23 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| AUTH-09 | Phase 9 | Pending |
+| INV-01 | Phase 9 | Pending |
+| INV-02 | Phase 9 | Pending |
+| INV-03 | Phase 9 | Pending |
+| INV-04 | Phase 9 | Pending |
+| RSVP-09 | Phase 9 | Pending |
+| RSVP-10 | Phase 9 | Pending |
+| DRINK-01 | Phase 9 | Pending |
+| DRINK-02 | Phase 9 | Pending |
+| DRINK-03 | Phase 9 | Pending |
+| DRINK-04 | Phase 9 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 11 total
-- Mapped to phases: 0
-- Unmapped: 11 (roadmap pending)
+- Mapped to phases: 11
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-11-14*
-*Last updated: 2026-11-14 after v2.0 scope and research confirmation*
+*Last updated: 2026-11-14 after v2.0 roadmap mapping*
