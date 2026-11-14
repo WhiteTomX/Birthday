@@ -1,10 +1,14 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { onRequestPost as submitFreshRsvp } from '../functions/api/fresh-rsvp.js';
+import {
+  onRequestGet as getDrinkSuggestions,
+  onRequestPost as suggestDrink,
+} from '../functions/api/drink-suggestions.js';
 
 const drinkCatalog = [
-  { id: 'bier', label: 'Bier' },
-  { id: 'wein', label: 'Wein' },
+  { id: 'bier', label: 'Bier', is_fixed: 1 },
+  { id: 'wein', label: 'Wein', is_fixed: 1 },
 ];
 
 class FakeStatement {
@@ -27,11 +31,29 @@ class FakeStatement {
     this.database.reads.push(this.sql);
     if (this.sql.includes('FROM drink_options')) {
       const requestedLabels = this.values.map((label) => label.toLowerCase());
+      const options = this.database.options;
+      if (!this.sql.includes('WHERE lower(label) IN')) {
+        return {
+          results: [...options].sort((first, second) => (
+            second.is_fixed - first.is_fixed || first.label.localeCompare(second.label)
+          )),
+        };
+      }
       return {
-        results: drinkCatalog.filter((option) => requestedLabels.includes(option.label.toLowerCase())),
+        results: options.filter((option) => requestedLabels.includes(option.label.toLowerCase())),
       };
     }
     return { results: [] };
+  }
+
+  async first() {
+    if (this.database.failRead) {
+      throw new Error('private database details');
+    }
+
+    this.database.reads.push(this.sql);
+    const label = this.values[0].toLowerCase();
+    return this.database.options.find((option) => option.label.toLowerCase() === label) ?? null;
   }
 
   async run() {
@@ -40,17 +62,35 @@ class FakeStatement {
     }
 
     this.database.runs.push({ sql: this.sql, values: this.values });
+    if (this.sql.includes('INSERT INTO drink_options')) {
+      if (this.database.conflictOnInsert) {
+        this.database.conflictOnInsert = false;
+        this.database.options.push({
+          id: 'concurrent-option',
+          label: this.values[1],
+          is_fixed: 0,
+        });
+        throw new Error('UNIQUE constraint failed: drink_options.label');
+      }
+      this.database.options.push({
+        id: this.values[0],
+        label: this.values[1],
+        is_fixed: this.values[2],
+      });
+    }
     return { success: true };
   }
 }
 
 class FakeDatabase {
-  constructor({ failRead = false, failWrite = false } = {}) {
+  constructor({ failRead = false, failWrite = false, conflictOnInsert = false } = {}) {
     this.failRead = failRead;
     this.failWrite = failWrite;
+    this.conflictOnInsert = conflictOnInsert;
     this.reads = [];
     this.runs = [];
     this.batches = [];
+    this.options = drinkCatalog.map((option) => ({ ...option }));
   }
 
   prepare(sql) {
@@ -78,6 +118,15 @@ function makeContext(body, { hostRef = '0', rawBody } = {}) {
     body: rawBody ?? JSON.stringify(body),
   });
   const DB = new FakeDatabase();
+  return { context: { request, env: { DB } }, DB };
+}
+
+function makeSuggestionContext(body, { method = 'POST', rawBody, DB = new FakeDatabase() } = {}) {
+  const request = new Request('https://birthday.test/api/drink-suggestions', {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    ...(method === 'GET' ? {} : { body: rawBody ?? JSON.stringify(body) }),
+  });
   return { context: { request, env: { DB } }, DB };
 }
 
@@ -211,6 +260,84 @@ test('returns a generic error when D1 persistence fails', async () => {
   DB.failWrite = true;
 
   const response = await submitFreshRsvp(context);
+  assert.equal(response.status, 500);
+  assert.deepEqual(await response.json(), { ok: false, error: 'Database error' });
+});
+
+test('returns fixed and suggested drink options in deterministic order', async () => {
+  const DB = new FakeDatabase();
+  DB.options.push({ id: 'apple-juice', label: 'Apfelsaft', is_fixed: 0 });
+  const { context } = makeSuggestionContext(null, { method: 'GET', DB });
+
+  const response = await getDrinkSuggestions(context);
+  assert.equal(response.status, 200);
+  const payload = await response.json();
+  assert.deepEqual(
+    payload.options.map(({ label }) => label),
+    ['Bier', 'Wein', 'Apfelsaft'],
+  );
+  assert.equal(payload.options[2].is_fixed, false);
+  assert.equal('rsvps' in payload, false);
+});
+
+test('normalizes and stores a new drink suggestion', async () => {
+  const { context, DB } = makeSuggestionContext({ label: '  Apfelsaft    natur  ' });
+
+  const response = await suggestDrink(context);
+  assert.equal(response.status, 200);
+  const payload = await response.json();
+  assert.equal(payload.created, true);
+  assert.equal(payload.option.label, 'Apfelsaft natur');
+  assert.equal(payload.option.is_fixed, false);
+  assert.equal(DB.runs.length, 1);
+});
+
+test('returns the canonical option for a case-insensitive duplicate suggestion', async () => {
+  const { context, DB } = makeSuggestionContext({ label: '  bIeR  ' });
+
+  const response = await suggestDrink(context);
+  assert.equal(response.status, 200);
+  const payload = await response.json();
+  assert.equal(payload.created, false);
+  assert.deepEqual(payload.option, { id: 'bier', label: 'Bier', is_fixed: true });
+  assert.equal(DB.runs.length, 0);
+});
+
+test('returns the canonical option after a concurrent suggestion conflict', async () => {
+  const DB = new FakeDatabase({ conflictOnInsert: true });
+  const { context } = makeSuggestionContext({ label: '  Apfelsaft   natur ' }, { DB });
+
+  const response = await suggestDrink(context);
+  assert.equal(response.status, 200);
+  const payload = await response.json();
+  assert.equal(payload.created, false);
+  assert.deepEqual(payload.option, {
+    id: 'concurrent-option',
+    label: 'Apfelsaft natur',
+    is_fixed: false,
+  });
+});
+
+test('rejects malformed, empty, and overlong drink suggestions', async (t) => {
+  for (const [label, rawBody, body] of [
+    ['malformed JSON', '{', null],
+    ['empty suggestion', null, { label: '   ' }],
+    ['overlong suggestion', null, { label: 'A'.repeat(81) }],
+  ]) {
+    await t.test(label, async () => {
+      const { context, DB } = makeSuggestionContext(body, { rawBody });
+      const response = await suggestDrink(context);
+      assert.equal(response.status, 400);
+      assert.equal(DB.runs.length, 0);
+    });
+  }
+});
+
+test('returns a generic error when saving a drink suggestion fails', async () => {
+  const DB = new FakeDatabase({ failWrite: true });
+  const { context } = makeSuggestionContext({ label: 'Apfelsaft' }, { DB });
+
+  const response = await suggestDrink(context);
   assert.equal(response.status, 500);
   assert.deepEqual(await response.json(), { ok: false, error: 'Database error' });
 });
