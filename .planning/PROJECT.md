@@ -4,27 +4,24 @@
 
 A joint 30th birthday celebration website for two friends sharing the same birthday event, serving as the single source of truth. Password-protected RSVP collection supports two separate guest circles (each with their own password) while all guests join one shared party. Evolves into a full event information hub with venue details, photo uploads, games, and a wishlist.
 
-## Current Milestone: v1.3 Joint Birthday
+## Current Milestone: v2.0 Actual Invitation
 
-**Goal:** Adapt the site to host a joint 30th birthday celebration — two passwords (`SITE_PASSWORD__0`, `SITE_PASSWORD__1`), RSVP records tagged with `0` or `1` indicating which host's circle the guest belongs to, and updated German copy reflecting a shared celebration.
+**Goal:** Turn the authenticated RSVP page into the formal German invitation for the shared birthday, with confirmed event details, park access directions, a fresh RSVP round, and group-level drink preferences.
 
 **Language:** German  
-**Hosting:** Cloudflare (free tier)  
-**Event Date:** 5 December  
+**Hosting:** Cloudflare Pages (free tier)  
+**Event:** 5 December at 17:00; year intentionally omitted  
 
-## Current State: v1.1 Password Hint Page ✅ Shipped 2026-05-10
+## Current State: v2.0 Actual Invitation — planning started 2026-11-14
 
-**What's live:** Password-protected Cloudflare Pages site at `birthday-4om.pages.dev` with a public festive hint page at `/`, a German birthday riddle shown to unauthenticated guests, and the RSVP form protected at `/rsvp/`.
+The venue is inside a park, so there is no street address. The invitation will use the existing environment-backed venue name and map link, plus park-entry directions from `PARK_ENTRY_DIRECTIONS`. An optional buffet contribution link will come from `BUFFET_LIST_URL`; neither secret value belongs in source control.
 
-**Tech shipped in v1.1:**
-- `public/index.html` — replaced with festive hint page (200, no auth, German riddle, `#FDF4E8` palette)
-- `public/rsvp/index.html` — RSVP content moved here with absolute resource paths
-- `functions/_middleware.js` — public exclusions for `/`, `/index.html`, `/style.css`; 401 returns full riddle HTML with `Cache-Control: no-store`
+The new RSVP round uses a separate D1 table so existing responses remain unchanged. Guests reconfirm whether they are coming, and coming groups may select multiple drink preferences. A separate drink-suggestion form adds new options to the list for the current and later respondents. Drink requests are preferences, not guarantees.
 
-**Key patterns from v1.1:**
-- Public exclusions in middleware: `pathname === '/'` etc. → `context.next()` (no auth check)
-- 401 body: full HTML with `<link rel="stylesheet" href="/style.css">` (CSS publicly excluded, so links work from 401)
-- `Cache-Control: no-store` on all 401s — prevents CDN from caching unauthenticated responses
+**Patterns to preserve:**
+- Keep `/` public and free of private logistics; the invitation and RSVP remain behind existing authentication at `/rsvp/`.
+- Continue using plain HTML/CSS/JavaScript, Pages Functions, and D1.
+- Keep the RSVP action prominent and maintain existing host-circle attribution.
 
 ## Milestones
 
@@ -42,10 +39,19 @@ A joint 30th birthday celebration website for two friends sharing the same birth
 - Matches warm festive design (`#FDF4E8` palette, same font stack)
 - `Cache-Control: no-store` on all 401s
 
-### v2.0: Full Invitation (Post-Venue Decision — Weeks Away)
-- Update site with confirmed venue details
-- Formal invitation information
-- Venue address, parking, timing, dress code (TBD based on venue)
+### v1.2: Not Coming ✅ Shipped 2026-06-14
+- Guests can submit a decline response
+
+### v1.3: Joint Birthday ✅ Shipped 2026-06-21
+- Dual-password auth for two host circles
+- D1 `host_ref` tagging for guest records
+- German copy updated for the shared birthday celebration
+
+### v2.0: Actual Invitation — planning started 2026-11-14
+- Formal German invitation with 5 December at 17:00
+- Venue map and park-entry directions, with no fabricated street address
+- Separate fresh RSVP table and multi-select group drink preferences
+- Drink-suggestion form and optional buffet contribution link
 
 ### v3.0: Event Day Experience (Pre-event Build, Activate on Day)
 - Photo upload functionality (guests can share photos)
@@ -68,6 +74,8 @@ A joint 30th birthday celebration website for two friends sharing the same birth
 - **Private data:** RSVP data only queryable via D1 dashboard, not exposed on frontend
 - **Language:** All UI in German (exception: "Save the Date" eyebrow — recognized international phrase)
 - **Free hosting:** Strictly Cloudflare free tier
+- **Preserve RSVP history:** v2.0 confirmations are stored separately; existing RSVP records remain unchanged
+- **Environment configuration:** Venue, park directions, and buffet-link values are not hardcoded in source
 
 ## Key Decisions
 
@@ -81,6 +89,11 @@ A joint 30th birthday celebration website for two friends sharing the same birth
 | Unique ID per RSVP | Prevents accidental overwrites, simple audit trail | All responses preserved |
 | `crypto.randomUUID()` PK | Native Workers global, no import, collision-resistant | Clean implementation |
 | `textContent` not `innerHTML` | XSS prevention for user-supplied data (guest name) in DOM | Security pattern established |
+| Separate D1 table for v2.0 RSVP round | Preserve the earlier save-the-date responses while collecting reconfirmations | Pending implementation |
+| Multi-select drinks per RSVP group | Capture several drink preferences for a group without per-person tracking | Pending implementation |
+| Separate drink-suggestion form | Let guests propose new drink options without mixing suggestions into RSVP data | Pending implementation |
+| Automatically reuse drink suggestions | Make valid new suggestions selectable immediately and for later guests | Pending implementation |
+| Secret-backed park directions and buffet URL | Keep configuration values out of source while showing them only to authenticated invitees | Pending implementation |
 
 ## Evolution
 
@@ -110,5 +123,5 @@ Requirements (all now validated):
 | `Cache-Control: no-store` on 401 | Prevents CDN caching unauthenticated responses | No "trapped in cached-401" loop for authenticated guests |
 
 ---
-*Last updated: 2026-06-20 — v1.3 Joint Birthday milestone started*
+*Last updated: 2026-11-14 after v2.0 milestone scope confirmation*
 
