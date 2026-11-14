@@ -5,16 +5,16 @@ milestone_name: Actual Invitation (Phase 9 — Planned)
 current_phase: 09
 current_phase_name: Actual Invitation, Fresh RSVP & Drinks
 status: executing
-stopped_at: Completed 09-03-PLAN.md
-last_updated: "2026-11-14T20:14:56.527Z"
+stopped_at: Completed 09-04-PLAN.md
+last_updated: "2026-11-14T20:24:57.822Z"
 last_activity: 2026-11-14
 last_activity_desc: Phase 09 execution started
-state_head: 593891275cd3fefa31fb51b8167f004cef87b0ae
+state_head: 9a5c18133b8964f5052575da94853986ca90470a
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 5
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-11-14)
 ## Current Position
 
 Phase: 09 (Actual Invitation, Fresh RSVP & Drinks) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-11-14 — Phase 09 execution started
 
@@ -87,8 +87,8 @@ v1.0 complete. v1.1 complete. v1.2 complete. v1.3 complete (shipped 2026-06-21).
 
 ## Session Continuity
 
-Last session: 2026-11-14T20:14:56.416Z
-Stopped at: Completed 09-03-PLAN.md
+Last session: 2026-11-14T20:24:57.499Z
+Stopped at: Completed 09-04-PLAN.md
 Resume file: None
 Last activity: 2026-11-14 - Confirmed invitation, fresh RSVP, and drink preference scope
 
@@ -99,8 +99,10 @@ Last activity: 2026-11-14 - Confirmed invitation, fresh RSVP, and drink preferen
 | Phase 09 P01 | 12 | 2 tasks | 2 files |
 | Phase 09 P02 | 5 | 2 tasks | 5 files |
 | Phase 09 P03 | 5min | 2 tasks | 5 files |
+| Phase 09 P04 | 5min | 2 tasks | 5 files |
 
 ## Decisions
 
 - [Phase 09]: Treat only drink label uniqueness conflicts as existing suggestions. — Concurrent duplicates should resolve to the canonical option without hiding unrelated D1 failures.
 - [Phase 09]: Accept only absolute HTTPS map and buffet URLs with no embedded credentials. — Reject unsafe destinations and avoid active links from untrusted environment values.
+- [Phase 09]: Keep suggestions in a separate form and associate the RSVP submit button with the RSVP form. — This preserves one submit action for RSVP responses without nesting forms.
