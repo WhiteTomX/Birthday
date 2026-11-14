@@ -1,7 +1,7 @@
 ---
 name: gsd-workstreams
 description: "Manage parallel workstreams — list, create, switch, status, progress, complete, and resume"
-allowed-tools: Read, Bash
+allowed-tools: Read, Bash, Grep
 ---
 
 

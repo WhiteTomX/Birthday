@@ -1,7 +1,7 @@
 ---
 name: gsd-ai-researcher
 description: "Researches a chosen AI framework's official docs to produce implementation-ready guidance — best practices, syntax, core patterns, and pitfalls distilled for the specific use case. Writes the Framework Quick Reference and Implementation Guidance sections of AI-SPEC.md. Spawned by /gsd-ai-integration-phase orchestrator."
-tools: ['read', 'edit', 'execute', 'search', 'web', 'io.github.upstash/context7/*']
+tools: ['read', 'edit', 'execute', 'search', 'web', 'io.github.upstash/context7/*', 'mcp__plugin_context7_context7__*']
 color: green
 ---
 
@@ -10,6 +10,8 @@ color: green
 You are a GSD AI researcher. Answer: "How do I correctly implement this AI system with the chosen framework?"
 Write Sections 3–4b of AI-SPEC.md: framework quick reference, implementation guidance, and AI systems best practices.
 </role>
+
+@.github/gsd-core/references/untrusted-input-boundary.md
 
 <documentation_lookup>
 @.github/gsd-core/references/research-documentation-lookup.md
@@ -65,7 +67,7 @@ Update AI-SPEC.md at `ai_spec_path`:
 
 **Section 3 — Framework Quick Reference:** real installation command, actual imports, working entry point pattern for `system_type`, abstractions table (3-5 rows), pitfall list with why-it's-a-pitfall notes, folder structure, Sources subsection with URLs.
 
-**Section 4 — Implementation Guidance:** specific model (e.g., `claude-sonnet-4-6`, `gpt-4o`) with params, core pattern as code snippet with inline comments, tool use config, state management approach, context window strategy.
+**Section 4 — Implementation Guidance:** specific model (e.g., `claude-sonnet-5`, `gpt-4o`) with params, core pattern as code snippet with inline comments, tool use config, state management approach, context window strategy.
 </step>
 
 <step name="write_section_4b">

@@ -1,9 +1,7 @@
 // functions/rsvp/index.js
-// Pages Function — intercepts GET /rsvp/ and personalises the invitation text.
+// Pages Function — personalises GET /rsvp/ with private environment variables.
 //
-// Reads the static public/rsvp/index.html via the ASSETS binding, replaces the
-// first occurrence of ">Wir werden 30." with ">{name} werden 30." using the
-// single INVITE_NAME env var. Falls back to "Wir" if the var is absent.
+// Venue details are injected only after the auth middleware accepts the request.
 
 export async function onRequestGet(context) {
   const { request, env } = context;
@@ -17,10 +15,33 @@ export async function onRequestGet(context) {
   // Read the HTML body.
   const html = await assetResponse.text();
 
-  // Replace ONLY the first occurrence of ">Wir werden 30." — the angle-bracket
-  // prefix anchors the match to the start of the paragraph text node so we
-  // never touch the lowercase "wir" elsewhere in the document.
-  const modified = html.replace('>Wir werden 30.', `>${name} werden 30.`);
+  const venueName = (env.VENUE_NAME || '').trim();
+  const venueMapUrl = (env.VENUE_MAP_URL || '').trim();
+  let venueDetails = '';
+
+  if (venueName && venueMapUrl) {
+    let parsedMapUrl;
+    try {
+      parsedMapUrl = new URL(venueMapUrl);
+    } catch {
+      console.error('VENUE_MAP_URL must be a valid HTTPS URL.');
+    }
+
+    if (parsedMapUrl?.protocol === 'https:') {
+      venueDetails = `<p><strong>${escapeHtml(venueName)}</strong></p>
+          <a href="${escapeHtml(parsedMapUrl.href)}" target="_blank" rel="noopener noreferrer">Auf OpenStreetMap ansehen</a>`;
+    } else if (parsedMapUrl) {
+      console.error('VENUE_MAP_URL must use HTTPS.');
+    }
+  } else {
+    console.warn('Set both VENUE_NAME and VENUE_MAP_URL to display venue details.');
+  }
+
+  // The marker is absent from the source response unless both values are
+  // configured and the map URL passes HTTPS validation.
+  const modified = html
+    .replace('<!-- VENUE_DETAILS -->', venueDetails)
+    .replace('>Wir werden 30.', `>${name} werden 30.`);
 
   // Preserve Content-Type from the asset, force no-store to prevent CDN caching
   // personalised responses (T-u1z-02).
@@ -34,4 +55,14 @@ export async function onRequestGet(context) {
       'Cache-Control': 'no-store',
     },
   });
+}
+
+function escapeHtml(value) {
+  return value.replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  })[character]);
 }
