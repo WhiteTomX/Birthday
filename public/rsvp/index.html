@@ -39,48 +39,53 @@
             placeholder="Dein Name"
             required
             autocomplete="name"
+            aria-describedby="name-error"
           />
-          <span id="name-error" class="error-msg" role="alert">Bitte gib deinen Namen ein.</span>
+          <span id="name-error" class="error-msg" role="alert" hidden>Bitte gib deinen Namen ein.</span>
         </div>
 
-        <div class="attendance-choice">
-          <button type="button" id="btn-not-coming" class="btn-attendance btn-attendance--secondary">
-            Ich kann leider nicht
-          </button>
-          <button type="button" id="btn-coming" class="btn-attendance btn-attendance--primary">
-            Ich komme
-          </button>
-        </div>
+        <fieldset class="attendance-choice" aria-describedby="attendance-error">
+          <legend>Kannst du dabei sein?</legend>
+          <label class="attendance-option" for="attendance-coming">
+            <input type="radio" id="attendance-coming" name="attendance" value="coming" required />
+            <span>Ich komme</span>
+          </label>
+          <label class="attendance-option" for="attendance-not-coming">
+            <input type="radio" id="attendance-not-coming" name="attendance" value="not_coming" />
+            <span>Ich kann leider nicht</span>
+          </label>
+        </fieldset>
+        <p id="attendance-error" class="error-msg" role="alert" hidden>Bitte wähle aus, ob du dabei bist.</p>
 
         <div id="coming-fields" hidden>
-          <div class="field" id="stepper-field">
+          <div class="field">
             <label for="attendee-count">Anzahl der Personen</label>
-            <div class="stepper">
-              <button type="button" id="btn-less" aria-label="Weniger" disabled>−</button>
-              <output id="attendee-count" aria-live="polite">1</output>
-              <button type="button" id="btn-more" aria-label="Mehr">+</button>
-            </div>
-            <input type="hidden" id="attendee-value" name="attendees" value="1" />
+            <input type="number" id="attendees" name="attendees" min="1" max="10" value="1" required />
           </div>
 
-          <div class="field" id="drink-field">
-            <label>Getränkewünsche <span class="optional">(mehrfach möglich)</span></label>
-            <div id="drink-options" class="drink-options" aria-live="polite"></div>
+          <fieldset class="field drink-field" id="drink-field">
+            <legend>Getränkewünsche <span class="optional">(mehrfach möglich)</span></legend>
+            <div id="drink-options" class="drink-options" role="group" aria-label="Getränkewünsche" aria-live="polite"></div>
             <p class="helper-text">Die Getränkewünsche sind nur Wünsche — keine Garantie.</p>
-          </div>
+          </fieldset>
+        </div>
 
-          <div class="field" id="drink-suggestion-field">
-            <label for="drink-suggestion">Getränk vorschlagen</label>
-            <div class="suggestion-row">
-              <input type="text" id="drink-suggestion" name="drink-suggestion" placeholder="z. B. Apfelsaft" />
-              <button type="button" id="btn-drink-suggestion" class="btn-secondary">Vorschlagen</button>
-            </div>
-            <span id="drink-suggestion-error" class="error-msg" role="alert">Bitte gib ein Getränk ein.</span>
-          </div>
+        <p id="submit-error" class="error-msg" role="alert" aria-live="assertive" hidden></p>
+      </form>
 
-          <button type="button" id="btn-submit-coming" class="btn-submit">Anmeldung senden</button>
+      <form id="drink-suggestion-form" novalidate>
+        <div class="field" id="drink-suggestion-field">
+          <label for="drink-suggestion">Getränk vorschlagen</label>
+          <div class="suggestion-row">
+            <input type="text" id="drink-suggestion" name="drink-suggestion" placeholder="z. B. Apfelsaft" aria-describedby="drink-suggestion-error" />
+            <button type="submit" id="btn-drink-suggestion" class="btn-secondary">Vorschlagen</button>
+          </div>
+          <span id="drink-suggestion-error" class="error-msg" role="alert" hidden>Bitte gib ein Getränk ein.</span>
+          <span id="drink-suggestion-status" class="helper-text" role="status" aria-live="polite"></span>
         </div>
       </form>
+
+      <button type="submit" id="btn-submit-coming" class="btn-submit" form="rsvp-form">Anmeldung senden</button>
     </section>
 
   </div>
