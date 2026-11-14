@@ -60,10 +60,19 @@
 **Plans**: 5 plans (dependency-ordered)
 
 Plans:
+**Wave 1**
 - [ ] 09-01: Add an additive D1 migration for the fresh yes/no RSVP table and a separate drink-options catalog; seed fixed options without changing historical RSVP rows.
+
+**Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 09-02: Add authenticated RSVP and drink-option endpoints, including decline-without-drinks behavior, safe validation, and unique reusable suggestions.
+
+**Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 09-03: Add authenticated invitation personalization for venue/map values, `PARK_ENTRY_DIRECTIONS`, and the optional `BUFFET_LIST_URL`.
+
+**Wave 4** *(blocked on Wave 3 completion)*
 - [ ] 09-04: Complete the German invitation, accessible fresh RSVP form, multi-select drink control, separate suggestion form, and immediate selector updates.
+
+**Wave 5** *(blocked on Wave 4 completion)*
 - [ ] 09-05: Verify public/authenticated behavior, both host credentials, populated and clean D1 migration outcomes, yes/no submissions, and drink suggestion reuse; apply the migration to the intended production database.
 **UI hint**: yes
 
