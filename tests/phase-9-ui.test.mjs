@@ -43,6 +43,7 @@ test('uses one accessible RSVP form and a separate suggestion form', () => {
   assert.match(rsvpForm, /<fieldset[^>]*id="drink-field"/);
   assert.match(rsvpForm, /<div[^>]*id="coming-fields"[^>]*hidden/);
   assert.match(rsvpForm, /role="alert"/);
+  assert.match(rsvpForm, /id="drink-options-status"[^>]*role="status"[^>]*aria-live="polite"/);
   assert.match(suggestionForm, /<label[^>]*for="drink-suggestion"/);
   assert.match(suggestionForm, /role="status"[^>]*aria-live="polite"/);
   assert.doesNotMatch(invitation, /id="contact"|Keine Präferenz/);
@@ -195,6 +196,7 @@ async function createRsvpHarness({ options = [], postRequest = async () => jsonR
     'attendance-error',
     'coming-fields',
     'attendees',
+    'attendees-error',
     'drink-options',
     'drink-options-status',
     'drink-suggestion-form',
@@ -328,6 +330,19 @@ test('submits a decline without headcount or drink fields and shows a personal c
   assert.equal(section.children[0].getAttribute('role'), 'status');
 });
 
+test('rejects a headcount outside the 1–10 range before submitting', async () => {
+  const { calls, elements, radios } = await createRsvpHarness();
+  elements.name.value = 'Mia';
+  elements.attendees.value = '11';
+  radios[0].checked = true;
+  await radios[0].dispatch('change');
+  await elements['rsvp-form'].dispatch('submit');
+
+  assert.equal(calls.some((call) => call.url === '/api/fresh-rsvp'), false);
+  assert.equal(elements['attendees-error'].hidden, false);
+  assert.equal(elements.attendees.getAttribute('aria-invalid'), 'true');
+});
+
 test('keeps the form usable and reports a useful status after request failures', async () => {
   const { elements, radios } = await createRsvpHarness({
     postRequest: async () => { throw new Error('<img src=x> network failure'); },
@@ -342,4 +357,10 @@ test('keeps the form usable and reports a useful status after request failures',
   assert.equal(elements['submit-error'].hidden, false);
   assert.match(elements['submit-error'].textContent, /erneut/);
   assert.doesNotMatch(elements['submit-error'].textContent, /<img/);
+
+  elements['drink-suggestion'].value = 'Kakao';
+  await elements['drink-suggestion-form'].dispatch('submit');
+  assert.equal(elements['btn-drink-suggestion'].disabled, false);
+  assert.equal(elements['btn-drink-suggestion'].textContent, 'Vorschlagen');
+  assert.equal(elements['drink-suggestion-error'].hidden, false);
 });
