@@ -5,16 +5,16 @@ milestone_name: Actual Invitation (Phase 9 — Blocked at production gate)
 current_phase: 09
 current_phase_name: Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch
 status: in_progress
-stopped_at: Completed 09-07-PLAN.md
-last_updated: "2026-11-15T15:28:59.954Z"
+stopped_at: Completed 09-08-PLAN.md
+last_updated: "2026-11-15T15:55:36.956Z"
 last_activity: 2026-11-15
-last_activity_desc: Separate job catalog architecture confirmed; Plan 09-06 execution started
-state_head: b1aa0f416ea15eea655c0ec338036b4c5fa38419
+last_activity_desc: Plan 09-08 job allocation UI completed; Plan 09-09 is next
+state_head: 8dc4deed982d45757c97075f1ac1939684adac3a
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 9
-  completed_plans: 6
+  completed_plans: 7
   percent: 0
 ---
 
@@ -30,9 +30,9 @@ See: .planning/PROJECT.md (updated 2026-11-14)
 ## Current Position
 
 Phase: 09 (Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch) — READY TO EXECUTE
-Plan: 6 of 9 complete; Plan 09-08 next
+Plan: 7 of 9 complete; Plan 09-09 next
 Status: Executing; production changes remain behind explicit authorization and merged-schema preconditions
-Last activity: 2026-11-15 — Plan 09-07 atomic capacity and selected suggestions completed
+Last activity: 2026-11-15 — Plan 09-08 job allocation UI completed; Plan 09-09 is next
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -87,10 +87,10 @@ v1.0 complete. v1.1 complete. v1.2 complete. v1.3 complete (shipped 2026-06-21).
 
 ## Session Continuity
 
-Last session: 2026-11-15T15:28:59.801Z
-Stopped at: Completed 09-07-PLAN.md
+Last session: 2026-11-15T15:55:36.784Z
+Stopped at: Completed 09-08-PLAN.md
 Resume file: None
-Last activity: 2026-11-15 - Plan 09-07 complete; Plan 09-08 is next
+Last activity: 2026-11-15 - Plan 09-08 complete; Plan 09-09 is next
 
 ## Performance Metrics
 
@@ -103,6 +103,7 @@ Last activity: 2026-11-15 - Plan 09-07 complete; Plan 09-08 is next
 | Phase 09 P05 | 15min | 1 of 3 tasks | 3 files |
 | Phase 09 P06 | 1h 1m | 2 tasks | 9 files |
 | Phase 09 P07 | 3h 44m | 2 tasks | 4 files |
+| Phase 09 P08 | 14 min | 2 tasks | 4 files |
 
 ## Decisions
 
