@@ -144,11 +144,11 @@ export async function onRequestPost(context) {
          SELECT ?, job_options.id,
            CASE
              WHEN job_options.max_capacity IS NULL THEN ?
-             ELSE MIN(?, job_options.max_capacity - COALESCE((
+             ELSE MIN(?, MAX(0, job_options.max_capacity - COALESCE((
                SELECT SUM(existing.assigned_count)
                FROM fresh_rsvp_job_allocations existing
                WHERE existing.job_option_id = job_options.id
-             ), 0))
+             ), 0)))
            END
          FROM job_options
          WHERE job_options.id = ?

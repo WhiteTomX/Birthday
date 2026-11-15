@@ -582,6 +582,23 @@ test('reserves job capacity in the RSVP batch and reports only returned accepted
   assert.ok(DB.reads.some((sql) => /SELECT job_option_id AS id, assigned_count/.test(sql)));
 });
 
+test('returns a generic error without persisting an RSVP when its job batch fails', async () => {
+  const DB = new FakeDatabase({ failWrite: true });
+  const { context } = makeContext({
+    name: 'Alice',
+    attendance: 'coming',
+    attendees: 1,
+    drinks: [],
+    jobs: [{ id: 'aufbau', count: 1 }],
+  }, { DB });
+
+  const response = await submitFreshRsvp(context);
+  assert.equal(response.status, 500);
+  assert.deepEqual(await response.json(), { ok: false, error: 'Database error' });
+  assert.equal(DB.batches.length, 0);
+  assert.equal(DB.runs.length, 0);
+});
+
 test('returns a generic error when loading job options fails', async () => {
   const { context } = makeJobOptionsContext([], { failRead: true });
 
