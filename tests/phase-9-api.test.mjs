@@ -30,6 +30,15 @@ class FakeStatement {
     }
 
     this.database.reads.push(this.sql);
+    if (this.sql.includes('FROM fresh_rsvp_job_allocations')) {
+      return { results: this.database.allocationResults };
+    }
+    if (this.sql.includes('FROM job_options')) {
+      const requestedIds = this.values.map(String);
+      return {
+        results: this.database.jobOptions.filter((option) => requestedIds.includes(option.id)),
+      };
+    }
     if (this.sql.includes('FROM drink_options')) {
       const requestedLabels = this.values.map((label) => label.toLowerCase());
       const options = this.database.options;
@@ -84,14 +93,25 @@ class FakeStatement {
 }
 
 class FakeDatabase {
-  constructor({ failRead = false, failWrite = false, conflictOnInsert = false } = {}) {
+  constructor({
+    failRead = false,
+    failWrite = false,
+    conflictOnInsert = false,
+    allocationResults = [],
+  } = {}) {
     this.failRead = failRead;
     this.failWrite = failWrite;
     this.conflictOnInsert = conflictOnInsert;
     this.reads = [];
     this.runs = [];
     this.batches = [];
+    this.allocationResults = allocationResults;
     this.options = drinkCatalog.map((option) => ({ ...option }));
+    this.jobOptions = [
+      { id: 'aufbau', label: 'Aufbau' },
+      { id: 'teilzeit-barkeeper', label: 'Teilzeit Barkeeper nach Lust und Laune' },
+      { id: 'dinge', label: 'Dinge' },
+    ];
   }
 
   prepare(sql) {
@@ -108,7 +128,7 @@ class FakeDatabase {
   }
 }
 
-function makeContext(body, { hostRef = '0', rawBody } = {}) {
+function makeContext(body, { hostRef = '0', rawBody, DB = new FakeDatabase() } = {}) {
   const headers = { 'Content-Type': 'application/json' };
   if (hostRef !== null) {
     headers['X-Host-Ref'] = hostRef;
@@ -118,7 +138,6 @@ function makeContext(body, { hostRef = '0', rawBody } = {}) {
     headers,
     body: rawBody ?? JSON.stringify(body),
   });
-  const DB = new FakeDatabase();
   return { context: { request, env: { DB } }, DB };
 }
 
@@ -462,6 +481,105 @@ test('returns fixed jobs before stable suggestions with draft descriptions and c
   )));
   assert.equal('rsvps' in payload, false);
   assert.match(query(), /ORDER BY\s+job_options\.is_fixed DESC,\s+CASE WHEN job_options\.is_fixed = 1 THEN job_options\.display_order END,\s+job_options\.normalized_label,\s+job_options\.id/);
+});
+
+test('rejects declines with job allocations', async () => {
+  const { context, DB } = makeContext({
+    name: 'Bob',
+    attendance: 'not_coming',
+    jobs: [{ id: 'aufbau', count: 1 }],
+  });
+
+  const response = await submitFreshRsvp(context);
+  assert.equal(response.status, 400);
+  assert.equal(DB.batches.length + DB.runs.length, 0);
+});
+
+test('rejects malformed, duplicate, unknown, and out-of-range job allocations', async (t) => {
+  const invalidJobs = [
+    [{ id: 'aufbau', count: 0 }],
+    [{ id: 'aufbau', count: -1 }],
+    [{ id: 'aufbau', count: 1.5 }],
+    [{ id: 'aufbau', count: 3 }],
+    [{ id: 'unknown', count: 1 }],
+    [{ id: 'aufbau', count: 1 }, { id: 'aufbau', count: 1 }],
+    [{ id: 'aufbau', count: 1, note: 'extra' }],
+  ];
+
+  for (const jobs of invalidJobs) {
+    await t.test(JSON.stringify(jobs), async () => {
+      const { context, DB } = makeContext({
+        name: 'Alice',
+        attendance: 'coming',
+        attendees: 2,
+        drinks: [],
+        jobs,
+      });
+
+      const response = await submitFreshRsvp(context);
+      assert.equal(response.status, 400);
+      assert.equal(DB.batches.length + DB.runs.length, 0);
+    });
+  }
+});
+
+test('reserves job capacity in the RSVP batch and reports only returned accepted counts', async () => {
+  const DB = new FakeDatabase({
+    allocationResults: [
+      { id: 'aufbau', assigned_count: 1 },
+      { id: 'teilzeit-barkeeper', assigned_count: 2 },
+    ],
+  });
+  const { context } = makeContext({
+    name: 'Alice',
+    attendance: 'coming',
+    attendees: 2,
+    drinks: ['Bier'],
+    jobs: [
+      { id: 'aufbau', count: 2 },
+      { id: 'teilzeit-barkeeper', count: 2 },
+      { id: 'dinge', count: 1 },
+    ],
+  }, { DB });
+
+  const response = await submitFreshRsvp(context);
+  assert.equal(response.status, 200);
+  assert.deepEqual((await response.json()).jobs, [
+    {
+      id: 'aufbau',
+      label: 'Aufbau',
+      requested_count: 2,
+      accepted_count: 1,
+    },
+    {
+      id: 'teilzeit-barkeeper',
+      label: 'Teilzeit Barkeeper nach Lust und Laune',
+      requested_count: 2,
+      accepted_count: 2,
+    },
+    {
+      id: 'dinge',
+      label: 'Dinge',
+      requested_count: 1,
+      accepted_count: 0,
+    },
+  ]);
+  assert.equal(DB.batches.length, 1);
+  const statements = DB.batches[0];
+  assert.equal(statements.length, 5);
+  assert.match(statements[0].sql, /INSERT INTO fresh_rsvps/);
+  assert.match(statements[1].sql, /INSERT INTO fresh_rsvp_drink_selections/);
+  const allocations = statements.slice(2);
+  assert.ok(allocations.every(({ sql }) => /INSERT INTO fresh_rsvp_job_allocations/.test(sql)));
+  assert.ok(allocations.every(({ sql }) => /MIN\(\?,\s*MAX\(0,\s*job_options\.max_capacity\s*-\s*COALESCE\(/.test(sql)));
+  assert.ok(allocations.every(({ sql }) => /job_options\.max_capacity IS NULL/.test(sql)));
+  assert.ok(allocations.every(({ sql }) => /WHERE job_options\.id = \?/.test(sql)));
+  assert.deepEqual(allocations.map(({ values }) => values.slice(1)), [
+    [2, 2, 'aufbau'],
+    [2, 2, 'teilzeit-barkeeper'],
+    [1, 1, 'dinge'],
+  ]);
+  assert.ok(DB.reads.some((sql) => /SELECT job_option_id AS id, assigned_count/.test(sql)));
 });
 
 test('returns a generic error when loading job options fails', async () => {
