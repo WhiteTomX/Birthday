@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { execFileSync, spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { createServer } from 'node:net';
+import { request as httpRequest } from 'node:http';
 import { existsSync } from 'node:fs';
 import { mkdir, mkdtemp, readFile, rm } from 'node:fs/promises';
 import { homedir } from 'node:os';
@@ -176,15 +177,41 @@ function basicAuth(password) {
 }
 
 async function request(path, { password, method = 'GET', body } = {}) {
-  const headers = new Headers();
-  if (password !== undefined) headers.set('Authorization', basicAuth(password));
-  if (body !== undefined) headers.set('Content-Type', 'application/json');
-  return fetch(`${baseUrl}${path}`, {
-    method,
-    headers,
-    ...(body === undefined ? {} : { body: typeof body === 'string' ? body : JSON.stringify(body) }),
-    redirect: 'manual',
-    signal: AbortSignal.timeout(10_000),
+  const headers = {};
+  if (password !== undefined) headers.Authorization = basicAuth(password);
+  if (body !== undefined) headers['Content-Type'] = 'application/json';
+  return new Promise((resolveRequest, rejectRequest) => {
+    const request = httpRequest(`${baseUrl}${path}`, {
+      method,
+      headers,
+      agent: false,
+    }, (response) => {
+      const chunks = [];
+      response.on('data', (chunk) => chunks.push(chunk));
+      response.once('end', () => {
+        const responseHeaders = new Headers();
+        for (const [name, value] of Object.entries(response.headers)) {
+          if (value !== undefined) {
+            responseHeaders.set(name, Array.isArray(value) ? value.join(', ') : value);
+          }
+        }
+        const responseBody = Buffer.concat(chunks).toString('utf8');
+        const status = response.statusCode ?? 0;
+        resolveRequest({
+          status,
+          ok: status >= 200 && status < 300,
+          headers: responseHeaders,
+          text: async () => responseBody,
+          json: async () => JSON.parse(responseBody),
+        });
+      });
+    });
+    request.setTimeout(10_000, () => request.destroy(new Error('Local Pages request timed out.')));
+    request.once('error', rejectRequest);
+    if (body !== undefined) {
+      request.write(typeof body === 'string' ? body : JSON.stringify(body));
+    }
+    request.end();
   });
 }
 
@@ -346,13 +373,12 @@ test('integrates authenticated invitation, RSVP, drink reuse, and isolated local
     });
     if (!suggestionResponse.ok) throw new Error('The local drink suggestion could not be saved.');
     const savedSuggestion = await responseJson(suggestionResponse);
-    if (!savedSuggestion.created || savedSuggestion.option?.label !== drinkLabel) {
-      throw new Error('The local drink suggestion response did not contain the new option.');
+    if (savedSuggestion.label !== drinkLabel) {
+      throw new Error('The local drink suggestion response did not contain its staged label.');
     }
-    const laterCatalogResponse = await request('/api/drink-suggestions', { password: hostPasswords[1] });
-    const laterCatalog = await responseJson(laterCatalogResponse);
-    if (!laterCatalog.options.some((option) => option.label === drinkLabel)) {
-      throw new Error('A saved drink suggestion was not available to the other host.');
+    const stagedCatalogCount = queryRows('SELECT COUNT(*) AS count FROM drink_options;')[0]?.count;
+    if (stagedCatalogCount !== 8) {
+      throw new Error('Staging a drink suggestion unexpectedly changed the shared catalog.');
     }
 
     for (const [name, password, attendees, drinks] of [
@@ -362,9 +388,20 @@ test('integrates authenticated invitation, RSVP, drink reuse, and isolated local
       const response = await request('/api/fresh-rsvp', {
         password,
         method: 'POST',
-        body: { name, attendance: 'coming', attendees, drinks },
+        body: {
+          name,
+          attendance: 'coming',
+          attendees,
+          drinks: drinks.filter((label) => label !== drinkLabel),
+          drink_suggestions: drinks.includes(drinkLabel) ? [drinkLabel] : [],
+        },
       });
       if (!response.ok) throw new Error('A valid coming RSVP was not saved.');
+    }
+    const laterCatalogResponse = await request('/api/drink-suggestions', { password: hostPasswords[1] });
+    const laterCatalog = await responseJson(laterCatalogResponse);
+    if (!laterCatalog.options.some((option) => option.label === drinkLabel)) {
+      throw new Error('A selected drink suggestion was not available to the other host.');
     }
     const declineResponse = await request('/api/fresh-rsvp', {
       password: hostPasswords[1],
