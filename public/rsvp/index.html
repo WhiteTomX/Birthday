@@ -82,17 +82,32 @@
         <p id="submit-error" class="error-msg" role="alert" aria-live="assertive" hidden></p>
       </form>
 
-      <form id="drink-suggestion-form" novalidate>
-        <div class="field" id="drink-suggestion-field">
-          <label for="drink-suggestion">Anderes Getränk</label>
-          <div class="suggestion-row">
-            <input type="text" id="drink-suggestion" name="drink-suggestion" placeholder="z. B. Apfelsaft" aria-describedby="drink-suggestion-error" />
-            <button type="submit" id="btn-drink-suggestion" class="btn-secondary">Hinzufügen</button>
+      <div id="coming-suggestion-fields" hidden>
+        <form id="drink-suggestion-form" novalidate>
+          <div class="field" id="drink-suggestion-field">
+            <label for="drink-suggestion">Anderes Getränk</label>
+            <div class="suggestion-row">
+              <input type="text" id="drink-suggestion" name="drink-suggestion" placeholder="z. B. Apfelsaft" aria-describedby="drink-suggestion-error" />
+              <button type="submit" id="btn-drink-suggestion" class="btn-secondary">Hinzufügen</button>
+            </div>
+            <span id="drink-suggestion-error" class="error-msg" role="alert" hidden>Bitte gib ein Getränk ein.</span>
+            <span id="drink-suggestion-status" class="helper-text" role="status" aria-live="polite"></span>
           </div>
-          <span id="drink-suggestion-error" class="error-msg" role="alert" hidden>Bitte gib ein Getränk ein.</span>
-          <span id="drink-suggestion-status" class="helper-text" role="status" aria-live="polite"></span>
-        </div>
-      </form>
+        </form>
+
+        <form id="job-suggestion-form" class="job-suggestion-form" novalidate>
+          <div class="field" id="job-suggestion-field">
+            <label for="job-suggestion">Anderen Helferjob vorschlagen</label>
+            <div class="suggestion-row">
+              <input type="text" id="job-suggestion" name="job-suggestion" placeholder="z. B. beim Dekorieren helfen" aria-describedby="job-suggestion-error" />
+              <button type="submit" id="btn-job-suggestion" class="btn-secondary">Job hinzufügen</button>
+            </div>
+            <span id="job-suggestion-error" class="error-msg" role="alert" hidden>Bitte gib einen Helferjob mit höchstens 80 Zeichen ein.</span>
+            <span id="job-suggestion-status" class="helper-text" role="status" aria-live="polite"></span>
+            <p class="helper-text">Ein Vorschlag wird erst mit deiner Anmeldung geteilt, wenn du dafür eine Anzahl auswählst.</p>
+          </div>
+        </form>
+      </div>
 
       <button type="submit" id="btn-submit-coming" class="btn-submit" form="rsvp-form">Anmeldung senden</button>
     </section>

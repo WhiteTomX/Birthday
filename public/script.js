@@ -19,13 +19,21 @@
   const drinkOptionsStatus = document.getElementById('drink-options-status');
   const jobOptionsWrap = document.getElementById('job-options');
   const jobOptionsStatus = document.getElementById('job-options-status');
+  const comingSuggestionFields = document.getElementById('coming-suggestion-fields');
   const suggestionForm = document.getElementById('drink-suggestion-form');
   const drinkSuggestion = document.getElementById('drink-suggestion');
   const drinkSuggestionError = document.getElementById('drink-suggestion-error');
   const drinkSuggestionStatus = document.getElementById('drink-suggestion-status');
   const btnDrinkSuggestion = document.getElementById('btn-drink-suggestion');
+  const jobSuggestionForm = document.getElementById('job-suggestion-form');
+  const jobSuggestion = document.getElementById('job-suggestion');
+  const jobSuggestionError = document.getElementById('job-suggestion-error');
+  const jobSuggestionStatus = document.getElementById('job-suggestion-status');
+  const btnJobSuggestion = document.getElementById('btn-job-suggestion');
   const submitButton = document.getElementById('btn-submit-coming');
   const submitError = document.getElementById('submit-error');
+  const stagedJobDescription = 'Vorgeschlagene Aufgabe; die genauen Details werden gemeinsam abgestimmt.';
+  let jobOptionsLoaded = false;
 
   function setFeedback(element, message, visible) {
     if (message !== null) element.textContent = message;
@@ -37,7 +45,15 @@
     return attendanceInputs.find((input) => input.checked)?.value || '';
   }
 
-  function createDrinkOption(option, checked = false) {
+  function normalizeSuggestionLabel(value) {
+    return value.normalize('NFC').trim().replace(/\s+/g, ' ');
+  }
+
+  function suggestionKey(value) {
+    return normalizeSuggestionLabel(value).toLocaleLowerCase('de-DE');
+  }
+
+  function createDrinkOption(option, checked = false, staged = false) {
     if (!option || typeof option.label !== 'string' || !option.label.trim()) {
       throw new Error('Invalid drink option');
     }
@@ -52,6 +68,7 @@
     checkbox.id = checkboxId;
     checkbox.value = option.label;
     checkbox.checked = checked;
+    if (staged) checkbox.dataset.drinkSuggestion = option.label;
 
     const text = document.createElement('span');
     text.textContent = option.label;
@@ -68,18 +85,34 @@
     drinkOptionsWrap.replaceChildren(...optionElements);
   }
 
-  function selectedDrinks() {
+  function selectedDrinkOptions() {
     return Array.from(
       drinkOptionsWrap.querySelectorAll('input[type="checkbox"]'),
-    ).filter((checkbox) => checkbox.checked).map((checkbox) => checkbox.value);
+    ).filter((checkbox) => checkbox.checked);
   }
 
-  function createJobOption(option) {
+  function selectedDrinks() {
+    return selectedDrinkOptions()
+      .filter((checkbox) => !checkbox.dataset.drinkSuggestion)
+      .map((checkbox) => checkbox.value);
+  }
+
+  function selectedDrinkSuggestions() {
+    return selectedDrinkOptions()
+      .filter((checkbox) => checkbox.dataset.drinkSuggestion)
+      .map((checkbox) => checkbox.dataset.drinkSuggestion);
+  }
+
+  function selectedDrinkLabels() {
+    return selectedDrinkOptions().map((checkbox) => checkbox.value);
+  }
+
+  function createJobOption(option, staged = false) {
     if (
       !option
-      || typeof option.id !== 'string'
       || typeof option.label !== 'string'
       || typeof option.description !== 'string'
+      || (!staged && typeof option.id !== 'string')
     ) {
       throw new Error('Invalid job option');
     }
@@ -140,7 +173,9 @@
     count.value = '';
     count.disabled = isFull;
     count.dataset.capacityFull = String(isFull);
-    count.dataset.jobId = option.id;
+    count.dataset.jobLabel = option.label;
+    if (staged) count.dataset.jobSuggestion = option.label;
+    else count.dataset.jobId = option.id;
     count.setAttribute('aria-label', `Anzahl für ${option.label}`);
     count.setAttribute('aria-describedby', `${description.id} ${capacityStatus.id}`);
     countLabel.appendChild(count);
@@ -151,7 +186,14 @@
 
   function renderJobOptions(options) {
     if (!Array.isArray(options)) throw new Error('Invalid job catalog');
-    jobOptionsWrap.replaceChildren(...options.map(createJobOption));
+    jobOptionsWrap.replaceChildren(...options.map((option) => createJobOption(option)));
+  }
+
+  function jobCountInputs() {
+    return [
+      ...jobOptionsWrap.querySelectorAll('input[data-job-id]'),
+      ...jobOptionsWrap.querySelectorAll('input[data-job-suggestion]'),
+    ];
   }
 
   function selectedJobs() {
@@ -160,9 +202,15 @@
       .map((input) => ({ id: input.dataset.jobId, count: Number(input.value) }));
   }
 
+  function selectedJobSuggestions() {
+    return Array.from(jobOptionsWrap.querySelectorAll('input[data-job-suggestion]'))
+      .filter((input) => !input.disabled && input.value.trim() !== '')
+      .map((input) => ({ label: input.dataset.jobSuggestion, count: Number(input.value) }));
+  }
+
   function updateJobCountMaximum() {
     const maximum = String(Number(attendeesInput.value) || 10);
-    jobOptionsWrap.querySelectorAll('input[data-job-id]').forEach((input) => {
+    jobCountInputs().forEach((input) => {
       input.max = maximum;
       if (input.value.trim() && Number(input.value) > Number(maximum)) {
         input.value = '';
@@ -172,9 +220,20 @@
 
   function updateJobControlState() {
     const canAssignJobs = selectedAttendance() === 'coming';
-    jobOptionsWrap.querySelectorAll('input[data-job-id]').forEach((input) => {
+    jobCountInputs().forEach((input) => {
       input.disabled = !canAssignJobs || input.dataset.capacityFull === 'true';
     });
+  }
+
+  function updateComingControlState() {
+    const isComing = selectedAttendance() === 'coming';
+    comingFields.hidden = !isComing;
+    comingSuggestionFields.hidden = !isComing;
+    drinkSuggestion.disabled = !isComing;
+    btnDrinkSuggestion.disabled = !isComing;
+    jobSuggestion.disabled = !isComing;
+    btnJobSuggestion.disabled = !isComing || !jobOptionsLoaded;
+    updateJobControlState();
   }
 
   async function postJson(endpoint, payload) {
@@ -200,9 +259,13 @@
     } else {
       const group = payload.attendees === 1 ? 'Person' : 'Personen';
       const drinkSummary = drinks.length ? drinks.join(', ') : 'keine angegeben';
-      const jobs = result.jobs?.filter((job) => job.accepted_count > 0) ?? [];
+      const jobs = Array.isArray(result.jobs) ? result.jobs : [];
       const jobSummary = jobs.length
-        ? ` Helferjobs: ${jobs.map((job) => `${job.label} (${job.accepted_count})`).join(', ')}.`
+        ? ` Helferjobs: ${jobs.map((job) => {
+          const unassigned = Math.max(job.requested_count - job.accepted_count, 0);
+          const remainder = unassigned > 0 ? `, ${unassigned} nicht bestätigt` : '';
+          return `${job.label}: ${job.accepted_count} von ${job.requested_count} bestätigt${remainder}`;
+        }).join('; ')}.`
         : '';
       confirmation.textContent = `Danke, ${payload.name}! Wir freuen uns auf euch mit ${payload.attendees} ${group}. Getränkewünsche: ${drinkSummary}. Die Getränke sind Wünsche, keine Garantie.${jobSummary}`;
     }
@@ -213,8 +276,7 @@
 
   attendanceInputs.forEach((input) => {
     input.addEventListener('change', () => {
-      comingFields.hidden = selectedAttendance() !== 'coming';
-      updateJobControlState();
+      updateComingControlState();
       setFeedback(attendanceError, null, false);
     });
   });
@@ -255,6 +317,7 @@
 
     let payload = { name, attendance };
     let drinks = [];
+    let drinkLabels = [];
     if (attendance === 'coming') {
       const attendees = Number(attendeesInput.value);
       if (!Number.isInteger(attendees) || attendees < 1 || attendees > 10) {
@@ -265,8 +328,9 @@
       }
       attendeesInput.removeAttribute('aria-invalid');
       setFeedback(attendeesError, null, false);
+      drinkLabels = selectedDrinkLabels();
       drinks = selectedDrinks();
-      const invalidJobInput = Array.from(jobOptionsWrap.querySelectorAll('input[data-job-id]'))
+      const invalidJobInput = jobCountInputs()
         .find((input) => {
           const value = input.value.trim();
           const count = Number(value);
@@ -282,16 +346,20 @@
         return;
       }
       const jobs = selectedJobs();
+      const jobSuggestions = selectedJobSuggestions();
       setFeedback(jobOptionsStatus, '', false);
       payload = { name, attendance, attendees, drinks };
+      const drinkSuggestions = selectedDrinkSuggestions();
+      if (drinkSuggestions.length > 0) payload.drink_suggestions = drinkSuggestions;
       if (jobs.length > 0) payload.jobs = jobs;
+      if (jobSuggestions.length > 0) payload.job_suggestions = jobSuggestions;
     }
 
     submitButton.disabled = true;
     submitButton.textContent = 'Wird gesendet…';
     try {
       const result = await postJson('/api/fresh-rsvp', payload);
-      showConfirmation(payload, drinks, result);
+      showConfirmation(payload, drinkLabels, result);
     } catch {
       submitButton.disabled = false;
       submitButton.textContent = 'Anmeldung senden';
@@ -303,8 +371,11 @@
     event.preventDefault();
     setFeedback(drinkSuggestionStatus, '', false);
 
-    const label = drinkSuggestion.value.trim();
-    if (!label || label.length > 80) {
+    if (selectedAttendance() !== 'coming') return;
+
+    const rawLabel = drinkSuggestion.value;
+    const label = rawLabel.trim();
+    if (!label || Array.from(label).length > 80) {
       drinkSuggestion.setAttribute('aria-invalid', 'true');
       setFeedback(drinkSuggestionError, 'Bitte gib ein Getränk mit höchstens 80 Zeichen ein.', true);
       drinkSuggestion.focus();
@@ -316,30 +387,86 @@
     btnDrinkSuggestion.disabled = true;
     btnDrinkSuggestion.textContent = 'Wird gespeichert…';
     try {
-      const data = await postJson('/api/drink-suggestions', { label });
-      if (!data.option) throw new Error('Missing drink option');
+      const data = await postJson('/api/drink-suggestions', { label: rawLabel });
+      if (typeof data.label !== 'string') throw new Error('Missing staged drink label');
+      const normalizedLabel = normalizeSuggestionLabel(data.label);
+      if (!normalizedLabel || Array.from(normalizedLabel).length > 80) {
+        throw new Error('Invalid staged drink label');
+      }
 
-      const existing = selectedDrinks().find(
-        (drink) => drink.toLowerCase() === data.option.label.toLowerCase(),
-      );
-      if (existing) {
-        const checkbox = Array.from(
-          drinkOptionsWrap.querySelectorAll('input[type="checkbox"]'),
-        ).find((option) => option.value === existing);
+      const checkbox = Array.from(
+        drinkOptionsWrap.querySelectorAll('input[type="checkbox"]'),
+      ).find((option) => suggestionKey(option.value) === suggestionKey(normalizedLabel));
+      if (checkbox) {
         checkbox.checked = true;
       } else {
-        const { label: optionLabel, checkbox } = createDrinkOption(data.option, true);
+        const { label: optionLabel } = createDrinkOption({ label: normalizedLabel }, true, true);
         drinkOptionsWrap.appendChild(optionLabel);
-        checkbox.checked = true;
       }
 
       drinkSuggestion.value = '';
-      setFeedback(drinkSuggestionStatus, `${data.option.label} wurde hinzugefügt und ausgewählt.`, true);
+      setFeedback(drinkSuggestionStatus, `${normalizedLabel} wurde hinzugefügt und ausgewählt.`, true);
     } catch {
       setFeedback(drinkSuggestionError, 'Das Getränk konnte nicht gespeichert werden. Bitte versuche es erneut.', true);
     } finally {
-      btnDrinkSuggestion.disabled = false;
       btnDrinkSuggestion.textContent = 'Hinzufügen';
+      updateComingControlState();
+    }
+  });
+
+  jobSuggestionForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    setFeedback(jobSuggestionStatus, '', false);
+
+    if (selectedAttendance() !== 'coming' || !jobOptionsLoaded) return;
+
+    const rawLabel = jobSuggestion.value;
+    const label = rawLabel.trim();
+    if (!label || Array.from(label).length > 80) {
+      jobSuggestion.setAttribute('aria-invalid', 'true');
+      setFeedback(jobSuggestionError, 'Bitte gib einen Helferjob mit höchstens 80 Zeichen ein.', true);
+      jobSuggestion.focus();
+      return;
+    }
+
+    jobSuggestion.removeAttribute('aria-invalid');
+    setFeedback(jobSuggestionError, null, false);
+    btnJobSuggestion.disabled = true;
+    btnJobSuggestion.textContent = 'Wird ergänzt…';
+    try {
+      const data = await postJson('/api/job-options', { label: rawLabel });
+      if (typeof data.label !== 'string') throw new Error('Missing staged job label');
+      const normalizedLabel = normalizeSuggestionLabel(data.label);
+      if (!normalizedLabel || Array.from(normalizedLabel).length > 80) {
+        throw new Error('Invalid staged job label');
+      }
+
+      const existing = jobCountInputs().find((input) => (
+        suggestionKey(input.dataset.jobLabel) === suggestionKey(normalizedLabel)
+      ));
+      if (existing) {
+        jobSuggestion.value = '';
+        const message = existing.dataset.jobSuggestion
+          ? `${normalizedLabel} wurde bereits vorgeschlagen.`
+          : `${normalizedLabel} ist bereits als Helferjob vorhanden. Gib eine Anzahl ein, um dich dafür einzutragen.`;
+        setFeedback(jobSuggestionStatus, message, true);
+      } else {
+        jobOptionsWrap.appendChild(createJobOption({
+          label: normalizedLabel,
+          description: stagedJobDescription,
+          max_capacity: null,
+          remaining: null,
+        }, true));
+        jobSuggestion.value = '';
+        updateJobCountMaximum();
+        updateJobControlState();
+        setFeedback(jobSuggestionStatus, `${normalizedLabel} wurde ergänzt. Wähle eine Anzahl, damit der Vorschlag mit deiner Anmeldung geteilt wird.`, true);
+      }
+    } catch {
+      setFeedback(jobSuggestionError, 'Der Helferjob konnte nicht ergänzt werden. Bitte versuche es erneut.', true);
+    } finally {
+      btnJobSuggestion.textContent = 'Job hinzufügen';
+      updateComingControlState();
     }
   });
 
@@ -347,6 +474,13 @@
     if (drinkSuggestion.value.trim()) {
       drinkSuggestion.removeAttribute('aria-invalid');
       setFeedback(drinkSuggestionError, null, false);
+    }
+  });
+
+  jobSuggestion.addEventListener('input', () => {
+    if (jobSuggestion.value.trim()) {
+      jobSuggestion.removeAttribute('aria-invalid');
+      setFeedback(jobSuggestionError, null, false);
     }
   });
 
@@ -371,14 +505,18 @@
       const data = await response.json();
       if (!response.ok || !data?.ok) throw new Error('Catalog request failed');
       renderJobOptions(data.options);
-      updateJobControlState();
+      jobOptionsLoaded = true;
+      updateComingControlState();
       setFeedback(jobOptionsStatus, '', false);
     } catch {
+      jobOptionsLoaded = false;
       jobOptionsWrap.replaceChildren();
+      updateComingControlState();
       setFeedback(jobOptionsStatus, 'Helferjobs konnten nicht geladen werden. Bitte lade die Seite erneut.', true);
     }
   }
 
+  updateComingControlState();
   loadDrinkOptions();
   loadJobOptions();
 })();

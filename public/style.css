@@ -397,6 +397,10 @@ input[type="number"].error {
   align-items: stretch;
 }
 
+.job-suggestion-form {
+  margin-top: 24px;
+}
+
 .suggestion-row input {
   flex: 1;
 }

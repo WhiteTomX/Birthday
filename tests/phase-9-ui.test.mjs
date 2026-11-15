@@ -61,14 +61,19 @@ test('uses one accessible RSVP form and a separate suggestion form', () => {
 
   const selectorEnd = invitation.indexOf('</fieldset>', invitation.indexOf('id="drink-field"'));
   const rsvpEnd = invitation.indexOf('</form>', invitation.indexOf('id="rsvp-form"'));
+  const suggestionBlockStart = invitation.lastIndexOf(
+    '<div',
+    invitation.indexOf('id="coming-suggestion-fields"'),
+  );
   const suggestionStart = invitation.indexOf('id="drink-suggestion-form"');
   const jobSuggestionStart = invitation.indexOf('id="job-suggestion-form"');
   const jobSuggestionEnd = invitation.indexOf('</form>', jobSuggestionStart);
   assert.ok(suggestionStart > selectorEnd);
   assert.ok(suggestionStart > rsvpEnd);
+  assert.ok(suggestionBlockStart > rsvpEnd);
   assert.ok(jobSuggestionStart > suggestionStart);
   assert.ok(jobSuggestionEnd < invitation.indexOf('id="btn-submit-coming"'));
-  assert.equal(invitation.slice(rsvpEnd + '</form>'.length, invitation.indexOf('id="coming-suggestion-fields"')).trim(), '');
+  assert.equal(invitation.slice(rsvpEnd + '</form>'.length, suggestionBlockStart).trim(), '');
 });
 
 test('associates the RSVP submit control with the RSVP form outside the suggestion form', () => {
@@ -80,7 +85,7 @@ test('associates the RSVP submit control with the RSVP form outside the suggesti
 
   assert.ok(submitButton);
   assert.ok(submitIndex > suggestionEnd);
-  assert.equal((invitation.match(/type="submit"/g) ?? []).length, 2);
+  assert.equal((invitation.match(/type="submit"/g) ?? []).length, 3);
 });
 
 test('provides visible keyboard focus and responsive form layout styles', () => {
@@ -423,6 +428,21 @@ test('does not publish an unallocated staged job suggestion', async () => {
     attendees: 1,
     drinks: [],
   });
+});
+
+test('renders a staged job label as inert text', async () => {
+  const maliciousLabel = '<img src=x onerror=alert(1)>';
+  const { elements, radios } = await createRsvpHarness({
+    postRequest: async () => jsonResponse({ ok: true, label: maliciousLabel }),
+  });
+  radios[0].checked = true;
+  await radios[0].dispatch('change');
+  elements['job-suggestion'].value = maliciousLabel;
+  await elements['job-suggestion-form'].dispatch('submit');
+
+  const stagedItem = elements['job-options'].children[0];
+  assert.equal(stagedItem.children[0].children[0].textContent, maliciousLabel);
+  assert.deepEqual(stagedItem.children[0].children[0].children, []);
 });
 
 test('reuses an existing catalog job when a guest suggests its label', async () => {
