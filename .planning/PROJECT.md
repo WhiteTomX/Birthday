@@ -6,7 +6,7 @@ A joint 30th birthday celebration website for two friends sharing the same birth
 
 ## Current Milestone: v2.0 Actual Invitation
 
-**Goal:** Turn the authenticated RSVP page into the formal German invitation for the shared birthday, with confirmed event details, park access directions, a fresh RSVP round, and group-level drink preferences.
+**Goal:** Turn the authenticated RSVP page into the formal German invitation for the shared birthday, with confirmed event details, park access directions, a fresh RSVP round, group-level drink preferences, and next-day buffet brunch/job sign-up.
 
 **Language:** German  
 **Hosting:** Cloudflare Pages (free tier)  
@@ -16,7 +16,7 @@ A joint 30th birthday celebration website for two friends sharing the same birth
 
 The venue is inside a park, so there is no street address. The invitation will use the existing environment-backed venue name and map link, plus park-entry directions from `PARK_ENTRY_DIRECTIONS`. An optional buffet contribution link will come from `BUFFET_LIST_URL`; neither secret value belongs in source control.
 
-The new RSVP round uses a separate D1 table so existing responses remain unchanged. Guests reconfirm whether they are coming, and coming groups may select multiple drink preferences. A separate drink-suggestion form adds new options to the list for the current and later respondents. Drink requests are preferences, not guarantees.
+The new RSVP round uses a separate D1 table so existing responses remain unchanged. Guests reconfirm whether they are coming, and coming groups may select multiple drink preferences. Drink and job suggestions are staged in the current form and become shared options only when the RSVP is submitted with them selected. The next-day signup includes the combined job option “Abbau & Brunch am nächsten Tag”, a drinks-shopping job requiring a car on Friday or Saturday, and other jobs with optional capacity limits.
 
 **Patterns to preserve:**
 - Keep `/` public and free of private logistics; the invitation and RSVP remain behind existing authentication at `/rsvp/`.
@@ -51,7 +51,8 @@ The new RSVP round uses a separate D1 table so existing responses remain unchang
 - Formal German invitation with 5 December at 17:00
 - Venue map and park-entry directions, with no fabricated street address
 - Separate fresh RSVP table and multi-select group drink preferences
-- Drink-suggestion form and optional buffet contribution link
+- Conditional drink/job suggestion catalog and optional buffet contribution link
+- Next-day buffet brunch and job signup, including optional job capacities
 
 ### v3.0: Event Day Experience (Pre-event Build, Activate on Day)
 - Photo upload functionality (guests can share photos)
@@ -92,7 +93,10 @@ The new RSVP round uses a separate D1 table so existing responses remain unchang
 | Separate D1 table for v2.0 RSVP round | Preserve the earlier save-the-date responses while collecting reconfirmations | Pending implementation |
 | Multi-select drinks per RSVP group | Capture several drink preferences for a group without per-person tracking | Pending implementation |
 | Separate drink-suggestion form | Let guests propose new drink options without mixing suggestions into RSVP data | Pending implementation |
-| Automatically reuse drink suggestions | Make valid new suggestions selectable immediately and for later guests | Pending implementation |
+| Publish drink/job suggestions with the selected RSVP | Avoid adding unused suggestions to shared catalogs | Added to Phase 9 |
+| Combine cleanup and brunch in one job option | Use “Abbau & Brunch am nächsten Tag”; do not add a separate Brunch option | Added to Phase 9 |
+| Job capacity and group allocations | Allow optional per-job caps and group-level attendee counts; Aufbau is capped at 15 | Added to Phase 9 |
+| Explain job options in German | Give each job a longer description clarifying the expected task, including the Friday-or-Saturday drinks shopping job with a car; keep “Dinge” general until reviewed | Added to Phase 9 |
 | Secret-backed park directions and buffet URL | Keep configuration values out of source while showing them only to authenticated invitees | Pending implementation |
 
 ## Evolution

@@ -21,9 +21,18 @@
 ### Drink Preferences
 
 - [ ] **DRINK-01**: A coming RSVP group can select multiple drink preferences from Bier, Wein, Sekt, Kola, Spezi, Fruchtlimonaden, Wasser, and alkoholfreies Bier.
-- [ ] **DRINK-02**: Guests can submit a new drink through a separate drink-suggestion form.
-- [ ] **DRINK-03**: A successfully submitted drink suggestion is saved as a safely displayed, unique selectable option, updates the current RSVP selector immediately, and is available to later respondents.
+- [ ] **DRINK-02**: Guests can suggest a new drink using the separate suggestion control on the authenticated RSVP page; the suggestion is staged for the current form and is not published to the shared catalog until the RSVP is submitted with that drink selected.
+- [ ] **DRINK-03**: A selected drink suggestion is saved with the submitted RSVP as a safely displayed, unique selectable option for later respondents; an unselected or abandoned suggestion is not published.
 - [ ] **DRINK-04**: The drink form has no “Keine Präferenz” choice and explains that drink requests are not guaranteed.
+
+### Next-Day Brunch and Jobs
+
+- [ ] **BRUNCH-01**: Guests coming to the birthday can select one combined “Abbau & Brunch am nächsten Tag” option; there is no separate Brunch option, form, or special headcount, and guests declining the birthday cannot select the combined option.
+- [ ] **JOB-01**: The job catalog offers Aufbau, Teilzeit Barkeeper nach Lust und Laune, Jemand der mit der Musikbox verbunden ist, Dinge, “Abbau & Brunch am nächsten Tag”, and “Getränkeeinkauf mit Auto (Freitag oder Samstag)”.
+- [ ] **JOB-02**: One RSVP contact for a coming party can allocate party members by count across multiple jobs, leave attendees without a job, and assign one attendee to more than one job.
+- [ ] **JOB-03**: Each job may have an optional maximum. Aufbau has a maximum of 15; capped jobs stop accepting sign-ups when full, while partial availability can be accepted for a group allocation.
+- [ ] **JOB-04**: Guests can suggest jobs. Suggestions are selected in the current form but are published to the shared catalog only when the RSVP is submitted with them selected; unselected or abandoned suggestions are not published. New suggestions are uncapped by default, and duplicate labels reuse the existing option.
+- [ ] **JOB-05**: Every job option has a longer German description explaining the expected task; this includes helping purchase drinks on Friday or Saturday with a car. Initial descriptions are drafts for owner review, and the description for “Dinge” stays general rather than inventing specific duties.
 
 ## Future Requirements
 
@@ -57,12 +66,18 @@
 | DRINK-02 | Phase 9 | Pending |
 | DRINK-03 | Phase 9 | Pending |
 | DRINK-04 | Phase 9 | Pending |
+| BRUNCH-01 | Phase 9 | Pending |
+| JOB-01 | Phase 9 | Pending |
+| JOB-02 | Phase 9 | Pending |
+| JOB-03 | Phase 9 | Pending |
+| JOB-04 | Phase 9 | Pending |
+| JOB-05 | Phase 9 | Pending |
 
 **Coverage:**
-- v2.0 requirements: 11 total
-- Mapped to phases: 11
+- v2.0 requirements: 17 total
+- Mapped to phases: 17
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-11-14*
-*Last updated: 2026-11-14 after v2.0 roadmap mapping*
+*Last updated: 2026-11-14 after Phase 9 scope expansion*
