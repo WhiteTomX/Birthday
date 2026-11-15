@@ -415,13 +415,122 @@ test('rejects malformed, empty, and overlong drink suggestions', async (t) => {
   }
 });
 
-test('returns a generic error when saving a drink suggestion fails', async () => {
+test('rejects malformed, empty, and overlong job suggestions', async (t) => {
+  assert.equal(typeof jobOptionsApi.onRequestPost, 'function');
+  if (typeof jobOptionsApi.onRequestPost !== 'function') return;
+
+  for (const [label, rawBody, body] of [
+    ['malformed JSON', '{', null],
+    ['empty suggestion', null, { label: '   ' }],
+    ['overlong suggestion', null, { label: '😀'.repeat(81) }],
+    ['extra field', null, { label: 'Hilfe', description: 'untrusted' }],
+  ]) {
+    await t.test(label, async () => {
+      const { context, DB } = makeJobSuggestionContext(body, { rawBody });
+      const response = await jobOptionsApi.onRequestPost(context);
+      assert.equal(response.status, 400);
+      assert.equal(DB.reads.length + DB.runs.length + DB.batches.length, 0);
+    });
+  }
+});
+
+test('publishes selected drink and job suggestions atomically with the RSVP', async () => {
+  const DB = new FakeDatabase({
+    selectionResults: [{
+      id: 'canonical-job-id',
+      label: 'Gästehilfe',
+      normalized_label: 'gästehilfe',
+      accepted_count: 1,
+    }],
+  });
+  const { context } = makeContext({
+    name: 'Alice',
+    attendance: 'coming',
+    attendees: 2,
+    drinks: [],
+    drink_suggestions: ['  Apfelsaft   natur '],
+    jobs: [],
+    job_suggestions: [{ label: '  Ga\u0308stehilfe ', count: 1 }],
+  }, { DB });
+
+  const response = await submitFreshRsvp(context);
+  assert.equal(response.status, 200);
+  assert.deepEqual((await response.json()).jobs, [{
+    id: 'canonical-job-id',
+    label: 'Gästehilfe',
+    requested_count: 1,
+    accepted_count: 1,
+  }]);
+  assert.equal(DB.batches.length, 1);
+  assert.equal(DB.runs.length, 0);
+  const statements = DB.batches[0];
+  assert.match(statements[0].sql, /INSERT INTO fresh_rsvps/);
+  assert.match(statements[1].sql, /INSERT INTO drink_options/);
+  assert.match(statements[1].sql, /ON CONFLICT\s*\(label\)\s+DO NOTHING/i);
+  assert.match(statements[2].sql, /INSERT INTO fresh_rsvp_drink_selections/);
+  assert.match(statements[2].sql, /SELECT \?, id FROM drink_options WHERE lower\(label\) = lower\(\?\)/i);
+  assert.match(statements[3].sql, /INSERT INTO job_options/);
+  assert.match(statements[3].sql, /ON CONFLICT\s*\(normalized_label\)\s+DO NOTHING/i);
+  assert.match(statements[4].sql, /INSERT INTO fresh_rsvp_job_allocations/);
+  assert.match(statements[4].sql, /job_options\.normalized_label = \?/);
+  assert.match(statements[4].sql, /MAX\(0,\s*job_options\.max_capacity\s*-\s*COALESCE\(/);
+  assert.ok(DB.reads.some((sql) => /LEFT JOIN fresh_rsvp_job_allocations/.test(sql)));
+});
+
+test('does not publish unselected staged suggestions or suggestions attached to a decline', async () => {
+  const DB = new FakeDatabase();
+  const stagedDrink = makeSuggestionContext(
+    { label: 'Apfelsaft' },
+    { DB },
+  );
+  assert.equal((await suggestDrink(stagedDrink.context)).status, 200);
+  assert.equal(DB.batches.length + DB.runs.length, 0);
+
+  const unselected = makeContext({
+    name: 'Alice',
+    attendance: 'coming',
+    attendees: 1,
+    drinks: [],
+  }, { DB });
+  assert.equal((await submitFreshRsvp(unselected.context)).status, 200);
+  assert.ok(DB.batches[0].every(({ sql }) => !/INSERT INTO (drink_options|job_options)\b/.test(sql)));
+
+  const declined = makeContext({
+    name: 'Bob',
+    attendance: 'not_coming',
+    drink_suggestions: ['Apfelsaft'],
+    job_suggestions: [{ label: 'Gästehilfe', count: 1 }],
+  }, { DB });
+  assert.equal((await submitFreshRsvp(declined.context)).status, 400);
+  assert.equal(DB.batches.length, 1);
+});
+
+test('rolls back selected suggestions when the RSVP batch fails', async () => {
+  const DB = new FakeDatabase({ failBatch: true });
+  const { context } = makeContext({
+    name: 'Alice',
+    attendance: 'coming',
+    attendees: 1,
+    drinks: [],
+    drink_suggestions: ['Apfelsaft'],
+    job_suggestions: [{ label: 'Gästehilfe', count: 1 }],
+  }, { DB });
+
+  const response = await submitFreshRsvp(context);
+  assert.equal(response.status, 500);
+  assert.deepEqual(await response.json(), { ok: false, error: 'Database error' });
+  assert.equal(DB.batches.length + DB.runs.length, 0);
+});
+
+test('stages a drink suggestion without depending on D1 availability', async () => {
   const DB = new FakeDatabase({ failWrite: true });
+  DB.failRead = true;
   const { context } = makeSuggestionContext({ label: 'Apfelsaft' }, { DB });
 
   const response = await suggestDrink(context);
-  assert.equal(response.status, 500);
-  assert.deepEqual(await response.json(), { ok: false, error: 'Database error' });
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { ok: true, label: 'Apfelsaft' });
+  assert.equal(DB.reads.length + DB.runs.length + DB.batches.length, 0);
 });
 
 test('returns fixed jobs before stable suggestions with draft descriptions and current capacity', async () => {
