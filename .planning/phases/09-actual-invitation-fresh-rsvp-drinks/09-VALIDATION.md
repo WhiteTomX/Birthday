@@ -20,8 +20,8 @@ created: "2026-11-14"
 | **Framework** | Node built-in `node:test` (Node v22.23.4) |
 | **Config file** | none — native Node test runner |
 | **Quick run command** | `node --test tests/phase-9-api.test.mjs tests/phase-9-ui.test.mjs` |
-| **Full suite command** | `node --test tests/phase-9-api.test.mjs tests/phase-9-ui.test.mjs tests/phase-9-e2e.test.mjs tests/phase-9-jobs-e2e.test.mjs` |
-| **Estimated runtime** | Quick tests under 30 seconds; complete local integration ~60 seconds as a final gate |
+| **Full suite command** | `node --test --test-concurrency=1 tests/phase-9-api.test.mjs tests/phase-9-ui.test.mjs tests/phase-9-e2e.test.mjs tests/phase-9-jobs-e2e.test.mjs` |
+| **Estimated runtime** | Quick tests under 30 seconds; complete serialized local integration ~3 minutes as a final gate |
 
 ---
 
@@ -29,7 +29,7 @@ created: "2026-11-14"
 
 - **After every task commit:** Run the smallest relevant API or UI test command listed in that task's plan.
 - **After each plan wave:** Run the focused verification commands for the tasks in that wave; do not repeat the complete integration suite.
-- **Final local gate:** Run `node --test tests/phase-9-api.test.mjs tests/phase-9-ui.test.mjs tests/phase-9-e2e.test.mjs tests/phase-9-jobs-e2e.test.mjs` and `powershell -NoProfile -ExecutionPolicy Bypass -File tests/phase-9-migration-check.ps1` once before the production checkpoint.
+- **Final local gate:** Run `node --test --test-concurrency=1 tests/phase-9-api.test.mjs tests/phase-9-ui.test.mjs tests/phase-9-e2e.test.mjs tests/phase-9-jobs-e2e.test.mjs` and `powershell -NoProfile -ExecutionPolicy Bypass -File tests/phase-9-migration-check.ps1` once before the production checkpoint.
 - **Before `/gsd-verify-work`:** Full suite must be green
 - **Max feedback latency:** <30 seconds for task-level feedback; reserve the ~60-second full integration suite for the final local gate.
 
@@ -47,17 +47,17 @@ created: "2026-11-14"
 | 09-03-02 | 09-03 | 3 | AUTH-09, INV-01, INV-02, INV-03, INV-04 | T-09-04 | Protected/private logistics, date/time copy, public-root separation | Invitation unit | `node --experimental-default-type=module --test tests/phase-9-invitation.test.mjs` | Yes | ✅ prior pass |
 | 09-04-01 | 09-04 | 4 | INV-01, INV-02, INV-03, INV-04, RSVP-10, DRINK-01, DRINK-04 | T-09-05 | German invitation, accessible single RSVP, fixed checkbox selector, no neutral option | UI unit | `node --experimental-default-type=module --test tests/phase-9-ui.test.mjs` | Yes | ✅ prior pass |
 | 09-04-02 | 09-04 | 4 | RSVP-10, DRINK-01, DRINK-02, DRINK-03, DRINK-04 | T-09-05 | Safe DOM rendering, selected suggestions, coming/decline payloads and confirmations | UI unit | `node --experimental-default-type=module --test tests/phase-9-ui.test.mjs` | Yes | ✅ prior pass |
-| 09-05-01 | 09-05 | 9 | AUTH-09, INV-01–INV-04, RSVP-09–RSVP-10, DRINK-01–DRINK-04 | T-09-06 | Existing local invitation/drink flow and historical-row checks rerun after implementation | Pages/D1 E2E | `node --test tests/phase-9-e2e.test.mjs tests/phase-9-jobs-e2e.test.mjs` | Yes | ⬜ recheck |
+| 09-05-01 | 09-05 | 9 | AUTH-09, INV-01–INV-04, RSVP-09–RSVP-10, DRINK-01–DRINK-04 | T-09-06 | Existing local invitation/drink flow and historical-row checks rerun after implementation | Pages/D1 E2E | `node --test --test-concurrency=1 tests/phase-9-e2e.test.mjs tests/phase-9-jobs-e2e.test.mjs` | Yes | ✅ pass |
 | 09-05-02 | 09-05 | 9 | AUTH-09, INV-01–INV-04, RSVP-09–RSVP-10, DRINK-01–DRINK-04, BRUNCH-01, JOB-01–JOB-05 | T-09-06, T-09-11 | Owner authorization names target and confirms configuration and draft-description review after final local checks | Blocking decision | N/A — human checkpoint | N/A | ⏸ blocked |
 | 09-05-03 | 09-05 | 9 | AUTH-09, RSVP-09 | T-09-06, T-09-11 | Only remaining Phase 09 migrations may apply after all merge/target/local gates; unrelated pending migrations stop | Production-only manual gate | `wrangler d1 migrations list birthday-rsvps --remote` — only after all preconditions | N/A | ⏸ blocked |
-| 09-06-01 | 09-06 | 5 | BRUNCH-01, JOB-01, JOB-02, JOB-03, JOB-05 | T-09-07 | One fixed Aufbau path, exact six seeds, coming-only and history-preserving D1 writes | Pages/D1 tracer | `node --test tests/phase-9-jobs-e2e.test.mjs` | Created by this task | ⬜ pending |
-| 09-06-02 | 09-06 | 5 | BRUNCH-01, JOB-01, JOB-05 | T-09-07 | Stable catalog order, descriptions, safe rendering, full/partial/uncapped display | API/UI unit | `node --test tests/phase-9-api.test.mjs tests/phase-9-ui.test.mjs` | Yes | ⬜ pending |
-| 09-07-01 | 09-07 | 6 | RSVP-09, RSVP-10, BRUNCH-01, JOB-02, JOB-03 | T-09-08 | Per-job boundaries, aggregate counts above party size, atomic partial/full/uncapped reservations | API unit | `node --test tests/phase-9-api.test.mjs` | Yes | ⬜ pending |
-| 09-07-02 | 09-07 | 6 | DRINK-02, DRINK-03, JOB-04 | T-09-08 | Staging no-write behavior, 80-code-point/Unicode boundaries, canonical duplicates, selected-only batch publish and rollback | API unit | `node --test tests/phase-9-api.test.mjs` | Yes | ⬜ pending |
-| 09-08-01 | 09-08 | 7 | BRUNCH-01, JOB-01, JOB-02, JOB-03, JOB-05 | T-09-09 | One combined brunch option, independent counts, decline gating, descriptions/capacity in UI | UI unit | `node --test tests/phase-9-ui.test.mjs` | Yes | ⬜ pending |
-| 09-08-02 | 09-08 | 7 | JOB-02, JOB-03, JOB-04, JOB-05 | T-09-09 | Safe staged job labels, duplicate reuse, exact accepted/partial/unassigned confirmation | UI unit | `node --test tests/phase-9-ui.test.mjs` | Yes | ⬜ pending |
-| 09-09-01 | 09-09 | 8 | AUTH-09, INV-01–INV-04, RSVP-09–RSVP-10, DRINK-01–DRINK-04, BRUNCH-01, JOB-01–JOB-05 | T-09-10 | Full local flow, all edge probes, concurrent cap 15, suggestion atomicity and history preservation | Full local integration | `node --test tests/phase-9-api.test.mjs tests/phase-9-ui.test.mjs tests/phase-9-e2e.test.mjs tests/phase-9-jobs-e2e.test.mjs` | Yes | ⬜ pending |
-| 09-09-02 | 09-09 | 8 | RSVP-09, BRUNCH-01, JOB-01, JOB-03, JOB-05 | T-09-10 | Clean/populated migration, exact seed/default checks, forbidden decline allocation, byte-identical history | Local migration regression | `powershell -NoProfile -ExecutionPolicy Bypass -File tests/phase-9-migration-check.ps1` | Yes | ⬜ pending |
+| 09-06-01 | 09-06 | 5 | BRUNCH-01, JOB-01, JOB-02, JOB-03, JOB-05 | T-09-07 | One fixed Aufbau path, exact six seeds, coming-only and history-preserving D1 writes | Pages/D1 tracer | `node --test tests/phase-9-jobs-e2e.test.mjs` | Created by this task | ✅ pass |
+| 09-06-02 | 09-06 | 5 | BRUNCH-01, JOB-01, JOB-05 | T-09-07 | Stable catalog order, descriptions, safe rendering, full/partial/uncapped display | API/UI unit | `node --test tests/phase-9-api.test.mjs tests/phase-9-ui.test.mjs` | Yes | ✅ pass |
+| 09-07-01 | 09-07 | 6 | RSVP-09, RSVP-10, BRUNCH-01, JOB-02, JOB-03 | T-09-08 | Per-job boundaries, aggregate counts above party size, atomic partial/full/uncapped reservations | API unit | `node --test tests/phase-9-api.test.mjs` | Yes | ✅ pass |
+| 09-07-02 | 09-07 | 6 | DRINK-02, DRINK-03, JOB-04 | T-09-08 | Staging no-write behavior, 80-code-point/Unicode boundaries, canonical duplicates, selected-only batch publish and rollback | API unit | `node --test tests/phase-9-api.test.mjs` | Yes | ✅ pass |
+| 09-08-01 | 09-08 | 7 | BRUNCH-01, JOB-01, JOB-02, JOB-03, JOB-05 | T-09-09 | One combined brunch option, independent counts, decline gating, descriptions/capacity in UI | UI unit | `node --test tests/phase-9-ui.test.mjs` | Yes | ✅ pass |
+| 09-08-02 | 09-08 | 7 | JOB-02, JOB-03, JOB-04, JOB-05 | T-09-09 | Safe staged job labels, duplicate reuse, exact accepted/partial/unassigned confirmation | UI unit | `node --test tests/phase-9-ui.test.mjs` | Yes | ✅ pass |
+| 09-09-01 | 09-09 | 8 | AUTH-09, INV-01–INV-04, RSVP-09–RSVP-10, DRINK-01–DRINK-04, BRUNCH-01, JOB-01–JOB-05 | T-09-10 | Full local flow, all edge probes, concurrent cap 15, suggestion atomicity and history preservation | Full local integration | `node --test --test-concurrency=1 tests/phase-9-api.test.mjs tests/phase-9-ui.test.mjs tests/phase-9-e2e.test.mjs tests/phase-9-jobs-e2e.test.mjs` | Yes | ✅ pass |
+| 09-09-02 | 09-09 | 8 | RSVP-09, BRUNCH-01, JOB-01, JOB-03, JOB-05 | T-09-10 | Clean/populated migration, exact seed/default checks, forbidden decline allocation, byte-identical history | Local migration regression | `powershell -NoProfile -ExecutionPolicy Bypass -File tests/phase-9-migration-check.ps1` | Yes | ✅ pass |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 

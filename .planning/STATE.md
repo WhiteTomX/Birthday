@@ -5,16 +5,16 @@ milestone_name: Actual Invitation (Phase 9 — Blocked at production gate)
 current_phase: 09
 current_phase_name: Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch
 status: in_progress
-stopped_at: Completed 09-08-PLAN.md
-last_updated: "2026-11-15T15:55:36.956Z"
+stopped_at: Completed 09-09-PLAN.md; 09-05 remains blocked at the production gate
+last_updated: "2026-11-15T20:59:25.037Z"
 last_activity: 2026-11-15
-last_activity_desc: Plan 09-08 job allocation UI completed; Plan 09-09 is next
-state_head: 8dc4deed982d45757c97075f1ac1939684adac3a
+last_activity_desc: Plan 09-09 local Pages/D1 verification passed; Plan 09-05 remains blocked at the production gate
+state_head: 0527ad6d19f1b4d7f26272e730e9730a82e89fa6
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 9
-  completed_plans: 7
+  completed_plans: 8
   percent: 0
 ---
 
@@ -29,10 +29,10 @@ See: .planning/PROJECT.md (updated 2026-11-14)
 
 ## Current Position
 
-Phase: 09 (Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch) — READY TO EXECUTE
-Plan: 7 of 9 complete; Plan 09-09 next
-Status: Executing; production changes remain behind explicit authorization and merged-schema preconditions
-Last activity: 2026-11-15 — Plan 09-08 job allocation UI completed; Plan 09-09 is next
+Phase: 09 (Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch) — BLOCKED AT PRODUCTION GATE
+Plan: 8 of 9 complete; Plan 09-05 remains next and blocked on its production gates
+Status: Local verification complete; production changes remain behind explicit authorization and merged-schema preconditions
+Last activity: 2026-11-15 — Plan 09-09 local Pages/D1 checks passed; Plan 09-05 remains blocked
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -69,6 +69,7 @@ v1.0 complete. v1.1 complete. v1.2 complete. v1.3 complete (shipped 2026-06-21).
 | Drink suggestions use a separate form and D1 catalog | Stage locally; publish only when selected in a successfully submitted RSVP |
 | Logistics values use environment configuration | Keep venue and map values as-is; load park directions and optional buffet URL from environment values |
 | v2.0 roadmap is one delivery phase with nine dependency-ordered plans | Phase 9 covers all 17 v2.0 requirements while retaining continuous phase numbering |
+| Serialize local Pages/D1 integration tests | Concurrent Wrangler test servers contend for ports/resources; the serialized suite passes |
 
 ## Pending Todos
 
@@ -87,10 +88,10 @@ v1.0 complete. v1.1 complete. v1.2 complete. v1.3 complete (shipped 2026-06-21).
 
 ## Session Continuity
 
-Last session: 2026-11-15T15:55:36.784Z
-Stopped at: Completed 09-08-PLAN.md
+Last session: 2026-11-15T20:59:25.037Z
+Stopped at: Completed 09-09-PLAN.md; Plan 09-05 remains blocked at the production gate
 Resume file: None
-Last activity: 2026-11-15 - Plan 09-08 complete; Plan 09-09 is next
+Last activity: 2026-11-15 - Plan 09-09 local Pages/D1 verification passed; Plan 09-05 remains blocked
 
 ## Performance Metrics
 
@@ -104,6 +105,7 @@ Last activity: 2026-11-15 - Plan 09-08 complete; Plan 09-09 is next
 | Phase 09 P06 | 1h 1m | 2 tasks | 9 files |
 | Phase 09 P07 | 3h 44m | 2 tasks | 4 files |
 | Phase 09 P08 | 14 min | 2 tasks | 4 files |
+| Phase 09 P09 | 4h 45m | 2 tasks | 6 files |
 
 ## Decisions
 
@@ -111,6 +113,7 @@ Last activity: 2026-11-15 - Plan 09-08 complete; Plan 09-09 is next
 - [Phase 09]: Accept only absolute HTTPS map and buffet URLs with no embedded credentials. — Reject unsafe destinations and avoid active links from untrusted environment values.
 - [Phase 09]: Keep suggestions in a separate form and associate the RSVP submit button with the RSVP form. — This preserves one submit action for RSVP responses without nesting forms.
 - [Phase 09]: Keep a separate job catalog from drink options. — Confirmed at the Plan 09-06 blocking architecture checkpoint.
+- [Phase 09]: Serialize local Pages/D1 integration tests. — Concurrent Wrangler test servers contend for ports/resources; serialized execution passed.
 
 ### Blockers
 
