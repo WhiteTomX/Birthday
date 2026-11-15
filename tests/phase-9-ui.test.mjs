@@ -40,6 +40,8 @@ test('uses one accessible RSVP form and a separate suggestion form', () => {
   assert.match(rsvpForm, /type="radio"[^>]*name="attendance"[^>]*value="coming"/);
   assert.match(rsvpForm, /type="radio"[^>]*name="attendance"[^>]*value="not_coming"/);
   assert.match(rsvpForm, /type="number"[^>]*id="attendees"[^>]*min="1"[^>]*max="10"/);
+  assert.match(rsvpForm, /<fieldset[^>]*id="job-field"/);
+  assert.match(rsvpForm, /id="job-options-status"[^>]*role="status"[^>]*aria-live="polite"/);
   assert.match(rsvpForm, /<fieldset[^>]*id="drink-field"/);
   assert.match(rsvpForm, /<div[^>]*id="coming-fields"[^>]*hidden/);
   assert.match(rsvpForm, /role="alert"/);
@@ -85,6 +87,7 @@ class FakeElement {
     this.hidden = false;
     this.disabled = false;
     this.children = [];
+    this.dataset = {};
     this.attributes = new Map();
     this.listeners = new Map();
     this.classes = new Set();
@@ -122,6 +125,10 @@ class FakeElement {
   appendChild(child) {
     this.children.push(child);
     return child;
+  }
+
+  append(...children) {
+    this.children.push(...children);
   }
 
   replaceChildren(...children) {
@@ -171,6 +178,9 @@ class FakeElement {
     if (selector === '*') return descendants;
     if (selector === 'input[type="checkbox"]') {
       return descendants.filter((element) => element.tagName === 'INPUT' && element.type === 'checkbox');
+    }
+    if (selector === 'input[data-job-id]') {
+      return descendants.filter((element) => element.tagName === 'INPUT' && element.dataset.jobId);
     }
     return [];
   }
@@ -372,4 +382,93 @@ test('keeps the form usable and reports a useful status after request failures',
   assert.equal(elements['btn-drink-suggestion'].disabled, false);
   assert.equal(elements['btn-drink-suggestion'].textContent, 'Hinzufügen');
   assert.equal(elements['drink-suggestion-error'].hidden, false);
+});
+
+test('renders job descriptions safely and communicates full, partial, and uncapped availability', async () => {
+  const maliciousDescription = '<img src=x onerror=alert(1)>';
+  const { elements } = await createRsvpHarness({
+    jobs: [
+      {
+        id: 'full',
+        label: 'Full capped job',
+        description: 'A capped job that is already full.',
+        is_fixed: true,
+        max_capacity: 15,
+        assigned_count: 15,
+        remaining: 0,
+      },
+      {
+        id: 'partial',
+        label: 'Partially available job',
+        description: maliciousDescription,
+        is_fixed: true,
+        max_capacity: 15,
+        assigned_count: 13,
+        remaining: 2,
+      },
+      {
+        id: 'uncapped',
+        label: 'Uncapped job',
+        description: 'An uncapped job has no maximum number of signups.',
+        is_fixed: true,
+        max_capacity: null,
+        assigned_count: 0,
+        remaining: null,
+      },
+    ],
+  });
+
+  const jobItems = elements['job-options'].children;
+  const counts = elements['job-options'].querySelectorAll('input[data-job-id]');
+  assert.equal(jobItems.length, 3);
+  assert.equal(counts.length, 3);
+  assert.equal(counts[0].disabled, true);
+  assert.match(jobItems[0].textContent, /Keine Plätze mehr frei/);
+  assert.equal(counts[1].disabled, false);
+  assert.match(jobItems[1].textContent, /Noch 2 Plätze frei/);
+  assert.equal(jobItems[1].children[0].children[1].textContent, maliciousDescription);
+  assert.deepEqual(jobItems[1].children[0].children[1].children, []);
+  assert.equal(counts[2].disabled, false);
+  assert.match(jobItems[2].textContent, /Keine feste Begrenzung/);
+  assert.doesNotMatch(jobItems[2].textContent, /Keine Plätze mehr frei/);
+  assert.match(styles, /\.job-options/);
+  assert.match(styles, /\.job-option/);
+  assert.match(styles, /\.job-option-capacity/);
+});
+
+test('submits job attendee counts and confirms the server-accepted partial count', async () => {
+  const { calls, elements, radios, section } = await createRsvpHarness({
+    jobs: [{
+      id: 'aufbau',
+      label: 'Aufbau',
+      description: 'Hilf beim Aufbau des Veranstaltungsbereichs.',
+      is_fixed: true,
+      max_capacity: 15,
+      assigned_count: 14,
+      remaining: 1,
+    }],
+    postRequest: async () => jsonResponse({
+      ok: true,
+      jobs: [{ id: 'aufbau', label: 'Aufbau', requested_count: 2, accepted_count: 1 }],
+    }),
+  });
+  const [count] = elements['job-options'].querySelectorAll('input[data-job-id]');
+  elements.name.value = 'Mia';
+  elements.attendees.value = '2';
+  await elements.attendees.dispatch('input');
+  assert.equal(count.max, '2');
+  count.value = '2';
+  radios[0].checked = true;
+  await radios[0].dispatch('change');
+  await elements['rsvp-form'].dispatch('submit');
+
+  const rsvpRequest = calls.find((call) => call.url === '/api/fresh-rsvp');
+  assert.deepEqual(JSON.parse(rsvpRequest.init.body), {
+    name: 'Mia',
+    attendance: 'coming',
+    attendees: 2,
+    drinks: [],
+    jobs: [{ id: 'aufbau', count: 2 }],
+  });
+  assert.match(section.children[0].textContent, /Aufbau \(1\)/);
 });

@@ -5,6 +5,7 @@ import {
   onRequestGet as getDrinkSuggestions,
   onRequestPost as suggestDrink,
 } from '../functions/api/drink-suggestions.js';
+import { onRequestGet as getJobOptions } from '../functions/api/job-options.js';
 
 const drinkCatalog = [
   { id: 'bier', label: 'Bier', is_fixed: 1 },
@@ -128,6 +129,22 @@ function makeSuggestionContext(body, { method = 'POST', rawBody, DB = new FakeDa
     ...(method === 'GET' ? {} : { body: rawBody ?? JSON.stringify(body) }),
   });
   return { context: { request, env: { DB } }, DB };
+}
+
+function makeJobOptionsContext(options, { failRead = false } = {}) {
+  let query;
+  const DB = {
+    prepare(sql) {
+      query = sql;
+      return {
+        async all() {
+          if (failRead) throw new Error('private database details');
+          return { results: options };
+        },
+      };
+    },
+  };
+  return { context: { env: { DB } }, query: () => query };
 }
 
 test('stores a coming RSVP and every selected drink in one atomic batch', async () => {
@@ -338,6 +355,119 @@ test('returns a generic error when saving a drink suggestion fails', async () =>
   const { context } = makeSuggestionContext({ label: 'Apfelsaft' }, { DB });
 
   const response = await suggestDrink(context);
+  assert.equal(response.status, 500);
+  assert.deepEqual(await response.json(), { ok: false, error: 'Database error' });
+});
+
+test('returns fixed jobs before stable suggestions with draft descriptions and current capacity', async () => {
+  const options = [
+    {
+      id: 'aufbau',
+      label: 'Aufbau',
+      description: 'Hilf dabei, den Veranstaltungsbereich vorzubereiten und beim Aufbau mit anzupacken. Welche Handgriffe gerade gebraucht werden, stimmen wir gemeinsam ab.',
+      is_fixed: 1,
+      max_capacity: 15,
+      assigned_count: 13,
+      remaining: 2,
+    },
+    {
+      id: 'teilzeit-barkeeper',
+      label: 'Teilzeit Barkeeper nach Lust und Laune',
+      description: 'Unterstütze beim Getränke-Ausschank so lange und so oft, wie es für dich passt. Eine feste Schicht oder bestimmte Dauer ist nicht vorgegeben.',
+      is_fixed: 1,
+      max_capacity: null,
+      assigned_count: 0,
+      remaining: null,
+    },
+    {
+      id: 'musikbox',
+      label: 'Jemand der mit der Musikbox verbunden ist',
+      description: 'Hilf dabei, die Musikbox mit dem passenden Gerät zu verbinden, damit während der Feier Musik abgespielt werden kann.',
+      is_fixed: 1,
+      max_capacity: null,
+      assigned_count: 0,
+      remaining: null,
+    },
+    {
+      id: 'dinge',
+      label: 'Dinge',
+      description: 'Für verschiedene Dinge, bei denen eine helfende Hand gebraucht wird. Was genau anfällt, klären wir gemeinsam.',
+      is_fixed: 1,
+      max_capacity: null,
+      assigned_count: 0,
+      remaining: null,
+    },
+    {
+      id: 'abbau-brunch',
+      label: 'Abbau & Brunch am nächsten Tag',
+      description: 'Hilf beim Aufräumen nach dem Geburtstag und sei am nächsten Tag beim Buffet-Brunch dabei. Diese Auswahl umfasst Abbau und Brunch gemeinsam.',
+      is_fixed: 1,
+      max_capacity: null,
+      assigned_count: 0,
+      remaining: null,
+    },
+    {
+      id: 'getraenkeeinkauf-auto',
+      label: 'Getränkeeinkauf mit Auto (Freitag oder Samstag)',
+      description: 'Hilf am Freitag oder Samstag mit deinem Auto beim Getränkeeinkauf. Die genaue Zeit und die weiteren Absprachen stimmen wir gemeinsam ab.',
+      is_fixed: 1,
+      max_capacity: null,
+      assigned_count: 0,
+      remaining: null,
+    },
+    {
+      id: 'suggestion-a',
+      label: 'Alternative',
+      description: 'Eine vorgeschlagene Aufgabe mit einer ausreichend langen Beschreibung.',
+      is_fixed: 0,
+      max_capacity: null,
+      assigned_count: 0,
+      remaining: null,
+    },
+    {
+      id: 'suggestion-z',
+      label: 'Zebra',
+      description: 'Eine weitere vorgeschlagene Aufgabe mit einer ausreichend langen Beschreibung.',
+      is_fixed: 0,
+      max_capacity: null,
+      assigned_count: 0,
+      remaining: null,
+    },
+  ];
+  const { context, query } = makeJobOptionsContext(options);
+
+  const response = await getJobOptions(context);
+  assert.equal(response.status, 200);
+  const payload = await response.json();
+  assert.deepEqual(payload.options.map(({ label }) => label), [
+    'Aufbau',
+    'Teilzeit Barkeeper nach Lust und Laune',
+    'Jemand der mit der Musikbox verbunden ist',
+    'Dinge',
+    'Abbau & Brunch am nächsten Tag',
+    'Getränkeeinkauf mit Auto (Freitag oder Samstag)',
+    'Alternative',
+    'Zebra',
+  ]);
+  assert.ok(payload.options.slice(0, 6).every(({ description }) => Array.from(description).length >= 40));
+  assert.equal(payload.options[0].is_fixed, true);
+  assert.equal(payload.options[0].max_capacity, 15);
+  assert.equal(payload.options[0].assigned_count, 13);
+  assert.equal(payload.options[0].remaining, 2);
+  assert.ok(payload.options.slice(1, 6).every(({ max_capacity, remaining }) => (
+    max_capacity === null && remaining === null
+  )));
+  assert.ok(payload.options.slice(6).every(({ is_fixed, max_capacity, remaining }) => (
+    is_fixed === false && max_capacity === null && remaining === null
+  )));
+  assert.equal('rsvps' in payload, false);
+  assert.match(query(), /ORDER BY\s+job_options\.is_fixed DESC,\s+CASE WHEN job_options\.is_fixed = 1 THEN job_options\.display_order END,\s+job_options\.normalized_label,\s+job_options\.id/);
+});
+
+test('returns a generic error when loading job options fails', async () => {
+  const { context } = makeJobOptionsContext([], { failRead: true });
+
+  const response = await getJobOptions(context);
   assert.equal(response.status, 500);
   assert.deepEqual(await response.json(), { ok: false, error: 'Database error' });
 });
