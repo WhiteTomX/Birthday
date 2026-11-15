@@ -43,21 +43,22 @@
 
 ### ◆ v2.0 Actual Invitation (Phase 9 — Blocked at production gate)
 
-**Milestone Goal:** Turn the authenticated RSVP page into the formal German invitation, collect a fresh attendance confirmation and group drink preferences, and preserve the existing RSVP history on the current Cloudflare Pages/Pages Functions, D1, and plain HTML/CSS/JavaScript stack.
+**Milestone Goal:** Turn the authenticated RSVP page into the formal German invitation, collect fresh attendance and group drink preferences, support next-day buffet brunch and job sign-up, and preserve existing RSVP history on the current Cloudflare Pages/Pages Functions, D1, and plain HTML/CSS/JavaScript stack.
 
-- [ ] **Phase 9: Actual Invitation, Fresh RSVP & Drinks** - Deliver the authenticated invitation, fresh RSVP round, and reusable drink-option catalog as one coherent guest workflow.
+- [ ] **Phase 9: Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch** - Deliver the authenticated invitation, fresh RSVP round, reusable drink options, and described next-day brunch/job signup as one coherent guest workflow.
 
-### Phase 9: Actual Invitation, Fresh RSVP & Drinks
-**Goal**: Guests can read the complete invitation and submit a fresh attendance response with group drink preferences, while existing RSVP data remains intact on the current Cloudflare Pages/Pages Functions, D1, and plain HTML/CSS/JavaScript stack.
+### Phase 9: Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch
+**Goal**: Guests can use the authenticated invitation for a fresh attendance response, drink preferences, and next-day buffet brunch and job sign-up, while historical RSVP data remains intact on the current Cloudflare Pages/Pages Functions, D1, and plain HTML/CSS/JavaScript stack.
 **Depends on**: Phase 8
-**Requirements**: AUTH-09, INV-01, INV-02, INV-03, INV-04, RSVP-09, RSVP-10, DRINK-01, DRINK-02, DRINK-03, DRINK-04
+**Requirements**: AUTH-09, INV-01, INV-02, INV-03, INV-04, RSVP-09, RSVP-10, DRINK-01, DRINK-02, DRINK-03, DRINK-04, BRUNCH-01, JOB-01, JOB-02, JOB-03, JOB-04, JOB-05
 **Success Criteria** (what must be TRUE):
-  1. Authenticated guests see a natural German joint-birthday invitation for 5 December at 17:00, the configured venue name and map link, and park-entry directions from `PARK_ENTRY_DIRECTIONS`; no street address or year is invented.
-  2. Venue, arrival, buffet, and RSVP details remain behind the existing authentication; the public page reveals none of these private logistics, and the optional link from `BUFFET_LIST_URL` appears only when configured.
-  3. Guests can submit either a coming or not-coming confirmation to a separate fresh-round D1 table; declines have no drink selection, and all historical RSVP rows remain unchanged after the additive migration.
-  4. A coming group can select multiple fixed drinks (Bier, Wein, Sekt, Kola, Spezi, Fruchtlimonaden, Wasser, alkoholfreies Bier) or catalogued suggestions, while a separate suggestion form lets guests submit a drink that is safely displayed and selectable immediately and by later respondents.
-  5. The drink form offers no “Keine Präferenz” choice and clearly explains that drink preferences are requests, not guarantees.
-**Plans**: 4/5 plans complete; Plan 09-05 local verification passed, production gate halted (dependency-ordered)
+  1. Authenticated guests see the German joint-birthday invitation for 5 December at 17:00, configured venue/map details and park-entry directions; no street address or year is invented, private logistics remain behind authentication, and the optional buffet link appears only when configured.
+  2. Guests can submit coming or not-coming responses to a separate fresh-round D1 table; declines have no drink selection, and historical RSVP records remain unchanged.
+  3. Coming groups can select multiple fixed or catalogued drink options, submit safely reusable drink suggestions, and see the explanation that preferences are requests, not guarantees.
+  4. Coming guests can select one combined “Abbau & Brunch am nächsten Tag” option; there is no separate Brunch option, form, or special headcount, and guests declining the birthday cannot select it.
+  5. Guests can select Aufbau, Teilzeit Barkeeper nach Lust und Laune, Jemand der mit der Musikbox verbunden ist, Dinge, “Abbau & Brunch am nächsten Tag”, and “Getränkeeinkauf mit Auto (Freitag oder Samstag)”; each has a longer explanatory German description. Suggestions are shared only when selected in a submitted RSVP.
+  6. Job capacity limits are optional per option; Aufbau is capped at 15, capped options stop accepting sign-ups when full, and signing up for Abbau includes buffet brunch.
+**Plans**: 4/9 plans complete; Plan 09-05 local verification passed, production gate halted pending expanded local checks and owner authorization (dependency-ordered)
 
 Plans:
 **Wave 1**
@@ -73,7 +74,19 @@ Plans:
 - [x] 09-04: Complete the German invitation, accessible fresh RSVP form, multi-select drink control, separate suggestion form, and immediate selector updates.
 
 **Wave 5** *(blocked on Wave 4 completion)*
-- [ ] 09-05: Local Pages/D1 and migration verification passed. Production configuration and migration are halted pending merged-schema and explicit owner-authorization gates.
+- [ ] 09-06-PLAN.md: Add the additive job catalog and one end-to-end fixed-job allocation path, preserving historical RSVP data.
+
+**Wave 6** *(blocked on Wave 5 completion)*
+- [ ] 09-07-PLAN.md: Enforce coming-only allocations, atomic capacity reservation, and selected-only drink/job suggestion publication.
+
+**Wave 7** *(blocked on Wave 6 completion)*
+- [ ] 09-08-PLAN.md: Complete accessible job descriptions, optional attendee counts, staged suggestions, and partial-acceptance confirmation.
+
+**Wave 8** *(blocked on Wave 7 completion)*
+- [ ] 09-09-PLAN.md: Verify all Phase 09 requirements and edge probes against isolated local Pages/D1, including concurrency and history preservation.
+
+**Wave 9** *(blocked on Wave 8 completion)*
+- [ ] 09-05: Re-run all local checks, then preserve the merged-schema, confirmed-target, and explicit owner-authorization production gates.
 **UI hint**: yes
 
 ### 📋 v3.0 Event Day Experience (Planned)
@@ -88,4 +101,4 @@ Plans:
 |-------|----------------|--------|-----------|
 | 7. Dual-Password Auth & RSVP Backend | 3/3 | Complete   | 2026-06-21 |
 | 8. German Content Update | 1/1 | Complete   | 2026-06-21 |
-| 9. Actual Invitation, Fresh RSVP & Drinks | 4/5 | Blocked | - |
+| 9. Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch | 4/9 | Blocked | - |

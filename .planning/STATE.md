@@ -1,21 +1,21 @@
 ---
 gsd_state_version: "1.0"
 milestone: v2.0
-milestone_name: Actual Invitation (Phase 9 — Planned)
+milestone_name: Actual Invitation (Phase 9 — Blocked at production gate)
 current_phase: 09
-current_phase_name: Actual Invitation, Fresh RSVP & Drinks
-status: blocked
-stopped_at: 09-05 halted at the production authorization checkpoint; local verification passed and production remains untouched
-last_updated: "2026-11-14T20:40:11.150Z"
-last_activity: 2026-11-14
-last_activity_desc: Phase 09 execution started
-state_head: 2a257889bc90206af9a6811f3ec4f74450c3f49e
+current_phase_name: Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch
+status: in_progress
+stopped_at: Phase 09 plans ready; Plan 09-06 begins with a blocking schema decision
+last_updated: "2026-11-15T10:40:43.277Z"
+last_activity: 2026-11-15
+last_activity_desc: Expanded Phase 09 plans prepared for verification
+state_head: a1f639491a72273d31b878f29c65c805403d287a
 progress:
   total_phases: 1
   completed_phases: 0
-  total_plans: 5
+  total_plans: 9
   completed_plans: 4
-  percent: 80
+  percent: 0
 ---
 
 # Project State
@@ -25,22 +25,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-11-14)
 
 **Core value:** Enable frictionless guest RSVPs via a password-protected, beautiful German site.
-**Current focus:** Phase 09 — Actual Invitation, Fresh RSVP & Drinks
+**Current focus:** Phase 09 — Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch
 
 ## Current Position
 
-Phase: 09 (Actual Invitation, Fresh RSVP & Drinks) — BLOCKED
-Plan: 5 of 5
-Status: Waiting for explicit production authorization and merged-schema preconditions
-Last activity: 2026-11-14 — Local Plan 09-05 verification passed; production actions halted
+Phase: 09 (Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch) — READY TO EXECUTE
+Plan: 4 of 9 complete; all nine plans passed review
+Status: Ready to execute; production changes remain behind explicit authorization and merged-schema preconditions
+Last activity: 2026-11-15 — Phase 09 plans verified and ready to execute
 
-Progress: [████████░░] 80%
+Progress: [░░░░░░░░░░] 0%
 
 ## Progress
 
 ```
 v2.0 Actual Invitation
-Phase 9 [████████  ] 80%  Blocked at production authorization gate
+Phase 9 [░░░░░░░░░░] Ready to execute; production gate remains
 ```
 
 v1.0 complete. v1.1 complete. v1.2 complete. v1.3 complete (shipped 2026-06-21).
@@ -66,9 +66,9 @@ v1.0 complete. v1.1 complete. v1.2 complete. v1.3 complete (shipped 2026-06-21).
 | Venue and event time confirmed | 5 December at 17:00; use the park map pin and entry directions, not a street address |
 | Fresh RSVP round uses a separate D1 table | Preserve the earlier RSVP history without rewriting it |
 | Group drink preferences are multi-select | Track one set of drink preferences per RSVP group, not per attendee |
-| Drink suggestions use a separate form and D1 catalog | Valid unique suggestions become selectable immediately and for later respondents |
+| Drink suggestions use a separate form and D1 catalog | Stage locally; publish only when selected in a successfully submitted RSVP |
 | Logistics values use environment configuration | Keep venue and map values as-is; load park directions and optional buffet URL from environment values |
-| v2.0 roadmap is one delivery phase with five dependency-ordered plans | Phase 9 covers all 11 v2.0 requirements while retaining continuous phase numbering |
+| v2.0 roadmap is one delivery phase with nine dependency-ordered plans | Phase 9 covers all 17 v2.0 requirements while retaining continuous phase numbering |
 
 ## Pending Todos
 
@@ -87,10 +87,10 @@ v1.0 complete. v1.1 complete. v1.2 complete. v1.3 complete (shipped 2026-06-21).
 
 ## Session Continuity
 
-Last session: 2026-11-14T20:40:10.956Z
-Stopped at: 09-05 halted at the production authorization checkpoint; local verification passed and production remains untouched
-Resume file: None
-Last activity: 2026-11-14 - Confirmed invitation, fresh RSVP, and drink preference scope
+Last session: 2026-11-15T10:40:43.277Z
+Stopped at: Phase 09 plans verified; execution awaits owner direction
+Resume file: .planning/phases/09-actual-invitation-fresh-rsvp-drinks/09-06-PLAN.md
+Last activity: 2026-11-15 - Phase 09 plans verified and ready to execute
 
 ## Performance Metrics
 
@@ -110,4 +110,10 @@ Last activity: 2026-11-14 - Confirmed invitation, fresh RSVP, and drink preferen
 
 ### Blockers
 
-- Plan 09-05 is halted at the production gate: explicit owner authorization and the merged-schema preconditions are not confirmed; no remote action was run.
+- Plan 09-06 begins with an explicit choice of job-catalog architecture. Plan 09-05 remains last and its explicit owner-authorization, merged-schema, confirmed-target, and migration-list gates remain unchanged. No remote action was run.
+
+## Accumulated Context
+
+### Roadmap Evolution
+
+- Phase 09 edited: edited fields: title, goal, requirements, success_criteria
