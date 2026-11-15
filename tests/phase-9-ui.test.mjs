@@ -472,3 +472,96 @@ test('submits job attendee counts and confirms the server-accepted partial count
   });
   assert.match(section.children[0].textContent, /Aufbau \(1\)/);
 });
+
+test('leaves optional job counts blank and validates each assignment independently', async () => {
+  const { calls, elements, radios } = await createRsvpHarness({
+    jobs: [
+      {
+        id: 'aufbau',
+        label: 'Aufbau',
+        description: 'Hilf beim Aufbau des Veranstaltungsbereichs.',
+        is_fixed: true,
+        max_capacity: 15,
+        assigned_count: 0,
+        remaining: 15,
+      },
+      {
+        id: 'musikbox',
+        label: 'Jemand der mit der Musikbox verbunden ist',
+        description: 'Hilf beim Verbinden der Musikbox mit einem Gerät.',
+        is_fixed: true,
+        max_capacity: null,
+        assigned_count: 0,
+        remaining: null,
+      },
+    ],
+  });
+  const counts = elements['job-options'].querySelectorAll('input[data-job-id]');
+
+  assert.equal(counts[0].value, '');
+  assert.equal(counts[0].min, '1');
+  assert.equal(counts[1].value, '');
+  assert.equal(counts[1].min, '1');
+
+  elements.name.value = 'Mia';
+  elements.attendees.value = '1';
+  counts[0].value = '1';
+  counts[1].value = '1';
+  radios[0].checked = true;
+  await radios[0].dispatch('change');
+  await elements['rsvp-form'].dispatch('submit');
+
+  const rsvpRequest = calls.find((call) => call.url === '/api/fresh-rsvp');
+  assert.deepEqual(JSON.parse(rsvpRequest.init.body), {
+    name: 'Mia',
+    attendance: 'coming',
+    attendees: 1,
+    drinks: [],
+    jobs: [
+      { id: 'aufbau', count: 1 },
+      { id: 'musikbox', count: 1 },
+    ],
+  });
+});
+
+test('disables job controls for declines and restores only valid coming controls', async () => {
+  const { elements, radios } = await createRsvpHarness({
+    jobs: [
+      {
+        id: 'full',
+        label: 'Full capped job',
+        description: 'This capped job is full.',
+        is_fixed: true,
+        max_capacity: 15,
+        assigned_count: 15,
+        remaining: 0,
+      },
+      {
+        id: 'open',
+        label: 'Open job',
+        description: 'This job is open.',
+        is_fixed: true,
+        max_capacity: null,
+        assigned_count: 0,
+        remaining: null,
+      },
+    ],
+  });
+  const [fullCount, openCount] = elements['job-options'].querySelectorAll('input[data-job-id]');
+  openCount.value = '2';
+  elements.attendees.value = '1';
+  await elements.attendees.dispatch('input');
+
+  radios[1].checked = true;
+  await radios[1].dispatch('change');
+  assert.equal(elements['coming-fields'].hidden, true);
+  assert.equal(fullCount.disabled, true);
+  assert.equal(openCount.disabled, true);
+
+  radios[0].checked = true;
+  await radios[0].dispatch('change');
+  assert.equal(elements['coming-fields'].hidden, false);
+  assert.equal(fullCount.disabled, true);
+  assert.equal(openCount.disabled, false);
+  assert.equal(openCount.value, '');
+});
