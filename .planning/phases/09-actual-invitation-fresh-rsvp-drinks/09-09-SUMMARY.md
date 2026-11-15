@@ -17,7 +17,7 @@ affects: [phase-09-verification, production-deployment]
 actuals:
   tokens: 9000
   tasks: 2
-  commits: 4
+  commits: 2
 
 # Tech tracking
 tech-stack:
@@ -88,7 +88,7 @@ status: complete
 1. **Task 1: Verify the full authenticated workflow and concurrent job capacity locally** - `7a359c3` (test)
 2. **Task 2: Extend clean and populated migration regression checks for job data** - `0527ad6` (fix)
 
-**Plan metadata:** This close-out commit (docs).
+**Plan metadata:** `246c032` (docs: record local verification closeout)
 
 ## Files Created/Modified
 
