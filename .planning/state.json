@@ -15,14 +15,14 @@
     },
     {
       "number": "9",
-      "name": "Actual Invitation, Fresh RSVP & Drinks",
+      "name": "Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch",
       "status": "pending"
     }
   ],
   "next": {
-    "command": "/gsd-progress",
-    "label": "Show progress",
-    "reason": "Unsure of state — showing progress"
+    "command": "/gsd-progress --next",
+    "label": "Advance to the next step",
+    "reason": "Phase 1 of 1 · 0% · executing"
   },
-  "updated_at": "2026-11-14T20:53:02.464Z"
+  "updated_at": "2026-11-15T11:43:01.550Z"
 }

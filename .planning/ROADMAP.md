@@ -58,7 +58,7 @@
   4. Coming guests can select one combined “Abbau & Brunch am nächsten Tag” option; there is no separate Brunch option, form, or special headcount, and guests declining the birthday cannot select it.
   5. Guests can select Aufbau, Teilzeit Barkeeper nach Lust und Laune, Jemand der mit der Musikbox verbunden ist, Dinge, “Abbau & Brunch am nächsten Tag”, and “Getränkeeinkauf mit Auto (Freitag oder Samstag)”; each has a longer explanatory German description. Suggestions are shared only when selected in a submitted RSVP.
   6. Job capacity limits are optional per option; Aufbau is capped at 15, capped options stop accepting sign-ups when full, and signing up for Abbau includes buffet brunch.
-**Plans**: 4/9 plans complete; Plan 09-05 local verification passed, production gate halted pending expanded local checks and owner authorization (dependency-ordered)
+**Plans**: 5/9 plans complete; Plan 09-05 local verification passed, production gate halted pending expanded local checks and owner authorization (dependency-ordered)
 
 Plans:
 **Wave 1**
@@ -74,7 +74,7 @@ Plans:
 - [x] 09-04: Complete the German invitation, accessible fresh RSVP form, multi-select drink control, separate suggestion form, and immediate selector updates.
 
 **Wave 5** *(blocked on Wave 4 completion)*
-- [ ] 09-06-PLAN.md: Add the additive job catalog and one end-to-end fixed-job allocation path, preserving historical RSVP data.
+- [x] 09-06-PLAN.md: Add the additive job catalog and one end-to-end fixed-job allocation path, preserving historical RSVP data.
 
 **Wave 6** *(blocked on Wave 5 completion)*
 - [ ] 09-07-PLAN.md: Enforce coming-only allocations, atomic capacity reservation, and selected-only drink/job suggestion publication.
@@ -101,4 +101,4 @@ Plans:
 |-------|----------------|--------|-----------|
 | 7. Dual-Password Auth & RSVP Backend | 3/3 | Complete   | 2026-06-21 |
 | 8. German Content Update | 1/1 | Complete   | 2026-06-21 |
-| 9. Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch | 4/9 | Blocked | - |
+| 9. Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch | 5/9 | Blocked | - |
