@@ -75,7 +75,12 @@
   }
 
   function createJobOption(option) {
-    if (!option || typeof option.id !== 'string' || typeof option.label !== 'string') {
+    if (
+      !option
+      || typeof option.id !== 'string'
+      || typeof option.label !== 'string'
+      || typeof option.description !== 'string'
+    ) {
       throw new Error('Invalid job option');
     }
 
@@ -87,12 +92,42 @@
     const label = document.createElement('strong');
     label.textContent = option.label;
     const description = document.createElement('p');
+    const optionIndex = createJobOption.nextId++;
+    description.id = `job-description-${optionIndex}`;
     description.textContent = option.description;
     details.append(label, description);
 
+    const capacityStatus = document.createElement('p');
+    capacityStatus.id = `job-capacity-${optionIndex}`;
+    capacityStatus.className = 'job-option-capacity';
+    capacityStatus.setAttribute('role', 'status');
+    let isFull = false;
+    if (option.max_capacity === null) {
+      if (option.remaining !== null) throw new Error('Invalid uncapped job availability');
+      capacityStatus.textContent = 'Keine feste Begrenzung.';
+    } else {
+      if (
+        !Number.isInteger(option.max_capacity)
+        || option.max_capacity < 0
+        || !Number.isInteger(option.remaining)
+        || option.remaining < 0
+        || option.remaining > option.max_capacity
+      ) {
+        throw new Error('Invalid capped job availability');
+      }
+      isFull = option.remaining === 0;
+      if (isFull) {
+        capacityStatus.textContent = 'Keine Plätze mehr frei.';
+        item.classList.add('is-full');
+      } else {
+        const placeWord = option.remaining === 1 ? 'Platz' : 'Plätze';
+        capacityStatus.textContent = `Noch ${option.remaining} ${placeWord} frei; bei mehr Anmeldungen werden nur verfügbare Plätze bestätigt.`;
+      }
+    }
+
     const countLabel = document.createElement('label');
     countLabel.className = 'job-count-label';
-    const countId = `job-count-${createJobOption.nextId++}`;
+    const countId = `job-count-${optionIndex}`;
     countLabel.htmlFor = countId;
     countLabel.textContent = 'Anzahl';
 
@@ -102,10 +137,12 @@
     count.min = '0';
     count.max = String(Number(attendeesInput.value) || 10);
     count.value = '0';
+    count.disabled = isFull;
     count.dataset.jobId = option.id;
     count.setAttribute('aria-label', `Anzahl für ${option.label}`);
+    count.setAttribute('aria-describedby', `${description.id} ${capacityStatus.id}`);
     countLabel.appendChild(count);
-    item.append(details, countLabel);
+    item.append(details, capacityStatus, countLabel);
     return item;
   }
   createJobOption.nextId = 0;
@@ -117,7 +154,7 @@
 
   function selectedJobs() {
     return Array.from(jobOptionsWrap.querySelectorAll('input[data-job-id]'))
-      .filter((input) => input.value.trim() !== '' && Number(input.value) !== 0)
+      .filter((input) => !input.disabled && input.value.trim() !== '' && Number(input.value) !== 0)
       .map((input) => ({ id: input.dataset.jobId, count: Number(input.value) }));
   }
 

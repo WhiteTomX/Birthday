@@ -331,6 +331,66 @@ input[type="number"].error {
   flex-shrink: 0;
 }
 
+.job-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.job-option {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 14px;
+  background-color: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.job-option.is-full {
+  background-color: var(--surface);
+}
+
+.job-option-details {
+  min-width: 0;
+}
+
+.job-option-details strong {
+  display: block;
+  color: var(--text);
+}
+
+.job-option-details p,
+.job-option-capacity {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.job-option-capacity {
+  grid-column: 1;
+}
+
+.job-count-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.job-count-label input {
+  width: 100%;
+}
+
+.job-count-label input:disabled {
+  color: var(--muted);
+  background-color: var(--surface);
+  cursor: not-allowed;
+}
+
 .suggestion-row {
   display: flex;
   gap: 12px;
@@ -417,6 +477,16 @@ input[type="number"].error {
 @media (max-width: 599px) {
   .save-the-date h1 {
     font-size: 40px;
+  }
+
+  .job-option {
+    grid-template-columns: minmax(0, 1fr) 84px;
+    gap: 8px 12px;
+    padding: 12px;
+  }
+
+  .job-count-label {
+    font-size: 13px;
   }
 
 }
