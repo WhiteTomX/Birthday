@@ -386,7 +386,7 @@ test('keeps the form usable and reports a useful status after request failures',
 
 test('renders job descriptions safely and communicates full, partial, and uncapped availability', async () => {
   const maliciousDescription = '<img src=x onerror=alert(1)>';
-  const { elements } = await createRsvpHarness({
+  const { elements, radios } = await createRsvpHarness({
     jobs: [
       {
         id: 'full',
@@ -417,6 +417,8 @@ test('renders job descriptions safely and communicates full, partial, and uncapp
       },
     ],
   });
+  radios[0].checked = true;
+  await radios[0].dispatch('change');
 
   const jobItems = elements['job-options'].children;
   const counts = elements['job-options'].querySelectorAll('input[data-job-id]');
@@ -434,6 +436,73 @@ test('renders job descriptions safely and communicates full, partial, and uncapp
   assert.match(styles, /\.job-options/);
   assert.match(styles, /\.job-option/);
   assert.match(styles, /\.job-option-capacity/);
+});
+
+test('renders all six fixed jobs in catalog order with one combined cleanup and brunch choice', async () => {
+  const jobs = [
+    {
+      id: 'aufbau',
+      label: 'Aufbau',
+      description: 'Hilf beim Aufbau des Veranstaltungsbereichs und stimme benötigte Handgriffe vor Ort ab.',
+      is_fixed: true,
+      max_capacity: 15,
+      assigned_count: 0,
+      remaining: 15,
+    },
+    {
+      id: 'teilzeit-barkeeper',
+      label: 'Teilzeit Barkeeper nach Lust und Laune',
+      description: 'Unterstütze beim Getränke-Ausschank so lange und so oft, wie es für dich passt.',
+      is_fixed: true,
+      max_capacity: null,
+      assigned_count: 0,
+      remaining: null,
+    },
+    {
+      id: 'musikbox',
+      label: 'Jemand der mit der Musikbox verbunden ist',
+      description: 'Hilf dabei, die Musikbox mit einem passenden Gerät zu verbinden.',
+      is_fixed: true,
+      max_capacity: null,
+      assigned_count: 0,
+      remaining: null,
+    },
+    {
+      id: 'dinge',
+      label: 'Dinge',
+      description: 'Hilf bei verschiedenen Dingen; was genau anfällt, klären wir gemeinsam.',
+      is_fixed: true,
+      max_capacity: null,
+      assigned_count: 0,
+      remaining: null,
+    },
+    {
+      id: 'abbau-brunch',
+      label: 'Abbau & Brunch am nächsten Tag',
+      description: 'Hilf beim Aufräumen nach dem Geburtstag und sei beim Buffet-Brunch dabei.',
+      is_fixed: true,
+      max_capacity: null,
+      assigned_count: 0,
+      remaining: null,
+    },
+    {
+      id: 'getraenkeeinkauf-auto',
+      label: 'Getränkeeinkauf mit Auto (Freitag oder Samstag)',
+      description: 'Hilf am Freitag oder Samstag mit deinem Auto beim Getränkeeinkauf.',
+      is_fixed: true,
+      max_capacity: null,
+      assigned_count: 0,
+      remaining: null,
+    },
+  ];
+  const { elements } = await createRsvpHarness({ jobs });
+  const rendered = elements['job-options'].children;
+  const labels = rendered.map((item) => item.children[0].children[0].textContent);
+  const descriptions = rendered.map((item) => item.children[0].children[1].textContent);
+
+  assert.deepEqual(labels, jobs.map((job) => job.label));
+  assert.deepEqual(descriptions, jobs.map((job) => job.description));
+  assert.equal(labels.filter((label) => label.includes('Brunch')).length, 1);
 });
 
 test('submits job attendee counts and confirms the server-accepted partial count', async () => {
@@ -524,6 +593,32 @@ test('leaves optional job counts blank and validates each assignment independent
   });
 });
 
+test('submits no job allocation when all optional counts remain blank', async () => {
+  const { calls, elements, radios } = await createRsvpHarness({
+    jobs: [{
+      id: 'aufbau',
+      label: 'Aufbau',
+      description: 'Hilf beim Aufbau.',
+      is_fixed: true,
+      max_capacity: 15,
+      assigned_count: 0,
+      remaining: 15,
+    }],
+  });
+  elements.name.value = 'Nina';
+  radios[0].checked = true;
+  await radios[0].dispatch('change');
+  await elements['rsvp-form'].dispatch('submit');
+
+  const rsvpRequest = calls.find((call) => call.url === '/api/fresh-rsvp');
+  assert.deepEqual(JSON.parse(rsvpRequest.init.body), {
+    name: 'Nina',
+    attendance: 'coming',
+    attendees: 1,
+    drinks: [],
+  });
+});
+
 test('disables job controls for declines and restores only valid coming controls', async () => {
   const { elements, radios } = await createRsvpHarness({
     jobs: [
@@ -548,20 +643,52 @@ test('disables job controls for declines and restores only valid coming controls
     ],
   });
   const [fullCount, openCount] = elements['job-options'].querySelectorAll('input[data-job-id]');
+  elements.attendees.value = '2';
+  await elements.attendees.dispatch('input');
+  radios[0].checked = true;
+  await radios[0].dispatch('change');
   openCount.value = '2';
   elements.attendees.value = '1';
   await elements.attendees.dispatch('input');
 
+  radios[0].checked = false;
   radios[1].checked = true;
   await radios[1].dispatch('change');
   assert.equal(elements['coming-fields'].hidden, true);
   assert.equal(fullCount.disabled, true);
   assert.equal(openCount.disabled, true);
 
+  radios[1].checked = false;
   radios[0].checked = true;
   await radios[0].dispatch('change');
   assert.equal(elements['coming-fields'].hidden, false);
   assert.equal(fullCount.disabled, true);
   assert.equal(openCount.disabled, false);
   assert.equal(openCount.value, '');
+});
+
+test('rejects zero and fractional job counts before submitting', async () => {
+  const { calls, elements, radios } = await createRsvpHarness({
+    jobs: [{
+      id: 'open',
+      label: 'Open job',
+      description: 'This job is open.',
+      is_fixed: true,
+      max_capacity: null,
+      assigned_count: 0,
+      remaining: null,
+    }],
+  });
+  const [count] = elements['job-options'].querySelectorAll('input[data-job-id]');
+  elements.name.value = 'Lea';
+  radios[0].checked = true;
+  await radios[0].dispatch('change');
+
+  for (const value of ['0', '1.5']) {
+    count.value = value;
+    await elements['rsvp-form'].dispatch('submit');
+    assert.equal(calls.some((call) => call.url === '/api/fresh-rsvp'), false);
+    assert.match(elements['job-options-status'].textContent, /zwischen 1 und der Gruppengröße/);
+    assert.equal(count.ownerDocument.activeElement, count);
+  }
 });

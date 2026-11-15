@@ -134,10 +134,12 @@
     const count = document.createElement('input');
     count.type = 'number';
     count.id = countId;
-    count.min = '0';
+    count.min = '1';
+    count.step = '1';
     count.max = String(Number(attendeesInput.value) || 10);
-    count.value = '0';
+    count.value = '';
     count.disabled = isFull;
+    count.dataset.capacityFull = String(isFull);
     count.dataset.jobId = option.id;
     count.setAttribute('aria-label', `Anzahl für ${option.label}`);
     count.setAttribute('aria-describedby', `${description.id} ${capacityStatus.id}`);
@@ -154,7 +156,7 @@
 
   function selectedJobs() {
     return Array.from(jobOptionsWrap.querySelectorAll('input[data-job-id]'))
-      .filter((input) => !input.disabled && input.value.trim() !== '' && Number(input.value) !== 0)
+      .filter((input) => !input.disabled && input.value.trim() !== '')
       .map((input) => ({ id: input.dataset.jobId, count: Number(input.value) }));
   }
 
@@ -162,6 +164,16 @@
     const maximum = String(Number(attendeesInput.value) || 10);
     jobOptionsWrap.querySelectorAll('input[data-job-id]').forEach((input) => {
       input.max = maximum;
+      if (input.value.trim() && Number(input.value) > Number(maximum)) {
+        input.value = '';
+      }
+    });
+  }
+
+  function updateJobControlState() {
+    const canAssignJobs = selectedAttendance() === 'coming';
+    jobOptionsWrap.querySelectorAll('input[data-job-id]').forEach((input) => {
+      input.disabled = !canAssignJobs || input.dataset.capacityFull === 'true';
     });
   }
 
@@ -202,6 +214,7 @@
   attendanceInputs.forEach((input) => {
     input.addEventListener('change', () => {
       comingFields.hidden = selectedAttendance() !== 'coming';
+      updateJobControlState();
       setFeedback(attendanceError, null, false);
     });
   });
@@ -253,18 +266,22 @@
       attendeesInput.removeAttribute('aria-invalid');
       setFeedback(attendeesError, null, false);
       drinks = selectedDrinks();
-      const jobs = selectedJobs();
-      if (jobs.some(({ count }) => !Number.isInteger(count) || count < 1 || count > attendees)) {
-        const invalidJobInput = Array.from(jobOptionsWrap.querySelectorAll('input[data-job-id]'))
-          .find((input) => input.value.trim() !== '' && Number(input.value) !== 0 && (
-            Number(input.value) < 1
-            || Number(input.value) > attendees
-            || !Number.isInteger(Number(input.value))
-          ));
-        if (invalidJobInput) invalidJobInput.focus();
+      const invalidJobInput = Array.from(jobOptionsWrap.querySelectorAll('input[data-job-id]'))
+        .find((input) => {
+          const value = input.value.trim();
+          const count = Number(value);
+          return value !== '' && (
+            count < 1
+            || count > attendees
+            || !Number.isInteger(count)
+          );
+        });
+      if (invalidJobInput) {
+        invalidJobInput.focus();
         setFeedback(jobOptionsStatus, 'Die Anzahl für jeden Helferjob muss zwischen 1 und der Gruppengröße liegen.', true);
         return;
       }
+      const jobs = selectedJobs();
       setFeedback(jobOptionsStatus, '', false);
       payload = { name, attendance, attendees, drinks };
       if (jobs.length > 0) payload.jobs = jobs;
@@ -354,6 +371,7 @@
       const data = await response.json();
       if (!response.ok || !data?.ok) throw new Error('Catalog request failed');
       renderJobOptions(data.options);
+      updateJobControlState();
       setFeedback(jobOptionsStatus, '', false);
     } catch {
       jobOptionsWrap.replaceChildren();
