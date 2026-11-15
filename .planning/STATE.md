@@ -5,10 +5,10 @@ milestone_name: Actual Invitation (Phase 9 — Blocked at production gate)
 current_phase: 09
 current_phase_name: Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch
 status: in_progress
-stopped_at: Phase 09 plans ready; Plan 09-06 begins with a blocking schema decision
+stopped_at: Plan 09-06 decision checkpoint passed; implementation in progress
 last_updated: "2026-11-15T10:40:43.277Z"
 last_activity: 2026-11-15
-last_activity_desc: Expanded Phase 09 plans prepared for verification
+last_activity_desc: Separate job catalog architecture confirmed; Plan 09-06 execution started
 state_head: a1f639491a72273d31b878f29c65c805403d287a
 progress:
   total_phases: 1
@@ -30,9 +30,9 @@ See: .planning/PROJECT.md (updated 2026-11-14)
 ## Current Position
 
 Phase: 09 (Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch) — READY TO EXECUTE
-Plan: 4 of 9 complete; all nine plans passed review
-Status: Ready to execute; production changes remain behind explicit authorization and merged-schema preconditions
-Last activity: 2026-11-15 — Phase 09 plans verified and ready to execute
+Plan: 4 of 9 complete; Plan 09-06 in progress
+Status: Executing; production changes remain behind explicit authorization and merged-schema preconditions
+Last activity: 2026-11-15 — Separate job catalog confirmed; Plan 09-06 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -40,7 +40,7 @@ Progress: [░░░░░░░░░░] 0%
 
 ```
 v2.0 Actual Invitation
-Phase 9 [░░░░░░░░░░] Ready to execute; production gate remains
+Phase 9 [░░░░░░░░░░] Execution in progress; production gate remains
 ```
 
 v1.0 complete. v1.1 complete. v1.2 complete. v1.3 complete (shipped 2026-06-21).
@@ -107,10 +107,11 @@ Last activity: 2026-11-15 - Phase 09 plans verified and ready to execute
 - [Phase 09]: Treat only drink label uniqueness conflicts as existing suggestions. — Concurrent duplicates should resolve to the canonical option without hiding unrelated D1 failures.
 - [Phase 09]: Accept only absolute HTTPS map and buffet URLs with no embedded credentials. — Reject unsafe destinations and avoid active links from untrusted environment values.
 - [Phase 09]: Keep suggestions in a separate form and associate the RSVP submit button with the RSVP form. — This preserves one submit action for RSVP responses without nesting forms.
+- [Phase 09]: Keep a separate job catalog from drink options. — Confirmed at the Plan 09-06 blocking architecture checkpoint.
 
 ### Blockers
 
-- Plan 09-06 begins with an explicit choice of job-catalog architecture. Plan 09-05 remains last and its explicit owner-authorization, merged-schema, confirmed-target, and migration-list gates remain unchanged. No remote action was run.
+- Plan 09-05 remains last; its explicit owner-authorization, merged-schema, confirmed-target, and migration-list gates remain unchanged. No remote action was run.
 
 ## Accumulated Context
 
