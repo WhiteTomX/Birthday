@@ -31,10 +31,14 @@ test('uses one accessible RSVP form and a separate suggestion form', () => {
   const suggestionForm = invitation.match(
     /<form\b[^>]*id="drink-suggestion-form"[\s\S]*?<\/form>/,
   )?.[0];
+  const jobSuggestionForm = invitation.match(
+    /<form\b[^>]*id="job-suggestion-form"[\s\S]*?<\/form>/,
+  )?.[0];
 
   assert.ok(rsvpForm);
   assert.ok(suggestionForm);
-  assert.equal((invitation.match(/<form\b/g) ?? []).length, 2);
+  assert.ok(jobSuggestionForm);
+  assert.equal((invitation.match(/<form\b/g) ?? []).length, 3);
   assert.match(rsvpForm, /<label[^>]*for="name"/);
   assert.match(rsvpForm, /<fieldset[^>]*class="attendance-choice"/);
   assert.match(rsvpForm, /type="radio"[^>]*name="attendance"[^>]*value="coming"/);
@@ -49,13 +53,22 @@ test('uses one accessible RSVP form and a separate suggestion form', () => {
   assert.match(suggestionForm, /<label[^>]*for="drink-suggestion">Anderes Getränk<\/label>/);
   assert.match(suggestionForm, /<button[^>]*id="btn-drink-suggestion"[^>]*>Hinzufügen<\/button>/);
   assert.match(suggestionForm, /role="status"[^>]*aria-live="polite"/);
+  assert.match(jobSuggestionForm, /<label[^>]*for="job-suggestion">Anderen Helferjob vorschlagen<\/label>/);
+  assert.match(jobSuggestionForm, /<button[^>]*id="btn-job-suggestion"[^>]*>Job hinzufügen<\/button>/);
+  assert.match(jobSuggestionForm, /role="status"[^>]*aria-live="polite"/);
+  assert.match(invitation, /id="coming-suggestion-fields"[^>]*hidden/);
   assert.doesNotMatch(invitation, /id="contact"|Keine Präferenz/);
 
   const selectorEnd = invitation.indexOf('</fieldset>', invitation.indexOf('id="drink-field"'));
   const rsvpEnd = invitation.indexOf('</form>', invitation.indexOf('id="rsvp-form"'));
-  const suggestionStart = invitation.indexOf('<form id="drink-suggestion-form"');
+  const suggestionStart = invitation.indexOf('id="drink-suggestion-form"');
+  const jobSuggestionStart = invitation.indexOf('id="job-suggestion-form"');
+  const jobSuggestionEnd = invitation.indexOf('</form>', jobSuggestionStart);
   assert.ok(suggestionStart > selectorEnd);
-  assert.equal(invitation.slice(rsvpEnd + '</form>'.length, suggestionStart).trim(), '');
+  assert.ok(suggestionStart > rsvpEnd);
+  assert.ok(jobSuggestionStart > suggestionStart);
+  assert.ok(jobSuggestionEnd < invitation.indexOf('id="btn-submit-coming"'));
+  assert.equal(invitation.slice(rsvpEnd + '</form>'.length, invitation.indexOf('id="coming-suggestion-fields"')).trim(), '');
 });
 
 test('associates the RSVP submit control with the RSVP form outside the suggestion form', () => {
@@ -182,6 +195,9 @@ class FakeElement {
     if (selector === 'input[data-job-id]') {
       return descendants.filter((element) => element.tagName === 'INPUT' && element.dataset.jobId);
     }
+    if (selector === 'input[data-job-suggestion]') {
+      return descendants.filter((element) => element.tagName === 'INPUT' && element.dataset.jobSuggestion);
+    }
     return [];
   }
 }
@@ -216,11 +232,17 @@ async function createRsvpHarness({
     'drink-options-status',
     'job-options',
     'job-options-status',
+    'coming-suggestion-fields',
     'drink-suggestion-form',
     'drink-suggestion',
     'drink-suggestion-error',
     'drink-suggestion-status',
     'btn-drink-suggestion',
+    'job-suggestion-form',
+    'job-suggestion',
+    'job-suggestion-error',
+    'job-suggestion-status',
+    'btn-job-suggestion',
     'btn-submit-coming',
     'submit-error',
   ];
@@ -235,11 +257,16 @@ async function createRsvpHarness({
   elements.attendees.value = '1';
   elements['drink-suggestion'].tagName = 'INPUT';
   elements['drink-suggestion'].type = 'text';
+  elements['job-suggestion'].tagName = 'INPUT';
+  elements['job-suggestion'].type = 'text';
   elements['btn-drink-suggestion'].tagName = 'BUTTON';
+  elements['btn-job-suggestion'].tagName = 'BUTTON';
   elements['btn-submit-coming'].tagName = 'BUTTON';
   elements['btn-submit-coming'].textContent = 'Anmeldung senden';
   elements['btn-drink-suggestion'].textContent = 'Hinzufügen';
+  elements['btn-job-suggestion'].textContent = 'Job hinzufügen';
   elements['coming-fields'].hidden = true;
+  elements['coming-suggestion-fields'].hidden = true;
   elements['attendee-value'].value = '1';
   elements['attendee-count'].textContent = '1';
 
@@ -294,7 +321,7 @@ test('renders drink options as text and submits multiple selected drinks with an
       { id: 'untrusted', label: maliciousLabel, is_fixed: false },
     ],
     postRequest: async (url) => url === '/api/drink-suggestions'
-      ? jsonResponse({ ok: true, option: { id: 'new-1', label: 'Apfelsaft' } })
+      ? jsonResponse({ ok: true, label: 'Apfelsaft' })
       : jsonResponse({ ok: true, attendance: 'coming' }),
   });
 
@@ -322,13 +349,174 @@ test('renders drink options as text and submits multiple selected drinks with an
     name: '<b>Ada</b>',
     attendance: 'coming',
     attendees: 2,
-    drinks: ['Bier', 'Apfelsaft'],
+    drinks: ['Bier'],
+    drink_suggestions: ['Apfelsaft'],
   });
   assert.match(section.children[0].textContent, /2 Personen/);
   assert.match(section.children[0].textContent, /Bier, Apfelsaft/);
   assert.match(section.children[0].textContent, /keine Garantie/);
   assert.equal(section.children[0].textContent.includes('<b>Ada</b>'), true);
   assert.equal(invitationCopy.textContent, '5. Dezember um 17:00 Uhr');
+});
+
+test('stages job suggestions locally and submits only an allocated suggestion', async () => {
+  const { calls, elements, radios, section } = await createRsvpHarness({
+    postRequest: async (url) => url === '/api/job-options'
+      ? jsonResponse({ ok: true, label: 'Neue Aufgabe' })
+      : jsonResponse({
+        ok: true,
+        jobs: [{ id: 'suggested', label: 'Neue Aufgabe', requested_count: 2, accepted_count: 1 }],
+      }),
+  });
+  elements.name.value = 'Mia';
+  elements.attendees.value = '2';
+  radios[0].checked = true;
+  await radios[0].dispatch('change');
+  elements['job-suggestion'].value = '  Neue Aufgabe  ';
+  await elements['job-suggestion-form'].dispatch('submit');
+
+  const stagingRequest = calls.find((call) => (
+    call.url === '/api/job-options' && call.init.method === 'POST'
+  ));
+  assert.ok(stagingRequest);
+  assert.deepEqual(JSON.parse(stagingRequest.init.body), { label: '  Neue Aufgabe  ' });
+  elements['job-suggestion'].value = 'Neue Aufgabe';
+  await elements['job-suggestion-form'].dispatch('submit');
+  assert.equal(elements['job-options'].children.length, 1);
+  const [count] = elements['job-options'].querySelectorAll('input[data-job-suggestion]');
+  assert.equal(count.dataset.jobSuggestion, 'Neue Aufgabe');
+
+  count.value = '2';
+  await elements['rsvp-form'].dispatch('submit');
+  const rsvpRequest = calls.find((call) => call.url === '/api/fresh-rsvp');
+  assert.deepEqual(JSON.parse(rsvpRequest.init.body), {
+    name: 'Mia',
+    attendance: 'coming',
+    attendees: 2,
+    drinks: [],
+    job_suggestions: [{ label: 'Neue Aufgabe', count: 2 }],
+  });
+  assert.match(section.children[0].textContent, /Neue Aufgabe: 1 von 2 bestätigt/);
+  assert.match(section.children[0].textContent, /1 nicht bestätigt/);
+});
+
+test('does not publish an unallocated staged job suggestion', async () => {
+  const { calls, elements, radios } = await createRsvpHarness({
+    postRequest: async (url) => url === '/api/job-options'
+      ? jsonResponse({ ok: true, label: 'Unzugewiesene Aufgabe' })
+      : jsonResponse({ ok: true }),
+  });
+  elements.name.value = 'Nina';
+  radios[0].checked = true;
+  await radios[0].dispatch('change');
+  elements['job-suggestion'].value = 'Unzugewiesene Aufgabe';
+  await elements['job-suggestion-form'].dispatch('submit');
+  assert.ok(calls.some((call) => (
+    call.url === '/api/job-options' && call.init.method === 'POST'
+  )));
+  await elements['rsvp-form'].dispatch('submit');
+
+  const rsvpRequest = calls.find((call) => call.url === '/api/fresh-rsvp');
+  assert.deepEqual(JSON.parse(rsvpRequest.init.body), {
+    name: 'Nina',
+    attendance: 'coming',
+    attendees: 1,
+    drinks: [],
+  });
+});
+
+test('reuses an existing catalog job when a guest suggests its label', async () => {
+  const { calls, elements, radios } = await createRsvpHarness({
+    jobs: [{
+      id: 'aufbau',
+      label: 'Aufbau',
+      description: 'Hilf beim Aufbau.',
+      is_fixed: true,
+      max_capacity: 15,
+      assigned_count: 0,
+      remaining: 15,
+    }],
+    postRequest: async (url) => url === '/api/job-options'
+      ? jsonResponse({ ok: true, label: 'Aufbau' })
+      : jsonResponse({ ok: true }),
+  });
+  elements.name.value = 'Lea';
+  radios[0].checked = true;
+  await radios[0].dispatch('change');
+  elements['job-suggestion'].value = 'Aufbau';
+  await elements['job-suggestion-form'].dispatch('submit');
+  assert.ok(calls.some((call) => (
+    call.url === '/api/job-options' && call.init.method === 'POST'
+  )));
+
+  assert.equal(elements['job-options'].children.length, 1);
+  const [count] = elements['job-options'].querySelectorAll('input[data-job-id]');
+  assert.equal(count.dataset.jobId, 'aufbau');
+  assert.equal(elements['job-options'].querySelectorAll('input[data-job-suggestion]').length, 0);
+
+  count.value = '1';
+  await elements['rsvp-form'].dispatch('submit');
+  const rsvpRequest = calls.find((call) => call.url === '/api/fresh-rsvp');
+  assert.deepEqual(JSON.parse(rsvpRequest.init.body), {
+    name: 'Lea',
+    attendance: 'coming',
+    attendees: 1,
+    drinks: [],
+    jobs: [{ id: 'aufbau', count: 1 }],
+  });
+});
+
+test('validates job suggestion length by Unicode code points', async () => {
+  const { calls, elements, radios } = await createRsvpHarness({
+    postRequest: async (url, init, body) => url === '/api/job-options'
+      ? jsonResponse({ ok: true, label: body.label.normalize('NFC').trim() })
+      : jsonResponse({ ok: true }),
+  });
+  elements.name.value = 'Ada';
+  radios[0].checked = true;
+  await radios[0].dispatch('change');
+
+  for (const value of ['', '😀'.repeat(81)]) {
+    elements['job-suggestion'].value = value;
+    await elements['job-suggestion-form'].dispatch('submit');
+    assert.equal(calls.some((call) => call.url === '/api/job-options' && call.init.method === 'POST'), false);
+    assert.equal(elements['job-suggestion-error'].hidden, false);
+  }
+
+  elements['job-suggestion'].value = '😀'.repeat(80);
+  await elements['job-suggestion-form'].dispatch('submit');
+  assert.equal(calls.filter((call) => call.url === '/api/job-options' && call.init.method === 'POST').length, 1);
+  assert.equal(elements['job-suggestion-error'].hidden, true);
+});
+
+test('hides and disables suggestion controls for declines', async () => {
+  const { calls, elements, radios } = await createRsvpHarness({
+    jobs: [{
+      id: 'aufbau',
+      label: 'Aufbau',
+      description: 'Hilf beim Aufbau.',
+      is_fixed: true,
+      max_capacity: 15,
+      assigned_count: 0,
+      remaining: 15,
+    }],
+    postRequest: async () => jsonResponse({ ok: true, label: 'Neue Aufgabe' }),
+  });
+  radios[0].checked = true;
+  await radios[0].dispatch('change');
+  assert.equal(elements['coming-suggestion-fields'].hidden, false);
+  assert.equal(elements['job-suggestion'].disabled, false);
+
+  radios[0].checked = false;
+  radios[1].checked = true;
+  await radios[1].dispatch('change');
+  assert.equal(elements['coming-suggestion-fields'].hidden, true);
+  assert.equal(elements['job-suggestion'].disabled, true);
+  assert.equal(elements['btn-job-suggestion'].disabled, true);
+
+  elements['job-suggestion'].value = 'Neue Aufgabe';
+  await elements['job-suggestion-form'].dispatch('submit');
+  assert.equal(calls.some((call) => call.url === '/api/job-options' && call.init.method === 'POST'), false);
 });
 
 test('submits a decline without headcount or drink fields and shows a personal confirmation', async () => {
@@ -539,7 +727,52 @@ test('submits job attendee counts and confirms the server-accepted partial count
     drinks: [],
     jobs: [{ id: 'aufbau', count: 2 }],
   });
-  assert.match(section.children[0].textContent, /Aufbau \(1\)/);
+  assert.match(section.children[0].textContent, /Aufbau: 1 von 2 bestätigt/);
+  assert.match(section.children[0].textContent, /1 nicht bestätigt/);
+});
+
+test('reports accepted and unassigned counts for full and uncapped job allocations', async () => {
+  const { elements, radios, section } = await createRsvpHarness({
+    jobs: [
+      {
+        id: 'aufbau',
+        label: 'Aufbau',
+        description: 'Hilf beim Aufbau.',
+        is_fixed: true,
+        max_capacity: 15,
+        assigned_count: 14,
+        remaining: 1,
+      },
+      {
+        id: 'barkeeper',
+        label: 'Barkeeper',
+        description: 'Hilf beim Getränke-Ausschank.',
+        is_fixed: true,
+        max_capacity: null,
+        assigned_count: 0,
+        remaining: null,
+      },
+    ],
+    postRequest: async () => jsonResponse({
+      ok: true,
+      jobs: [
+        { id: 'aufbau', label: 'Aufbau', requested_count: 2, accepted_count: 0 },
+        { id: 'barkeeper', label: 'Barkeeper', requested_count: 2, accepted_count: 2 },
+      ],
+    }),
+  });
+  const counts = elements['job-options'].querySelectorAll('input[data-job-id]');
+  elements.name.value = 'Mia';
+  elements.attendees.value = '2';
+  counts[0].value = '2';
+  counts[1].value = '2';
+  radios[0].checked = true;
+  await radios[0].dispatch('change');
+  await elements['rsvp-form'].dispatch('submit');
+
+  assert.match(section.children[0].textContent, /Aufbau: 0 von 2 bestätigt/);
+  assert.match(section.children[0].textContent, /2 nicht bestätigt/);
+  assert.match(section.children[0].textContent, /Barkeeper: 2 von 2 bestätigt/);
 });
 
 test('leaves optional job counts blank and validates each assignment independently', async () => {
