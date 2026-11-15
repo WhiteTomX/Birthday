@@ -1,0 +1,106 @@
+CREATE TABLE job_options (
+  id TEXT PRIMARY KEY,
+  label TEXT NOT NULL,
+  normalized_label TEXT NOT NULL UNIQUE,
+  description TEXT NOT NULL CHECK(length(trim(description)) > 0),
+  is_fixed INTEGER NOT NULL DEFAULT 0 CHECK(is_fixed IN (0, 1)),
+  display_order INTEGER,
+  max_capacity INTEGER CHECK(max_capacity IS NULL OR max_capacity >= 0),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE fresh_rsvp_job_allocations (
+  fresh_rsvp_id TEXT NOT NULL,
+  job_option_id TEXT NOT NULL,
+  assigned_count INTEGER NOT NULL CHECK(assigned_count > 0),
+  PRIMARY KEY (fresh_rsvp_id, job_option_id),
+  FOREIGN KEY (fresh_rsvp_id) REFERENCES fresh_rsvps(id) ON DELETE CASCADE,
+  FOREIGN KEY (job_option_id) REFERENCES job_options(id) ON DELETE CASCADE
+);
+
+CREATE INDEX fresh_rsvp_job_allocations_option_idx
+  ON fresh_rsvp_job_allocations(job_option_id);
+
+CREATE TRIGGER fresh_rsvp_jobs_require_coming
+BEFORE INSERT ON fresh_rsvp_job_allocations
+WHEN (SELECT attendance FROM fresh_rsvps WHERE id = NEW.fresh_rsvp_id) IS NOT 'coming'
+BEGIN
+  SELECT RAISE(ABORT, 'job allocations require a coming RSVP');
+END;
+
+CREATE TRIGGER fresh_rsvp_jobs_update_require_coming
+BEFORE UPDATE ON fresh_rsvp_job_allocations
+WHEN (SELECT attendance FROM fresh_rsvps WHERE id = NEW.fresh_rsvp_id) IS NOT 'coming'
+BEGIN
+  SELECT RAISE(ABORT, 'job allocations require a coming RSVP');
+END;
+
+CREATE TRIGGER fresh_rsvp_cannot_decline_with_jobs
+BEFORE UPDATE OF attendance ON fresh_rsvps
+WHEN NEW.attendance = 'not_coming'
+  AND EXISTS (
+    SELECT 1
+    FROM fresh_rsvp_job_allocations
+    WHERE fresh_rsvp_id = NEW.id
+  )
+BEGIN
+  SELECT RAISE(ABORT, 'declining RSVP cannot have job allocations');
+END;
+
+INSERT INTO job_options (
+  id, label, normalized_label, description, is_fixed, display_order, max_capacity
+) VALUES
+  (
+    'aufbau',
+    'Aufbau',
+    'aufbau',
+    'Hilf dabei, den Veranstaltungsbereich vorzubereiten und beim Aufbau mit anzupacken. Welche Handgriffe gerade gebraucht werden, stimmen wir gemeinsam ab.',
+    1,
+    1,
+    15
+  ),
+  (
+    'teilzeit-barkeeper',
+    'Teilzeit Barkeeper nach Lust und Laune',
+    'teilzeit barkeeper nach lust und laune',
+    'Unterstütze beim Getränke-Ausschank so lange und so oft, wie es für dich passt. Eine feste Schicht oder bestimmte Dauer ist nicht vorgegeben.',
+    1,
+    2,
+    NULL
+  ),
+  (
+    'musikbox',
+    'Jemand der mit der Musikbox verbunden ist',
+    'jemand der mit der musikbox verbunden ist',
+    'Hilf dabei, die Musikbox mit dem passenden Gerät zu verbinden, damit während der Feier Musik abgespielt werden kann.',
+    1,
+    3,
+    NULL
+  ),
+  (
+    'dinge',
+    'Dinge',
+    'dinge',
+    'Für verschiedene Dinge, bei denen eine helfende Hand gebraucht wird. Was genau anfällt, klären wir gemeinsam.',
+    1,
+    4,
+    NULL
+  ),
+  (
+    'abbau-brunch',
+    'Abbau & Brunch am nächsten Tag',
+    'abbau & brunch am nächsten tag',
+    'Hilf beim Aufräumen nach dem Geburtstag und sei am nächsten Tag beim Buffet-Brunch dabei. Diese Auswahl umfasst Abbau und Brunch gemeinsam.',
+    1,
+    5,
+    NULL
+  ),
+  (
+    'getraenkeeinkauf-auto',
+    'Getränkeeinkauf mit Auto (Freitag oder Samstag)',
+    'getränkeeinkauf mit auto (freitag oder samstag)',
+    'Hilf am Freitag oder Samstag mit deinem Auto beim Getränkeeinkauf. Die genaue Zeit und die weiteren Absprachen stimmen wir gemeinsam ab.',
+    1,
+    6,
+    NULL
+  );

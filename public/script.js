@@ -17,6 +17,8 @@
   const attendeesError = document.getElementById('attendees-error');
   const drinkOptionsWrap = document.getElementById('drink-options');
   const drinkOptionsStatus = document.getElementById('drink-options-status');
+  const jobOptionsWrap = document.getElementById('job-options');
+  const jobOptionsStatus = document.getElementById('job-options-status');
   const suggestionForm = document.getElementById('drink-suggestion-form');
   const drinkSuggestion = document.getElementById('drink-suggestion');
   const drinkSuggestionError = document.getElementById('drink-suggestion-error');
@@ -72,6 +74,60 @@
     ).filter((checkbox) => checkbox.checked).map((checkbox) => checkbox.value);
   }
 
+  function createJobOption(option) {
+    if (!option || typeof option.id !== 'string' || typeof option.label !== 'string') {
+      throw new Error('Invalid job option');
+    }
+
+    const item = document.createElement('div');
+    item.className = 'job-option';
+
+    const details = document.createElement('div');
+    details.className = 'job-option-details';
+    const label = document.createElement('strong');
+    label.textContent = option.label;
+    const description = document.createElement('p');
+    description.textContent = option.description;
+    details.append(label, description);
+
+    const countLabel = document.createElement('label');
+    countLabel.className = 'job-count-label';
+    const countId = `job-count-${createJobOption.nextId++}`;
+    countLabel.htmlFor = countId;
+    countLabel.textContent = 'Anzahl';
+
+    const count = document.createElement('input');
+    count.type = 'number';
+    count.id = countId;
+    count.min = '0';
+    count.max = String(Number(attendeesInput.value) || 10);
+    count.value = '0';
+    count.dataset.jobId = option.id;
+    count.setAttribute('aria-label', `Anzahl für ${option.label}`);
+    countLabel.appendChild(count);
+    item.append(details, countLabel);
+    return item;
+  }
+  createJobOption.nextId = 0;
+
+  function renderJobOptions(options) {
+    if (!Array.isArray(options)) throw new Error('Invalid job catalog');
+    jobOptionsWrap.replaceChildren(...options.map(createJobOption));
+  }
+
+  function selectedJobs() {
+    return Array.from(jobOptionsWrap.querySelectorAll('input[data-job-id]'))
+      .filter((input) => input.value.trim() !== '' && Number(input.value) !== 0)
+      .map((input) => ({ id: input.dataset.jobId, count: Number(input.value) }));
+  }
+
+  function updateJobCountMaximum() {
+    const maximum = String(Number(attendeesInput.value) || 10);
+    jobOptionsWrap.querySelectorAll('input[data-job-id]').forEach((input) => {
+      input.max = maximum;
+    });
+  }
+
   async function postJson(endpoint, payload) {
     const response = await fetch(endpoint, {
       method: 'POST',
@@ -83,7 +139,7 @@
     return data;
   }
 
-  function showConfirmation(payload, drinks) {
+  function showConfirmation(payload, drinks, result) {
     const confirmation = document.createElement('p');
     confirmation.className = 'success-msg';
     confirmation.setAttribute('role', 'status');
@@ -95,7 +151,11 @@
     } else {
       const group = payload.attendees === 1 ? 'Person' : 'Personen';
       const drinkSummary = drinks.length ? drinks.join(', ') : 'keine angegeben';
-      confirmation.textContent = `Danke, ${payload.name}! Wir freuen uns auf euch mit ${payload.attendees} ${group}. Getränkewünsche: ${drinkSummary}. Die Getränke sind Wünsche, keine Garantie.`;
+      const jobs = result.jobs?.filter((job) => job.accepted_count > 0) ?? [];
+      const jobSummary = jobs.length
+        ? ` Helferjobs: ${jobs.map((job) => `${job.label} (${job.accepted_count})`).join(', ')}.`
+        : '';
+      confirmation.textContent = `Danke, ${payload.name}! Wir freuen uns auf euch mit ${payload.attendees} ${group}. Getränkewünsche: ${drinkSummary}. Die Getränke sind Wünsche, keine Garantie.${jobSummary}`;
     }
 
     section.replaceChildren(confirmation);
@@ -119,6 +179,7 @@
   attendeesInput.addEventListener('input', () => {
     attendeesInput.removeAttribute('aria-invalid');
     setFeedback(attendeesError, null, false);
+    updateJobCountMaximum();
   });
 
   form.addEventListener('submit', async (event) => {
@@ -155,14 +216,28 @@
       attendeesInput.removeAttribute('aria-invalid');
       setFeedback(attendeesError, null, false);
       drinks = selectedDrinks();
+      const jobs = selectedJobs();
+      if (jobs.some(({ count }) => !Number.isInteger(count) || count < 1 || count > attendees)) {
+        const invalidJobInput = Array.from(jobOptionsWrap.querySelectorAll('input[data-job-id]'))
+          .find((input) => input.value.trim() !== '' && Number(input.value) !== 0 && (
+            Number(input.value) < 1
+            || Number(input.value) > attendees
+            || !Number.isInteger(Number(input.value))
+          ));
+        if (invalidJobInput) invalidJobInput.focus();
+        setFeedback(jobOptionsStatus, 'Die Anzahl für jeden Helferjob muss zwischen 1 und der Gruppengröße liegen.', true);
+        return;
+      }
+      setFeedback(jobOptionsStatus, '', false);
       payload = { name, attendance, attendees, drinks };
+      if (jobs.length > 0) payload.jobs = jobs;
     }
 
     submitButton.disabled = true;
     submitButton.textContent = 'Wird gesendet…';
     try {
-      await postJson('/api/fresh-rsvp', payload);
-      showConfirmation(payload, drinks);
+      const result = await postJson('/api/fresh-rsvp', payload);
+      showConfirmation(payload, drinks, result);
     } catch {
       submitButton.disabled = false;
       submitButton.textContent = 'Anmeldung senden';
@@ -235,5 +310,20 @@
     }
   }
 
+  async function loadJobOptions() {
+    setFeedback(jobOptionsStatus, 'Helferjobs werden geladen …', true);
+    try {
+      const response = await fetch('/api/job-options');
+      const data = await response.json();
+      if (!response.ok || !data?.ok) throw new Error('Catalog request failed');
+      renderJobOptions(data.options);
+      setFeedback(jobOptionsStatus, '', false);
+    } catch {
+      jobOptionsWrap.replaceChildren();
+      setFeedback(jobOptionsStatus, 'Helferjobs konnten nicht geladen werden. Bitte lade die Seite erneut.', true);
+    }
+  }
+
   loadDrinkOptions();
+  loadJobOptions();
 })();
