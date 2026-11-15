@@ -1,6 +1,6 @@
 CREATE TABLE job_options (
   id TEXT PRIMARY KEY,
-  label TEXT NOT NULL,
+  label TEXT NOT NULL CHECK(length(trim(label)) > 0),
   normalized_label TEXT NOT NULL UNIQUE,
   description TEXT NOT NULL CHECK(length(trim(description)) > 0),
   is_fixed INTEGER NOT NULL DEFAULT 0 CHECK(is_fixed IN (0, 1)),
