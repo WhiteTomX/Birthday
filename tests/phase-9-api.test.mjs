@@ -5,7 +5,9 @@ import {
   onRequestGet as getDrinkSuggestions,
   onRequestPost as suggestDrink,
 } from '../functions/api/drink-suggestions.js';
-import { onRequestGet as getJobOptions } from '../functions/api/job-options.js';
+import * as jobOptionsApi from '../functions/api/job-options.js';
+
+const getJobOptions = jobOptionsApi.onRequestGet;
 
 const drinkCatalog = [
   { id: 'bier', label: 'Bier', is_fixed: 1 },
@@ -30,11 +32,21 @@ class FakeStatement {
     }
 
     this.database.reads.push(this.sql);
+    if (this.sql.includes('LEFT JOIN fresh_rsvp_job_allocations')) {
+      return { results: this.database.selectionResults };
+    }
     if (this.sql.includes('FROM fresh_rsvp_job_allocations')) {
       return { results: this.database.allocationResults };
     }
     if (this.sql.includes('FROM job_options')) {
       const requestedIds = this.values.map(String);
+      if (this.sql.includes('normalized_label IN')) {
+        return {
+          results: this.database.jobOptions.filter((option) => (
+            requestedIds.includes(option.normalized_label)
+          )),
+        };
+      }
       return {
         results: this.database.jobOptions.filter((option) => requestedIds.includes(option.id)),
       };
@@ -97,20 +109,28 @@ class FakeDatabase {
     failRead = false,
     failWrite = false,
     conflictOnInsert = false,
+    failBatch = false,
     allocationResults = [],
+    selectionResults = [],
   } = {}) {
     this.failRead = failRead;
     this.failWrite = failWrite;
     this.conflictOnInsert = conflictOnInsert;
+    this.failBatch = failBatch;
     this.reads = [];
     this.runs = [];
     this.batches = [];
     this.allocationResults = allocationResults;
+    this.selectionResults = selectionResults;
     this.options = drinkCatalog.map((option) => ({ ...option }));
     this.jobOptions = [
-      { id: 'aufbau', label: 'Aufbau' },
-      { id: 'teilzeit-barkeeper', label: 'Teilzeit Barkeeper nach Lust und Laune' },
-      { id: 'dinge', label: 'Dinge' },
+      { id: 'aufbau', label: 'Aufbau', normalized_label: 'aufbau' },
+      {
+        id: 'teilzeit-barkeeper',
+        label: 'Teilzeit Barkeeper nach Lust und Laune',
+        normalized_label: 'teilzeit barkeeper nach lust und laune',
+      },
+      { id: 'dinge', label: 'Dinge', normalized_label: 'dinge' },
     ];
   }
 
@@ -119,7 +139,7 @@ class FakeDatabase {
   }
 
   async batch(statements) {
-    if (this.failWrite) {
+    if (this.failWrite || this.failBatch) {
       throw new Error('private database details');
     }
 
@@ -146,6 +166,15 @@ function makeSuggestionContext(body, { method = 'POST', rawBody, DB = new FakeDa
     method,
     headers: { 'Content-Type': 'application/json' },
     ...(method === 'GET' ? {} : { body: rawBody ?? JSON.stringify(body) }),
+  });
+  return { context: { request, env: { DB } }, DB };
+}
+
+function makeJobSuggestionContext(body, { rawBody, DB = new FakeDatabase() } = {}) {
+  const request = new Request('https://birthday.test/api/job-options', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: rawBody ?? JSON.stringify(body),
   });
   return { context: { request, env: { DB } }, DB };
 }
@@ -316,42 +345,59 @@ test('returns fixed and suggested drink options in deterministic order', async (
   assert.equal('rsvps' in payload, false);
 });
 
-test('normalizes and stores a new drink suggestion', async () => {
-  const { context, DB } = makeSuggestionContext({ label: '  Apfelsaft    natur  ' });
+test('stages a normalized drink suggestion without writing to the catalog', async () => {
+  const { context, DB } = makeSuggestionContext({ label: '  Cafe\u0301    natur  ' });
 
   const response = await suggestDrink(context);
   assert.equal(response.status, 200);
   const payload = await response.json();
-  assert.equal(payload.created, true);
-  assert.equal(payload.option.label, 'Apfelsaft natur');
-  assert.equal(payload.option.is_fixed, false);
-  assert.equal(DB.runs.length, 1);
+  assert.deepEqual(payload, { ok: true, label: 'Café natur' });
+  assert.equal(DB.reads.length + DB.runs.length + DB.batches.length, 0);
 });
 
-test('returns the canonical option for a case-insensitive duplicate suggestion', async () => {
+test('stages drink suggestions without resolving them against the shared catalog', async () => {
   const { context, DB } = makeSuggestionContext({ label: '  bIeR  ' });
 
   const response = await suggestDrink(context);
   assert.equal(response.status, 200);
   const payload = await response.json();
-  assert.equal(payload.created, false);
-  assert.deepEqual(payload.option, { id: 'bier', label: 'Bier', is_fixed: true });
-  assert.equal(DB.runs.length, 0);
+  assert.deepEqual(payload, { ok: true, label: 'bIeR' });
+  assert.equal(DB.reads.length + DB.runs.length + DB.batches.length, 0);
 });
 
-test('returns the canonical option after a concurrent suggestion conflict', async () => {
-  const DB = new FakeDatabase({ conflictOnInsert: true });
-  const { context } = makeSuggestionContext({ label: '  Apfelsaft   natur ' }, { DB });
+test('stages normalized job suggestions without writing to the catalog', async () => {
+  assert.equal(typeof jobOptionsApi.onRequestPost, 'function');
+  if (typeof jobOptionsApi.onRequestPost !== 'function') return;
 
-  const response = await suggestDrink(context);
+  const { context, DB } = makeJobSuggestionContext({ label: '  Cafe\u0301   mit Auto  ' });
+  const response = await jobOptionsApi.onRequestPost(context);
   assert.equal(response.status, 200);
-  const payload = await response.json();
-  assert.equal(payload.created, false);
-  assert.deepEqual(payload.option, {
-    id: 'concurrent-option',
-    label: 'Apfelsaft natur',
-    is_fixed: false,
-  });
+  assert.deepEqual(await response.json(), { ok: true, label: 'Café mit Auto' });
+  assert.equal(DB.reads.length + DB.runs.length + DB.batches.length, 0);
+});
+
+test('staged drink and job labels enforce Unicode code-point length limits', async (t) => {
+  for (const [label, post, makeContextForPost] of [
+    ['drink', suggestDrink, makeSuggestionContext],
+    ['job', jobOptionsApi.onRequestPost, makeJobSuggestionContext],
+  ]) {
+    await t.test(`${label} accepts 80 supplementary characters`, async () => {
+      if (typeof post !== 'function') assert.fail(`${label} suggestion handler is missing`);
+      const { context, DB } = makeContextForPost({ label: '😀'.repeat(80) });
+      const response = await post(context);
+      assert.equal(response.status, 200);
+      assert.equal(Array.from((await response.json()).label).length, 80);
+      assert.equal(DB.reads.length + DB.runs.length + DB.batches.length, 0);
+    });
+
+    await t.test(`${label} rejects 81 supplementary characters`, async () => {
+      if (typeof post !== 'function') assert.fail(`${label} suggestion handler is missing`);
+      const { context, DB } = makeContextForPost({ label: '😀'.repeat(81) });
+      const response = await post(context);
+      assert.equal(response.status, 400);
+      assert.equal(DB.reads.length + DB.runs.length + DB.batches.length, 0);
+    });
+  }
 });
 
 test('rejects malformed, empty, and overlong drink suggestions', async (t) => {
