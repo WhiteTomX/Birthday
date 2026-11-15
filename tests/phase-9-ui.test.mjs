@@ -183,7 +183,11 @@ function jsonResponse(payload, ok = true) {
   };
 }
 
-async function createRsvpHarness({ options = [], postRequest = async () => jsonResponse({ ok: true }) } = {}) {
+async function createRsvpHarness({
+  options = [],
+  jobs = [],
+  postRequest = async () => jsonResponse({ ok: true }),
+} = {}) {
   const ids = [
     'rsvp-form',
     'name',
@@ -200,6 +204,8 @@ async function createRsvpHarness({ options = [], postRequest = async () => jsonR
     'attendees-error',
     'drink-options',
     'drink-options-status',
+    'job-options',
+    'job-options-status',
     'drink-suggestion-form',
     'drink-suggestion',
     'drink-suggestion-error',
@@ -259,7 +265,9 @@ async function createRsvpHarness({ options = [], postRequest = async () => jsonR
   const calls = [];
   const fetch = async (url, init = {}) => {
     calls.push({ url, init });
-    if (!init.method) return jsonResponse({ ok: true, options });
+    if (!init.method) {
+      return jsonResponse({ ok: true, options: url === '/api/job-options' ? jobs : options });
+    }
     return postRequest(url, init, JSON.parse(init.body));
   };
   vm.runInNewContext(script, { document, fetch });
