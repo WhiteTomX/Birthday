@@ -3,18 +3,7 @@ function jsonResponse(status, payload) {
 }
 
 function normalizeLabel(value) {
-  return value.trim().replace(/\s+/g, ' ');
-}
-
-function isLabelConflict(error) {
-  return typeof error?.message === 'string'
-    && /UNIQUE constraint failed:\s*drink_options\.label/i.test(error.message);
-}
-
-async function findOption(env, label) {
-  return env.DB.prepare(
-    'SELECT id, label, is_fixed FROM drink_options WHERE lower(label) = lower(?)'
-  ).bind(label).first();
+  return value.normalize('NFC').trim().replace(/\s+/g, ' ');
 }
 
 function optionPayload(option) {
@@ -43,7 +32,7 @@ export async function onRequestGet(context) {
 }
 
 export async function onRequestPost(context) {
-  const { request, env } = context;
+  const { request } = context;
 
   let body;
   try {
@@ -61,40 +50,9 @@ export async function onRequestPost(context) {
   }
 
   const label = typeof body.label === 'string' ? normalizeLabel(body.label) : '';
-  if (!label || label.length > 80) {
+  if (!label || Array.from(label).length > 80) {
     return jsonResponse(400, { ok: false, error: 'Drink required' });
   }
 
-  try {
-    const existing = await findOption(env, label);
-    if (existing) {
-      return jsonResponse(200, { ok: true, created: false, option: optionPayload(existing) });
-    }
-
-    const id = crypto.randomUUID();
-    const now = new Date().toISOString();
-    try {
-      await env.DB.prepare(
-        'INSERT INTO drink_options (id, label, is_fixed, created_at) VALUES (?, ?, 0, ?)'
-      ).bind(id, label, now).run();
-    } catch (error) {
-      if (!isLabelConflict(error)) {
-        throw error;
-      }
-
-      const canonical = await findOption(env, label);
-      if (!canonical) {
-        throw error;
-      }
-      return jsonResponse(200, { ok: true, created: false, option: optionPayload(canonical) });
-    }
-
-    return jsonResponse(200, {
-      ok: true,
-      created: true,
-      option: { id, label, is_fixed: false },
-    });
-  } catch {
-    return jsonResponse(500, { ok: false, error: 'Database error' });
-  }
+  return jsonResponse(200, { ok: true, label });
 }

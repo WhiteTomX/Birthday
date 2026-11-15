@@ -38,3 +38,33 @@ export async function onRequestGet({ env }) {
     return jsonResponse(500, { ok: false, error: 'Database error' });
   }
 }
+
+function normalizeLabel(value) {
+  return value.normalize('NFC').trim().replace(/\s+/g, ' ');
+}
+
+export async function onRequestPost({ request }) {
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse(400, { ok: false, error: 'Invalid JSON' });
+  }
+
+  if (
+    !body
+    || typeof body !== 'object'
+    || Array.isArray(body)
+    || Object.keys(body).length !== 1
+    || !Object.hasOwn(body, 'label')
+  ) {
+    return jsonResponse(400, { ok: false, error: 'Invalid suggestion fields' });
+  }
+
+  const label = typeof body.label === 'string' ? normalizeLabel(body.label) : '';
+  if (!label || Array.from(label).length > 80) {
+    return jsonResponse(400, { ok: false, error: 'Job required' });
+  }
+
+  return jsonResponse(200, { ok: true, label });
+}

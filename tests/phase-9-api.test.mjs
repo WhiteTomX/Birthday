@@ -32,9 +32,6 @@ class FakeStatement {
     }
 
     this.database.reads.push(this.sql);
-    if (this.sql.includes('LEFT JOIN fresh_rsvp_job_allocations')) {
-      return { results: this.database.selectionResults };
-    }
     if (this.sql.includes('FROM fresh_rsvp_job_allocations')) {
       return { results: this.database.allocationResults };
     }
@@ -84,22 +81,6 @@ class FakeStatement {
     }
 
     this.database.runs.push({ sql: this.sql, values: this.values });
-    if (this.sql.includes('INSERT INTO drink_options')) {
-      if (this.database.conflictOnInsert) {
-        this.database.conflictOnInsert = false;
-        this.database.options.push({
-          id: 'concurrent-option',
-          label: this.values[1],
-          is_fixed: 0,
-        });
-        throw new Error('UNIQUE constraint failed: drink_options.label');
-      }
-      this.database.options.push({
-        id: this.values[0],
-        label: this.values[1],
-        is_fixed: this.values[2],
-      });
-    }
     return { success: true };
   }
 }
@@ -108,20 +89,16 @@ class FakeDatabase {
   constructor({
     failRead = false,
     failWrite = false,
-    conflictOnInsert = false,
     failBatch = false,
     allocationResults = [],
-    selectionResults = [],
   } = {}) {
     this.failRead = failRead;
     this.failWrite = failWrite;
-    this.conflictOnInsert = conflictOnInsert;
     this.failBatch = failBatch;
     this.reads = [];
     this.runs = [];
     this.batches = [];
     this.allocationResults = allocationResults;
-    this.selectionResults = selectionResults;
     this.options = drinkCatalog.map((option) => ({ ...option }));
     this.jobOptions = [
       { id: 'aufbau', label: 'Aufbau', normalized_label: 'aufbau' },
@@ -434,14 +411,58 @@ test('rejects malformed, empty, and overlong job suggestions', async (t) => {
   }
 });
 
+test('rejects invalid or duplicate job suggestions before writing', async (t) => {
+  const invalidSuggestions = [
+    [{ label: 'Gästehilfe', count: 0 }],
+    [{ label: 'Gästehilfe', count: 3 }],
+    [{ label: 'Gästehilfe', count: 1.5 }],
+    [{ label: 'Gästehilfe', count: 1, extra: true }],
+    [{ label: 'Gästehilfe', count: 1 }, { label: '  GA\u0308STEHILFE ', count: 1 }],
+  ];
+
+  for (const job_suggestions of invalidSuggestions) {
+    await t.test(JSON.stringify(job_suggestions), async () => {
+      const { context, DB } = makeContext({
+        name: 'Alice',
+        attendance: 'coming',
+        attendees: 2,
+        drinks: [],
+        job_suggestions,
+      });
+
+      const response = await submitFreshRsvp(context);
+      assert.equal(response.status, 400);
+      assert.equal(DB.batches.length + DB.runs.length, 0);
+    });
+  }
+});
+
+test('rejects a job selected both as a catalog option and a staged suggestion', async () => {
+  const { context, DB } = makeContext({
+    name: 'Alice',
+    attendance: 'coming',
+    attendees: 1,
+    drinks: [],
+    jobs: [{ id: 'aufbau', count: 1 }],
+    job_suggestions: [{ label: 'AUFBAU', count: 1 }],
+  });
+
+  const response = await submitFreshRsvp(context);
+  assert.equal(response.status, 400);
+  assert.equal(DB.batches.length + DB.runs.length, 0);
+});
+
 test('publishes selected drink and job suggestions atomically with the RSVP', async () => {
   const DB = new FakeDatabase({
-    selectionResults: [{
+    allocationResults: [{
       id: 'canonical-job-id',
-      label: 'Gästehilfe',
-      normalized_label: 'gästehilfe',
-      accepted_count: 1,
+      assigned_count: 1,
     }],
+  });
+  DB.jobOptions.push({
+    id: 'canonical-job-id',
+    label: 'Gästehilfe',
+    normalized_label: 'gästehilfe',
   });
   const { context } = makeContext({
     name: 'Alice',
@@ -474,7 +495,7 @@ test('publishes selected drink and job suggestions atomically with the RSVP', as
   assert.match(statements[4].sql, /INSERT INTO fresh_rsvp_job_allocations/);
   assert.match(statements[4].sql, /job_options\.normalized_label = \?/);
   assert.match(statements[4].sql, /MAX\(0,\s*job_options\.max_capacity\s*-\s*COALESCE\(/);
-  assert.ok(DB.reads.some((sql) => /LEFT JOIN fresh_rsvp_job_allocations/.test(sql)));
+  assert.ok(DB.reads.some((sql) => /SELECT job_option_id AS id, assigned_count/.test(sql)));
 });
 
 test('does not publish unselected staged suggestions or suggestions attached to a decline', async () => {
