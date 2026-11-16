@@ -51,8 +51,10 @@ test('renders only a valid absolute HTTPS buffet URL without credentials', async
   });
 
   assert.match(html, /class="event-callout"/);
+  assert.match(html, /Buffet-Brunch am nächsten Tag/);
+  assert.match(html, /Wenn du etwas zum Buffet beitragen möchtest/);
   assert.match(html, /href="https:\/\/buffet\.example\/liste\?group=party&amp;view=1"/);
-  assert.match(html, /Zum Buffetbeitrag/);
+  assert.match(html, /Zur Mitbringliste/);
 });
 
 test('omits absent, malformed, non-HTTPS, and credential-bearing buffet callouts', async (t) => {
@@ -66,7 +68,7 @@ test('omits absent, malformed, non-HTTPS, and credential-bearing buffet callouts
     await t.test(label, async () => {
       const { html } = await getInvitation({ BUFFET_LIST_URL: value });
       assert.equal(
-        /event-callout|Zum Buffetbeitrag|<!-- BUFFET_LINK -->/.test(html),
+        /event-callout|Buffet-Brunch am nächsten Tag|Zur Mitbringliste|<!-- BUFFET_LINK -->/.test(html),
         false,
         'invalid buffet values must not produce an active callout',
       );
@@ -80,7 +82,7 @@ test('omits a credential-bearing buffet URL', async () => {
   });
 
   assert.equal(
-    /event-callout|Zum Buffetbeitrag|href="[^"]*guest/.test(html),
+    /event-callout|Buffet-Brunch am nächsten Tag|Zur Mitbringliste|href="[^"]*guest/.test(html),
     false,
     'credential-bearing buffet values must not produce an active callout',
   );
@@ -127,12 +129,13 @@ test('keeps venue and arrival details in the integrated invitation flow', () => 
   assert.ok(invitationSection.includes('<div class="invitation-copy">'));
   assert.equal(invitationSection.includes('<aside class="venue-note"'), false);
 
+  const buffetIndex = invitationSection.indexOf('<!-- BUFFET_LINK -->');
   const venueIndex = invitationSection.indexOf('<!-- VENUE_DETAILS -->');
   const directionsIndex = invitationSection.indexOf('<!-- PARK_ENTRY_DIRECTIONS -->');
-  const buffetIndex = invitationSection.indexOf('<!-- BUFFET_LINK -->');
+  assert.ok(buffetIndex >= 0);
+  assert.ok(venueIndex > buffetIndex);
   assert.ok(venueIndex >= 0);
   assert.ok(directionsIndex > venueIndex);
-  assert.ok(buffetIndex > directionsIndex);
 });
 
 test('keeps private logistics out of the public root and the date free of an invented year', () => {
