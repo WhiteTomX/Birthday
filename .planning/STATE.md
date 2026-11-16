@@ -6,10 +6,10 @@ current_phase: 09
 current_phase_name: Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch
 status: in_progress
 stopped_at: Completed 09-09-PLAN.md; 09-05 remains blocked at the production gate
-last_updated: "2026-11-16T11:58:39.746Z"
+last_updated: "2026-11-16T12:05:52.302Z"
 last_activity: 2026-11-15
 last_activity_desc: Plan 09-09 local Pages/D1 verification passed; Plan 09-05 remains blocked at the production gate
-state_head: 054d216ec9280a9f7a34ac62bab5cebea09157c7
+state_head: fd0db4b519056693e8e2be5d7d4cde986f440cbe
 progress:
   total_phases: 1
   completed_phases: 0
@@ -87,6 +87,7 @@ v1.0 complete. v1.1 complete. v1.2 complete. v1.3 complete (shipped 2026-06-21).
 | 260621-u1z | insert host names into RSVP invitation text | 2026-06-21 | cd4d90c | [260621-u1z-i-want-to-insert-the-names-to-the-invita](./quick/260621-u1z-i-want-to-insert-the-names-to-the-invita/) |
 | 3 | Make buffet brunch details prominent above the location | 2026-11-16 | 0602363 | — |
 | 4 | Clarify buffet is served at the party and leftovers are reused next day | 2026-11-16 | 054d216 | — |
+| 5 | Use Helfen for user-facing RSVP help labels and place suggestions below options | 2026-11-16 | fd0db4b | — |
 
 ## Session Continuity
 
