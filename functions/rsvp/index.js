@@ -31,8 +31,8 @@ export async function onRequestGet(context) {
   const parsedBuffetUrl = parseHttpsUrl(buffetUrl);
   const buffetMarkup = parsedBuffetUrl
     ? `<div class="event-callout">
-        <p><strong>Buffet-Brunch am nächsten Tag</strong></p>
-        <p>Am Tag nach der Feier möchten wir mit euch beim Buffet-Brunch weiterfeiern. Wenn du etwas zum Buffet beitragen möchtest, findest du hier die Mitbringliste.</p>
+        <p><strong>Buffet</strong></p>
+        <p>Damit wir verschiedenstes essen können, bringe etwas mit!</p>
         <a class="btn-hint" href="${escapeHtml(parsedBuffetUrl.href)}" target="_blank" rel="noopener noreferrer">Zur Mitbringliste</a>
       </div>`
     : '';
