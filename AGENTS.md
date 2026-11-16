@@ -62,13 +62,23 @@ The `migrations/` directory contains versioned SQL migrations managed by Wrangle
 wrangler d1 migrations apply birthday-rsvps --local
 ```
 
-**Apply migrations to production** (run manually after merging a PR that includes schema changes — Cloudflare Pages does not run this automatically):
+**Update the preview D1 database** when a PR adds or changes migrations needed by the Pages preview. Before preview UAT, inspect the pending migrations and apply them to the `preview` environment's `DB` binding (`birthday-rsvps-preview`):
 
 ```
-wrangler d1 migrations apply birthday-rsvps
+wrangler d1 migrations list DB --env preview --remote
+wrangler d1 migrations apply DB --env preview --remote
 ```
 
-Run the local command whenever you create a new migration file or set up a fresh local environment. Run the production command manually after each deploy that includes schema changes.
+Run the local command whenever you create a migration or set up a fresh local environment. For a migration-bearing PR, apply only the expected pending migrations to preview and include the target and migration results in the PR description. Cloudflare Pages does not apply D1 migrations automatically.
+
+**Apply migrations to production** only after the schema PR is merged, all required local checks pass, the production `DB` target is confirmed, and the owner explicitly authorizes the production change. Inspect the complete migration list first; stop if any earlier or unrelated migration is pending, or the result is unclear:
+
+```
+wrangler d1 migrations list DB --remote
+wrangler d1 migrations apply DB --remote
+```
+
+Never use the production command to prepare or test a PR preview. Production migration and configuration changes remain subject to the gates in `.planning/phases/09-actual-invitation-fresh-rsvp-drinks/09-05-PLAN.md`.
 
 ## Stack
 
