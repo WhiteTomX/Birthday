@@ -51,7 +51,8 @@ test('renders only a valid absolute HTTPS buffet URL without credentials', async
   });
 
   assert.match(html, /class="event-callout"/);
-  assert.match(html, /Buffet-Brunch am nächsten Tag/);
+  assert.match(html, /Das Buffet gibt es schon bei der Feier/);
+  assert.match(html, /Was davon übrig bleibt, essen wir am nächsten Tag beim Brunch weiter/);
   assert.match(html, /Wenn du etwas zum Buffet beitragen möchtest/);
   assert.match(html, /href="https:\/\/buffet\.example\/liste\?group=party&amp;view=1"/);
   assert.match(html, /Zur Mitbringliste/);
