@@ -25,14 +25,13 @@
   const drinkSuggestionError = document.getElementById('drink-suggestion-error');
   const drinkSuggestionStatus = document.getElementById('drink-suggestion-status');
   const btnDrinkSuggestion = document.getElementById('btn-drink-suggestion');
-  const jobSuggestionForm = document.getElementById('job-suggestion-form');
   const jobSuggestion = document.getElementById('job-suggestion');
   const jobSuggestionError = document.getElementById('job-suggestion-error');
   const jobSuggestionStatus = document.getElementById('job-suggestion-status');
   const btnJobSuggestion = document.getElementById('btn-job-suggestion');
   const submitButton = document.getElementById('btn-submit-coming');
   const submitError = document.getElementById('submit-error');
-  const stagedJobDescription = 'Vorgeschlagene Aufgabe; die genauen Details werden gemeinsam abgestimmt.';
+  const stagedJobDescription = 'Vorgeschlagene Hilfe; die genauen Details werden gemeinsam abgestimmt.';
   let jobOptionsLoaded = false;
 
   function setFeedback(element, message, visible) {
@@ -261,7 +260,7 @@
       const drinkSummary = drinks.length ? drinks.join(', ') : 'keine angegeben';
       const jobs = Array.isArray(result.jobs) ? result.jobs : [];
       const jobSummary = jobs.length
-        ? ` Helferjobs: ${jobs.map((job) => {
+        ? `Deine Hilfe: ${jobs.map((job) => {
           const unassigned = Math.max(job.requested_count - job.accepted_count, 0);
           const remainder = unassigned > 0 ? `, ${unassigned} nicht bestätigt` : '';
           return `${job.label}: ${job.accepted_count} von ${job.requested_count} bestätigt${remainder}`;
@@ -342,7 +341,7 @@
         });
       if (invalidJobInput) {
         invalidJobInput.focus();
-        setFeedback(jobOptionsStatus, 'Die Anzahl für jeden Helferjob muss zwischen 1 und der Gruppengröße liegen.', true);
+        setFeedback(jobOptionsStatus, 'Die Anzahl für jede Hilfe muss zwischen 1 und der Gruppengröße liegen.', true);
         return;
       }
       const jobs = selectedJobs();
@@ -414,7 +413,7 @@
     }
   });
 
-  jobSuggestionForm.addEventListener('submit', async (event) => {
+  async function addJobSuggestion(event) {
     event.preventDefault();
     setFeedback(jobSuggestionStatus, '', false);
 
@@ -424,7 +423,7 @@
     const label = rawLabel.trim();
     if (!label || Array.from(label).length > 80) {
       jobSuggestion.setAttribute('aria-invalid', 'true');
-      setFeedback(jobSuggestionError, 'Bitte gib einen Helferjob mit höchstens 80 Zeichen ein.', true);
+      setFeedback(jobSuggestionError, 'Bitte beschreibe deine Hilfe mit höchstens 80 Zeichen.', true);
       jobSuggestion.focus();
       return;
     }
@@ -432,7 +431,7 @@
     jobSuggestion.removeAttribute('aria-invalid');
     setFeedback(jobSuggestionError, null, false);
     btnJobSuggestion.disabled = true;
-    btnJobSuggestion.textContent = 'Wird ergänzt…';
+    btnJobSuggestion.textContent = 'Wird vorgeschlagen…';
     try {
       const data = await postJson('/api/job-options', { label: rawLabel });
       if (typeof data.label !== 'string') throw new Error('Missing staged job label');
@@ -448,7 +447,7 @@
         jobSuggestion.value = '';
         const message = existing.dataset.jobSuggestion
           ? `${normalizedLabel} wurde bereits vorgeschlagen.`
-          : `${normalizedLabel} ist bereits als Helferjob vorhanden. Gib eine Anzahl ein, um dich dafür einzutragen.`;
+          : `${normalizedLabel} ist bereits als Hilfe eingetragen. Wähle eine Anzahl, um dich dafür einzutragen.`;
         setFeedback(jobSuggestionStatus, message, true);
       } else {
         jobOptionsWrap.appendChild(createJobOption({
@@ -463,11 +462,18 @@
         setFeedback(jobSuggestionStatus, `${normalizedLabel} wurde ergänzt. Wähle eine Anzahl, damit der Vorschlag mit deiner Anmeldung geteilt wird.`, true);
       }
     } catch {
-      setFeedback(jobSuggestionError, 'Der Helferjob konnte nicht ergänzt werden. Bitte versuche es erneut.', true);
+      setFeedback(jobSuggestionError, 'Der Vorschlag konnte nicht ergänzt werden. Bitte versuche es erneut.', true);
     } finally {
-      btnJobSuggestion.textContent = 'Job hinzufügen';
+      btnJobSuggestion.textContent = 'Hilfe vorschlagen';
       updateComingControlState();
     }
+  }
+
+  btnJobSuggestion.addEventListener('click', addJobSuggestion);
+  jobSuggestion.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    return addJobSuggestion(event);
   });
 
   drinkSuggestion.addEventListener('input', () => {
@@ -499,7 +505,7 @@
   }
 
   async function loadJobOptions() {
-    setFeedback(jobOptionsStatus, 'Helferjobs werden geladen …', true);
+    setFeedback(jobOptionsStatus, 'Hilfeangebote werden geladen …', true);
     try {
       const response = await fetch('/api/job-options');
       const data = await response.json();
@@ -512,7 +518,7 @@
       jobOptionsLoaded = false;
       jobOptionsWrap.replaceChildren();
       updateComingControlState();
-      setFeedback(jobOptionsStatus, 'Helferjobs konnten nicht geladen werden. Bitte lade die Seite erneut.', true);
+      setFeedback(jobOptionsStatus, 'Hilfeangebote konnten nicht geladen werden. Bitte lade die Seite erneut.', true);
     }
   }
 

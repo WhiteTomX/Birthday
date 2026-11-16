@@ -26,19 +26,19 @@ test('presents the event details in warm German invitation copy without inventin
   assert.match(invitation, /Getränkewünsche[^<]*Wünsche, keine Garantie/);
 });
 
-test('uses one accessible RSVP form and a separate suggestion form', () => {
+test('keeps help suggestions below the help options and outside nested forms', () => {
   const rsvpForm = invitation.match(/<form\b[^>]*id="rsvp-form"[\s\S]*?<\/form>/)?.[0];
   const suggestionForm = invitation.match(
     /<form\b[^>]*id="drink-suggestion-form"[\s\S]*?<\/form>/,
   )?.[0];
   const jobSuggestionForm = invitation.match(
-    /<form\b[^>]*id="job-suggestion-form"[\s\S]*?<\/form>/,
+    /<div\b[^>]*id="job-suggestion-form"[\s\S]*?<\/div>\s*<\/fieldset>/,
   )?.[0];
 
   assert.ok(rsvpForm);
   assert.ok(suggestionForm);
   assert.ok(jobSuggestionForm);
-  assert.equal((invitation.match(/<form\b/g) ?? []).length, 3);
+  assert.equal((invitation.match(/<form\b/g) ?? []).length, 2);
   assert.match(rsvpForm, /<label[^>]*for="name"/);
   assert.match(rsvpForm, /<fieldset[^>]*class="attendance-choice"/);
   assert.match(rsvpForm, /type="radio"[^>]*name="attendance"[^>]*value="coming"/);
@@ -53,9 +53,10 @@ test('uses one accessible RSVP form and a separate suggestion form', () => {
   assert.match(suggestionForm, /<label[^>]*for="drink-suggestion">Anderes Getränk<\/label>/);
   assert.match(suggestionForm, /<button[^>]*id="btn-drink-suggestion"[^>]*>Hinzufügen<\/button>/);
   assert.match(suggestionForm, /role="status"[^>]*aria-live="polite"/);
-  assert.match(jobSuggestionForm, /<label[^>]*for="job-suggestion">Anderen Helferjob vorschlagen<\/label>/);
-  assert.match(jobSuggestionForm, /<button[^>]*id="btn-job-suggestion"[^>]*>Job hinzufügen<\/button>/);
+  assert.match(jobSuggestionForm, /<label[^>]*for="job-suggestion">Ich möchte anders helfen<\/label>/);
+  assert.match(jobSuggestionForm, /<button[^>]*id="btn-job-suggestion"[^>]*>Hilfe vorschlagen<\/button>/);
   assert.match(jobSuggestionForm, /role="status"[^>]*aria-live="polite"/);
+  assert.match(rsvpForm, /aria-label="Hilfeangebote"/);
   assert.match(invitation, /id="coming-suggestion-fields"[^>]*hidden/);
   assert.doesNotMatch(invitation, /id="contact"|Keine Präferenz/);
 
@@ -67,12 +68,15 @@ test('uses one accessible RSVP form and a separate suggestion form', () => {
   );
   const suggestionStart = invitation.indexOf('id="drink-suggestion-form"');
   const jobSuggestionStart = invitation.indexOf('id="job-suggestion-form"');
-  const jobSuggestionEnd = invitation.indexOf('</form>', jobSuggestionStart);
+  const jobOptionsEnd = invitation.indexOf('</div>', invitation.indexOf('id="job-options"'));
+  const jobSuggestionEnd = invitation.indexOf('</fieldset>', jobSuggestionStart);
   assert.ok(suggestionStart > selectorEnd);
   assert.ok(suggestionStart > rsvpEnd);
   assert.ok(suggestionBlockStart > rsvpEnd);
-  assert.ok(jobSuggestionStart > suggestionStart);
-  assert.ok(jobSuggestionEnd < invitation.indexOf('id="btn-submit-coming"'));
+  assert.ok(jobSuggestionStart > jobOptionsEnd);
+  assert.ok(jobSuggestionStart < invitation.indexOf('id="drink-field"'));
+  assert.ok(jobSuggestionEnd < invitation.indexOf('id="drink-field"'));
+  assert.equal((invitation.match(/<button[^>]*type="submit"/g) ?? []).length, 2);
   assert.equal(invitation.slice(rsvpEnd + '</form>'.length, suggestionBlockStart).trim(), '');
 });
 
@@ -85,7 +89,7 @@ test('associates the RSVP submit control with the RSVP form outside the suggesti
 
   assert.ok(submitButton);
   assert.ok(submitIndex > suggestionEnd);
-  assert.equal((invitation.match(/type="submit"/g) ?? []).length, 3);
+  assert.equal((invitation.match(/type="submit"/g) ?? []).length, 2);
 });
 
 test('provides visible keyboard focus and responsive form layout styles', () => {
@@ -172,8 +176,9 @@ class FakeElement {
     this.listeners.set(type, listeners);
   }
 
-  async dispatch(type) {
+  async dispatch(type, properties = {}) {
     const event = {
+      ...properties,
       target: this,
       defaultPrevented: false,
       preventDefault() { this.defaultPrevented = true; },
@@ -269,7 +274,7 @@ async function createRsvpHarness({
   elements['btn-submit-coming'].tagName = 'BUTTON';
   elements['btn-submit-coming'].textContent = 'Anmeldung senden';
   elements['btn-drink-suggestion'].textContent = 'Hinzufügen';
-  elements['btn-job-suggestion'].textContent = 'Job hinzufügen';
+  elements['btn-job-suggestion'].textContent = 'Hilfe vorschlagen';
   elements['coming-fields'].hidden = true;
   elements['coming-suggestion-fields'].hidden = true;
   elements['attendee-value'].value = '1';
@@ -378,7 +383,7 @@ test('stages job suggestions locally and submits only an allocated suggestion', 
   radios[0].checked = true;
   await radios[0].dispatch('change');
   elements['job-suggestion'].value = '  Neue Aufgabe  ';
-  await elements['job-suggestion-form'].dispatch('submit');
+  await elements['btn-job-suggestion'].dispatch('click');
 
   const stagingRequest = calls.find((call) => (
     call.url === '/api/job-options' && call.init.method === 'POST'
@@ -386,7 +391,7 @@ test('stages job suggestions locally and submits only an allocated suggestion', 
   assert.ok(stagingRequest);
   assert.deepEqual(JSON.parse(stagingRequest.init.body), { label: '  Neue Aufgabe  ' });
   elements['job-suggestion'].value = 'Neue Aufgabe';
-  await elements['job-suggestion-form'].dispatch('submit');
+  await elements['btn-job-suggestion'].dispatch('click');
   assert.equal(elements['job-options'].children.length, 1);
   const [count] = elements['job-options'].querySelectorAll('input[data-job-suggestion]');
   assert.equal(count.dataset.jobSuggestion, 'Neue Aufgabe');
@@ -405,6 +410,21 @@ test('stages job suggestions locally and submits only an allocated suggestion', 
   assert.match(section.children[0].textContent, /1 nicht bestätigt/);
 });
 
+test('submits a help suggestion when Enter is pressed in its input', async () => {
+  const { calls, elements, radios } = await createRsvpHarness({
+    postRequest: async () => jsonResponse({ ok: true, label: 'Dekorieren' }),
+  });
+  radios[0].checked = true;
+  await radios[0].dispatch('change');
+  elements['job-suggestion'].value = 'Dekorieren';
+
+  await elements['job-suggestion'].dispatch('keydown', { key: 'Enter' });
+
+  assert.ok(calls.some((call) => (
+    call.url === '/api/job-options' && call.init.method === 'POST'
+  )));
+});
+
 test('does not publish an unallocated staged job suggestion', async () => {
   const { calls, elements, radios } = await createRsvpHarness({
     postRequest: async (url) => url === '/api/job-options'
@@ -415,7 +435,7 @@ test('does not publish an unallocated staged job suggestion', async () => {
   radios[0].checked = true;
   await radios[0].dispatch('change');
   elements['job-suggestion'].value = 'Unzugewiesene Aufgabe';
-  await elements['job-suggestion-form'].dispatch('submit');
+  await elements['btn-job-suggestion'].dispatch('click');
   assert.ok(calls.some((call) => (
     call.url === '/api/job-options' && call.init.method === 'POST'
   )));
@@ -438,7 +458,7 @@ test('renders a staged job label as inert text', async () => {
   radios[0].checked = true;
   await radios[0].dispatch('change');
   elements['job-suggestion'].value = maliciousLabel;
-  await elements['job-suggestion-form'].dispatch('submit');
+  await elements['btn-job-suggestion'].dispatch('click');
 
   const stagedItem = elements['job-options'].children[0];
   assert.equal(stagedItem.children[0].children[0].textContent, maliciousLabel);
@@ -464,7 +484,7 @@ test('reuses an existing catalog job when a guest suggests its label', async () 
   radios[0].checked = true;
   await radios[0].dispatch('change');
   elements['job-suggestion'].value = 'Aufbau';
-  await elements['job-suggestion-form'].dispatch('submit');
+  await elements['btn-job-suggestion'].dispatch('click');
   assert.ok(calls.some((call) => (
     call.url === '/api/job-options' && call.init.method === 'POST'
   )));
@@ -498,13 +518,13 @@ test('validates job suggestion length by Unicode code points', async () => {
 
   for (const value of ['', '😀'.repeat(81)]) {
     elements['job-suggestion'].value = value;
-    await elements['job-suggestion-form'].dispatch('submit');
+    await elements['btn-job-suggestion'].dispatch('click');
     assert.equal(calls.some((call) => call.url === '/api/job-options' && call.init.method === 'POST'), false);
     assert.equal(elements['job-suggestion-error'].hidden, false);
   }
 
   elements['job-suggestion'].value = '😀'.repeat(80);
-  await elements['job-suggestion-form'].dispatch('submit');
+  await elements['btn-job-suggestion'].dispatch('click');
   assert.equal(calls.filter((call) => call.url === '/api/job-options' && call.init.method === 'POST').length, 1);
   assert.equal(elements['job-suggestion-error'].hidden, true);
 });
