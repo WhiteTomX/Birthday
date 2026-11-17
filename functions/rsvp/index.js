@@ -10,38 +10,31 @@ export async function onRequestGet(context) {
   const html = await assetResponse.text();
 
   const venueName = (env.VENUE_NAME || '').trim();
-  const venueMapUrl = (env.VENUE_MAP_URL || '').trim();
+  const venueOSMUrl = (env.VENUE_OSM_URL || env.VENUE_MAP_URL || '').trim();
+  const venueGeoUrl = (env.VENUE_GEO_URL || '').trim();
   const parkDirections = (env.PARK_ENTRY_DIRECTIONS || '').trim();
+  const parkVideosUrl = (env.PARK_ENTRY_VIDEOS_URL || '').trim();
   const buffetUrl = (env.BUFFET_LIST_URL || '').trim();
-
-  let venueDetails = '';
-  const parsedMapUrl = parseHttpsUrl(venueMapUrl);
-  if (venueName) {
-    venueDetails = `<p><strong>${escapeHtml(venueName)}</strong></p>`;
-    if (parsedMapUrl) {
-      venueDetails += `
-        <a href="${escapeHtml(parsedMapUrl.href)}" target="_blank" rel="noopener noreferrer">Auf OpenStreetMap ansehen</a>`;
-    }
-  }
+  const name = (env.INVITE_NAME || '').trim() || 'Wir';
+  const parsedOSMUrl = parseHttpsUrl(venueOSMUrl);
 
   const directionsMarkup = parkDirections
-    ? `<p class="event-directions"><strong>Anreise:</strong> ${escapeHtml(parkDirections)}</p>`
+    ? `<p><strong>Wegbeschreibung & Parkhinweise:</strong> ${escapeHtml(parkDirections)}</p>`
+    : '';
+  const videosMarkup = parkVideosUrl
+    ? `<p>Für die visuellen unter euch, haben wir <a href="${escapeHtml(parkVideosUrl)}" target="_blank" rel="noopener noreferrer">Videos</a> vorbereitet.</p>`
     : '';
 
   const parsedBuffetUrl = parseHttpsUrl(buffetUrl);
-  const buffetMarkup = parsedBuffetUrl
-    ? `<div class="event-callout">
-        <p><strong>Buffet</strong></p>
-      <p>Das Buffet gibt es schon bei der Feier. Was davon übrig bleibt, essen wir am nächsten Tag beim Brunch weiter. Wenn du etwas zum Buffet beitragen möchtest, trag es gern in die Mitbringliste ein.</p>
-        <a class="btn-hint" href="${escapeHtml(parsedBuffetUrl.href)}" target="_blank" rel="noopener noreferrer">Zur Mitbringliste</a>
-      </div>`
-    : '';
 
   const modified = html
-    .replace('<!-- VENUE_DETAILS -->', venueDetails)
+    .replace('<!-- VENUE_NAME -->', escapeHtml(venueName))
+    .replace('<!-- VENUE_MAP_URL -->',`<a href="${escapeHtml(parsedOSMUrl.href)}" target="_blank" rel="noopener noreferrer">Auf OpenStreetMap ansehen</a>`)
+    .replace('<!-- VENUE_GEO_URL -->',`<a href="${escapeHtml(venueGeoUrl)}" target="_blank" rel="noopener noreferrer">Koordinaten öffnen</a>`)
     .replace('<!-- PARK_ENTRY_DIRECTIONS -->', directionsMarkup)
-    .replace('<!-- BUFFET_LINK -->', buffetMarkup)
-    .replace(/>Wir werden 30\./, '>Wir feiern zusammen.');
+    .replace('<!-- PARK_ENTRY_VIDEOS -->', videosMarkup)
+    .replace('<!-- BUFFET_LIST -->', `<a href="${escapeHtml(parsedBuffetUrl.href)}" target="_blank" rel="noopener noreferrer">Mitbringliste</a>`)
+    .replace('<!-- Name -->', name);
 
   const contentType =
     assetResponse.headers.get('Content-Type') || 'text/html; charset=utf-8';
