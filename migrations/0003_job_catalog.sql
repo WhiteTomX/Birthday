@@ -54,43 +54,34 @@ INSERT INTO job_options (
     'aufbau',
     'Aufbau',
     'aufbau',
-    'Hilf dabei, den Veranstaltungsbereich vorzubereiten und beim Aufbau mit anzupacken. Welche Handgriffe gerade gebraucht werden, stimmen wir gemeinsam ab.',
+    'Du möchten beim Vorbereiten helfen. Was gerade anfällt vermutlich vor 17:00 Uhr.',
     1,
     1,
     15
   ),
   (
     'teilzeit-barkeeper',
-    'Teilzeit Barkeeper nach Lust und Laune',
+    'Teilzeit "Barkeeper" nach Lust und Laune',
     'teilzeit barkeeper nach lust und laune',
-    'Unterstütze beim Getränke-Ausschank so lange und so oft, wie es für dich passt. Eine feste Schicht oder bestimmte Dauer ist nicht vorgegeben.',
+    'Du möchtest hinter der Bar unterstützen, wenn du gerade Lust hast. Ansonsten können sich die Gäste auch selbst bedienen.',
     1,
     2,
-    NULL
-  ),
-  (
-    'musikbox',
-    'Jemand der mit der Musikbox verbunden ist',
-    'jemand der mit der musikbox verbunden ist',
-    'Hilf dabei, die Musikbox mit dem passenden Gerät zu verbinden, damit während der Feier Musik abgespielt werden kann.',
-    1,
-    3,
     NULL
   ),
   (
     'dinge',
     'Dinge',
     'dinge',
-    'Für verschiedene Dinge, bei denen eine helfende Hand gebraucht wird. Was genau anfällt, klären wir gemeinsam.',
+    'Du möchtest irgendwie helfen.',
     1,
     4,
     NULL
   ),
   (
     'abbau-brunch',
-    'Abbau & Brunch am nächsten Tag',
+    'Brunch (& Abbau) am nächsten Tag',
     'abbau & brunch am nächsten tag',
-    'Hilf beim Aufräumen nach dem Geburtstag und sei am nächsten Tag beim Buffet-Brunch dabei. Diese Auswahl umfasst Abbau und Brunch gemeinsam.',
+    'Du möchtest am nächsten Tag die Reste brunchen und aufräumen.',
     1,
     5,
     NULL
@@ -99,7 +90,7 @@ INSERT INTO job_options (
     'getraenkeeinkauf-auto',
     'Getränkeeinkauf mit Auto (Freitag oder Samstag)',
     'getränkeeinkauf mit auto (freitag oder samstag)',
-    'Hilf am Freitag oder Samstag mit deinem Auto beim Getränkeeinkauf. Die genaue Zeit und die weiteren Absprachen stimmen wir gemeinsam ab.',
+    'Du möchtest am Freitag oder Samstag mit deinem Auto beim Einkaufen helfen.',
     1,
     6,
     NULL
