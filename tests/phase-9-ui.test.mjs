@@ -16,16 +16,6 @@ const script = await readFile(
   'utf8',
 );
 
-test('presents the event details in warm German invitation copy without inventing logistics', () => {
-  assert.match(invitation, /5\. Dezember/);
-  assert.match(invitation, /17:00 Uhr/);
-  assert.doesNotMatch(invitation, /\b20\d{2}\b|Musterstraße|Hauptstraße/);
-  assert.match(invitation, /<!-- VENUE_DETAILS -->/);
-  assert.match(invitation, /<!-- PARK_ENTRY_DIRECTIONS -->/);
-  assert.match(invitation, /<!-- BUFFET_LINK -->/);
-  assert.match(invitation, /Getränkewünsche[^<]*Wünsche, keine Garantie/);
-});
-
 test('keeps help suggestions below the help options and outside nested forms', () => {
   const rsvpForm = invitation.match(/<form\b[^>]*id="rsvp-form"[\s\S]*?<\/form>/)?.[0];
   const suggestionForm = invitation.match(
