@@ -6,45 +6,42 @@
 export async function onRequestGet(context) {
   const { request, env } = context;
 
-  // Fetch the static asset — uses the Pages ASSETS binding so no extra hop.
   const assetResponse = await env.ASSETS.fetch(request);
-
-  // Resolve the name, falling back to "Wir" if absent/empty.
-  const name = (env.INVITE_NAME || '').trim() || 'Wir';
-
-  // Read the HTML body.
   const html = await assetResponse.text();
 
   const venueName = (env.VENUE_NAME || '').trim();
-  const venueMapUrl = (env.VENUE_MAP_URL || '').trim();
-  let venueDetails = '';
+  const venueOSMUrl = (env.VENUE_OSM_URL || env.VENUE_MAP_URL || '').trim();
+  const venueGeoUrl = (env.VENUE_GEO_URL || '').trim();
+  const parkDirections = (env.PARK_ENTRY_DIRECTIONS || '').trim();
+  const parkVideosUrl = (env.PARK_ENTRY_VIDEOS_URL || '').trim();
+  const buffetUrl = (env.BUFFET_LIST_URL || '').trim();
+  const name = (env.INVITE_NAME || '').trim() || 'Wir';
+  const parsedOSMUrl = parseHttpsUrl(venueOSMUrl);
+  const parsedBuffetUrl = parseHttpsUrl(buffetUrl);
 
-  if (venueName && venueMapUrl) {
-    let parsedMapUrl;
-    try {
-      parsedMapUrl = new URL(venueMapUrl);
-    } catch {
-      console.error('VENUE_MAP_URL must be a valid HTTPS URL.');
-    }
+  const directionsMarkup = parkDirections
+    ? `<p><strong>Wegbeschreibung & Parkhinweise:</strong> ${escapeHtml(parkDirections)}</p>`
+    : '';
+  const videosMarkup = parkVideosUrl
+    ? `<p>Für die visuellen unter euch, haben wir <a href="${escapeHtml(parkVideosUrl)}" target="_blank" rel="noopener noreferrer">Videos</a> vorbereitet.</p>`
+    : '';
 
-    if (parsedMapUrl?.protocol === 'https:') {
-      venueDetails = `<p><strong>${escapeHtml(venueName)}</strong></p>
-          <a href="${escapeHtml(parsedMapUrl.href)}" target="_blank" rel="noopener noreferrer">Auf OpenStreetMap ansehen</a>`;
-    } else if (parsedMapUrl) {
-      console.error('VENUE_MAP_URL must use HTTPS.');
-    }
-  } else {
-    console.warn('Set both VENUE_NAME and VENUE_MAP_URL to display venue details.');
-  }
+  const birthdayNoticeMarkup = getHost0BirthdayNotice(request, env);
 
-  // The marker is absent from the source response unless both values are
-  // configured and the map URL passes HTTPS validation.
   const modified = html
-    .replace('<!-- VENUE_DETAILS -->', venueDetails)
-    .replace('>Wir werden 30.', `>${name} werden 30.`);
+    .replace('<!-- VENUE_NAME -->', escapeHtml(venueName))
+    .replace('<!-- VENUE_MAP_URL -->', parsedOSMUrl
+      ? `<a href="${escapeHtml(parsedOSMUrl.href)}" target="_blank" rel="noopener noreferrer">Auf OpenStreetMap ansehen</a>`
+      : '')
+    .replace('<!-- VENUE_GEO_URL -->',`<a href="${escapeHtml(venueGeoUrl)}" target="_blank" rel="noopener noreferrer">Koordinaten öffnen</a>`)
+    .replace('<!-- PARK_ENTRY_DIRECTIONS -->', directionsMarkup)
+    .replace('<!-- PARK_ENTRY_VIDEOS -->', videosMarkup)
+    .replace('<!-- BUFFET_LIST -->', parsedBuffetUrl
+      ? `<a href="${escapeHtml(parsedBuffetUrl.href)}" target="_blank" rel="noopener noreferrer">Mitbringliste</a>`
+      : '')
+    .replace('<!-- HOST_0_BIRTHDAY_NOTICE -->', birthdayNoticeMarkup)
+    .replace('<!-- Name -->', name);
 
-  // Preserve Content-Type from the asset, force no-store to prevent CDN caching
-  // personalised responses (T-u1z-02).
   const contentType =
     assetResponse.headers.get('Content-Type') || 'text/html; charset=utf-8';
 
@@ -57,6 +54,45 @@ export async function onRequestGet(context) {
   });
 }
 
+function getHost0BirthdayNotice(request, env) {
+  if (request.headers.get('X-Host-Ref') !== '0') {
+    return '';
+  }
+
+  const birthdayDate = parseDateOnly(env.HOST_0_BIRTHDAY_DATE);
+  if (!birthdayDate || birthdayDate < new Date().toISOString().slice(0, 10)) {
+    return '';
+  }
+
+  const formattedDate = new Intl.DateTimeFormat('de-DE', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(`${birthdayDate}T00:00:00.000Z`));
+  const locationUrl = parseHttpsUrl((env.HOST_0_LIVE_LOCATION_URL || '').trim());
+  const locationText = locationUrl
+    ? `<a href="${escapeHtml(locationUrl.href)}" target="_blank" rel="noopener noreferrer">Live-Standort</a>`
+    : 'Live-Standort';
+
+  return `<p class="host-0-birthday-notice">An meinem Geburtstag (${formattedDate}) bin ich ausnahmsweise in der Stadt. Weiß noch nicht, was ich mache. Ich teile wieder einen Link mit meinem ${locationText}.</p>`;
+}
+
+function parseDateOnly(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return null;
+  }
+
+  const date = new Date(`${value}T00:00:00.000Z`);
+  if (
+    Number.isNaN(date.valueOf()) ||
+    date.toISOString().slice(0, 10) !== value
+  ) {
+    return null;
+  }
+  return value;
+}
+
 function escapeHtml(value) {
   return value.replace(/[&<>"']/g, (character) => ({
     '&': '&amp;',
@@ -65,4 +101,20 @@ function escapeHtml(value) {
     '"': '&quot;',
     "'": '&#39;',
   })[character]);
+}
+
+function parseHttpsUrl(value) {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:' || !url.hostname || url.username || url.password) {
+      return null;
+    }
+    return url;
+  } catch {
+    return null;
+  }
 }

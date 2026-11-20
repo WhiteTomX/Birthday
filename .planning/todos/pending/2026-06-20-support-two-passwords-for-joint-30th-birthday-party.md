@@ -10,7 +10,7 @@ files:
 
 ## Problem
 
-A friend also turns 30 and they want to throw a joint birthday party. The site currently only accepts one password (geburtstag1 from .dev.vars). The site needs to accept two passwords — one per birthday person — so both sets of guests can access the site. The text/content should also be updated to reflect the joint celebration.
+A friend also turns 30 and they want to throw a joint birthday party. The site currently only accepts one password from .dev.vars). The site needs to accept two passwords — one per birthday person — so both sets of guests can access the site. The text/content should also be updated to reflect the joint celebration.
 
 Planned for milestone v1.3.
 

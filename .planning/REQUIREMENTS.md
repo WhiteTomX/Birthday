@@ -1,47 +1,83 @@
-# Requirements: Birthday Website — v1.3 Joint Birthday
+# Requirements: Birthday Website — v2.0 Actual Invitation
 
-**Defined:** 2026-06-20
-**Core Value:** Enable frictionless guest RSVPs via a password-protected, beautiful German site.
+**Defined:** 2026-11-14
+**Core Value:** Make the site feel like the real invitation for the shared birthday while preserving a smooth, reliable RSVP flow.
 
-## v1.3 Requirements
+## v2.0 Requirements
 
-### Auth
+### Access and Invitation
 
-- [ ] **AUTH-07**: Guest can access `/rsvp/` with either `SITE_PASSWORD__0` or `SITE_PASSWORD__1`
-- [ ] **AUTH-08**: Middleware passes password index (`0` or `1`) to downstream handlers without exposing the password value itself (e.g. via a request header)
+- [x] **AUTH-09**: Venue, arrival, buffet, and RSVP details remain behind the existing guest authentication; the public page does not reveal them.
+- [x] **INV-01**: Guests see the joint-birthday invitation in German with the event date, 5 December, and start time, 17:00.
+- [x] **INV-02**: Authenticated guests see the venue name and map link from the existing environment values without a fabricated street address.
+- [x] **INV-03**: Authenticated guests see the park-entry directions loaded from `PARK_ENTRY_DIRECTIONS`.
+- [x] **INV-04**: The optional buffet contribution link is loaded from `BUFFET_LIST_URL` and is not shown when unset.
 
-### RSVP
+### Fresh RSVP Round
 
-- [ ] **RSVP-07**: RSVP submission stores a `host_ref` field (`0` or `1`) derived from which password the guest authenticated with
-- [ ] **RSVP-08**: D1 schema includes `host_ref` column (added via migration or schema update)
+- [x] **RSVP-09**: New confirmations are written to a separate D1 table; existing RSVP records remain unchanged.
+- [x] **RSVP-10**: The fresh round records both “coming” and “not coming” responses; declining responses have no drink selection.
 
-### Content
+### Drink Preferences
 
-- [ ] **CONT-01**: Site text (hint page riddle, save-the-date copy, RSVP page) updated in German to reflect a joint birthday celebration by two hosts
+- [x] **DRINK-01**: A coming RSVP group can select multiple drink preferences from Bier, Wein, Sekt, Kola, Spezi, Fruchtlimonaden, Wasser, and alkoholfreies Bier.
+- [x] **DRINK-02**: Guests can suggest a new drink using the separate suggestion control on the authenticated RSVP page; the suggestion is staged for the current form and is not published to the shared catalog until the RSVP is submitted with that drink selected.
+- [x] **DRINK-03**: A selected drink suggestion is saved with the submitted RSVP as a safely displayed, unique selectable option for later respondents; an unselected or abandoned suggestion is not published.
+- [x] **DRINK-04**: The drink form has no “Keine Präferenz” choice and explains that drink requests are not guaranteed.
+
+### Next-Day Brunch and Jobs
+
+- [x] **BRUNCH-01**: Guests coming to the birthday can select one combined “Abbau & Brunch am nächsten Tag” option; there is no separate Brunch option, form, or special headcount, and guests declining the birthday cannot select the combined option.
+- [x] **JOB-01**: The job catalog offers Aufbau, Teilzeit Barkeeper nach Lust und Laune, Dinge, “Abbau & Brunch am nächsten Tag”, and “Getränkeeinkauf mit Auto (Freitag oder Samstag)”.
+- [x] **JOB-02**: One RSVP contact for a coming party can allocate party members by count across multiple jobs, leave attendees without a job, and assign one attendee to more than one job.
+- [x] **JOB-03**: Each job may have an optional maximum. Aufbau has a maximum of 15; capped jobs stop accepting sign-ups when full, while partial availability can be accepted for a group allocation.
+- [x] **JOB-04**: Guests can suggest jobs. Suggestions are selected in the current form but are published to the shared catalog only when the RSVP is submitted with them selected; unselected or abandoned suggestions are not published. New suggestions are uncapped by default, and duplicate labels reuse the existing option.
+- [x] **JOB-05**: Every job option has a longer German description explaining the expected task; this includes helping purchase drinks on Friday or Saturday with a car. Initial descriptions are drafts for owner review, and the description for “Dinge” stays general rather than inventing specific duties.
+
+## Future Requirements
+
+### Later Milestones
+
+- **EVNT-01**: Guests can share event-day photos.
+- **EVNT-02**: Guests can use event-day games or other interactive elements.
+- **EVNT-03**: Guests can view the event wishlist.
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Separate guest lists per host | Not needed — all guests attend one shared party |
-| Storing the actual password value | Security — only the index (0 or 1) is stored |
-| Per-host RSVP dashboards | Out of scope for this milestone; raw D1 query covers admin needs |
+| Per-attendee drink selections | v2.0 collects one multi-select set per RSVP group |
+| Editing or deleting historical RSVP responses | Preserve the earlier RSVP history as-is |
+| A street address for the park | The venue is inside a park; use the map link and park-entry directions |
+| Live map embedding or a bespoke booking/payment flow | A simple external map link and optional buffet contribution link are sufficient |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-07 | Phase 7 | Pending |
-| AUTH-08 | Phase 7 | Pending |
-| RSVP-07 | Phase 7 | Pending |
-| RSVP-08 | Phase 7 | Pending |
-| CONT-01 | Phase 8 | Pending |
+| AUTH-09 | Phase 9 | Complete |
+| INV-01 | Phase 9 | Complete |
+| INV-02 | Phase 9 | Complete |
+| INV-03 | Phase 9 | Complete |
+| INV-04 | Phase 9 | Complete |
+| RSVP-09 | Phase 9 | Complete |
+| RSVP-10 | Phase 9 | Complete |
+| DRINK-01 | Phase 9 | Complete |
+| DRINK-02 | Phase 9 | Complete |
+| DRINK-03 | Phase 9 | Complete |
+| DRINK-04 | Phase 9 | Complete |
+| BRUNCH-01 | Phase 9 | Complete |
+| JOB-01 | Phase 9 | Complete |
+| JOB-02 | Phase 9 | Complete |
+| JOB-03 | Phase 9 | Complete |
+| JOB-04 | Phase 9 | Complete |
+| JOB-05 | Phase 9 | Complete |
 
 **Coverage:**
-- v1.3 requirements: 5 total
-- Mapped to phases: 5
-- Unmapped: 0 ✓
+- v2.0 requirements: 17 total
+- Mapped to phases: 17
+- Unmapped: 0
 
 ---
-*Requirements defined: 2026-06-20*
-*Last updated: 2026-06-20 — phase assignments confirmed (Phase 7: AUTH-07, AUTH-08, RSVP-07, RSVP-08; Phase 8: CONT-01)*
+*Requirements defined: 2026-11-14*
+*Last updated: 2026-11-14 after Phase 9 scope expansion*

@@ -3,40 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Save the Date - 5. Dezember</title>
+  <title>Einladung - 5. Dezember</title>
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
   <div class="container">
 
-    <section class="save-the-date">
-      <p class="eyebrow">Save the Date</p>
+    <section class="save-the-date invitation-layout">
+      <p class="eyebrow">Einladung</p>
       <h1>5. Dezember</h1>
-      <div class="save-the-date__content">
-        <div>
-          <p>Moin</p>
-          <p>Wir werden 30. Aus irgendwelchen Gründen ist das etwas Großes — und wir feiern das zusammen. Mit euch.</p>
-          <p>Der Plan ist: gutes Buffet und danach richtig feiern. Wir halten euch auf dem Laufenden, sobald wir mehr wissen.</p>
-          <p>Wenn wir jemanden vergessen haben — einfach den Link weitergeben!</p>
-          <p class="deadline">Je früher ihr euch anmeldet, desto besser — dann können wir besser planen.</p>
-          <p>P.S. Wer uns vorher ein besonderes großed Geschenk machen möchte nimmt uns die Planung ab.</p>
-        </div>
-        <aside class="venue-note" aria-labelledby="venue-note-title">
-          <p class="venue-note__title" id="venue-note-title">Voraussichtlicher Veranstaltungsort</p>
-          <p>Der Vertrag steht noch aus, deshalb ist der Ort noch nicht endgültig bestätigt.</p>
-          <!-- VENUE_DETAILS -->
-        </aside>
+      <div class="invitation-copy">
+        <p>Liebe Freunde und Familie,</p>
+        <p><!-- Name --> werden 30! Das feiern wir am 5. Dezember um 17:00 Uhr gemeinsam mit euch. 
+          Wir freuen uns auf einen Abend mit verschiedenen Speisen, Getränken, Gesprächen und Musik.</p>
+        <p>Um möglichst viel verschiedenes probieren zu können, freuen wir uns, wenn ihr etwas mitbringt. Tragt das bitte in die <!-- BUFFET_LIST --> ein.</p>
+        <p>Da seit dem Save the Date schon einige Zeit vergangen ist, meldet euch bitte unten erneut an, auch wenn ihr euch schon beim Save the date angemeldet habt.</p>
+        <p><strong>Ort:</strong> <!-- VENUE_NAME --></p>
+        <p>Es gibt keine richtige Adresse, da es sich mitten in einem Park befindet. Ihr könnt den Ort <!-- VENUE_MAP_URL -->. Alternativ (am Handy) <!-- VENUE_GEO_URL -->. Achtet darauf, dass eure App des vertrauens euch nicht zur nächsten Straße leitet.</p>
+        <!-- PARK_ENTRY_DIRECTIONS -->
+        <!-- PARK_ENTRY_VIDEOS -->
+        <!-- HOST_0_BIRTHDAY_NOTICE -->
       </div>
     </section>
 
     <div class="divider" aria-hidden="true"></div>
 
     <section class="rsvp-section">
-      <h2>Anmeldung</h2>
+      <h2>Bitte meldet euch an</h2>
 
       <form id="rsvp-form" novalidate>
-
-        <!-- Name field — always visible -->
         <div class="field">
           <label for="name">Name</label>
           <input
@@ -45,58 +40,83 @@
             name="name"
             placeholder="Dein Name"
             required
-            autocomplete="given-name"
+            autocomplete="name"
+            maxlength="200"
+            aria-describedby="name-error"
           />
-          <span id="name-error" class="error-msg" role="alert">Bitte gib deinen Namen ein.</span>
+          <span id="name-error" class="error-msg" role="alert" hidden>Bitte gib deinen Namen ein.</span>
         </div>
 
-        <!-- Attendance choice — two buttons -->
-        <div class="attendance-choice">
-          <button type="button" id="btn-not-coming" class="btn-attendance btn-attendance--secondary">
-            Ich komme leider nicht
-          </button>
-          <button type="button" id="btn-coming" class="btn-attendance btn-attendance--primary">
-            Ich komme
-          </button>
-        </div>
+        <fieldset class="attendance-choice" aria-describedby="attendance-error">
+          <legend>Kannst du dabei sein?</legend>
+          <label class="attendance-option" for="attendance-coming">
+            <input type="radio" id="attendance-coming" name="attendance" value="coming" required />
+            <span>Ich komme</span>
+          </label>
+          <label class="attendance-option" for="attendance-not-coming">
+            <input type="radio" id="attendance-not-coming" name="attendance" value="not_coming" />
+            <span>Ich kann leider nicht</span>
+          </label>
+        </fieldset>
+        <p id="attendance-error" class="error-msg" role="alert" hidden>Bitte wähle aus, ob du dabei bist.</p>
 
-        <!-- Extra fields revealed when "Ich komme" is selected -->
         <div id="coming-fields" hidden>
-
-          <!-- Contact method (optional) -->
-          <div class="field" id="contact-field">
-            <label for="contact">Bevorzugte Kontaktmethode <span class="optional">(optional)</span></label>
-            <select id="contact" name="contact">
-              <option value="">Bitte wählen</option>
-              <option value="whatsapp">WhatsApp</option>
-              <option value="telegram">Telegram</option>
-              <option value="signal">Signal</option>
-              <option value="discord">Discord</option>
-              <option value="matrix">Matrix</option>
-              <option value="sms">SMS</option>
-              <option value="threema">Threema</option>
-            </select>
-          </div>
-
-          <!-- Attendee count stepper -->
-          <div class="field" id="stepper-field">
+          <div class="field">
             <label for="attendee-count">Anzahl der Personen</label>
-            <div class="stepper">
-              <button type="button" id="btn-less" aria-label="Weniger" disabled>−</button>
-              <output id="attendee-count" aria-live="polite">1</output>
-              <button type="button" id="btn-more" aria-label="Mehr">+</button>
-            </div>
-            <input type="hidden" id="attendee-value" name="attendees" value="1" />
+            <input type="number" id="attendees" name="attendees" min="1" max="10" value="1" required aria-describedby="attendees-error" />
+            <span id="attendees-error" class="error-msg" role="alert" hidden>Bitte wähle eine Gruppengröße zwischen 1 und 10 Personen.</span>
           </div>
 
-          <button type="button" id="btn-submit-coming" class="btn-submit">Anmelden</button>
+          <fieldset class="field job-field" id="job-field">
+            <legend>Möchtest du helfen? <span class="optional">(optional)</span></legend>
+            <div id="job-options" class="job-options" role="group" aria-label="Hilfeangebote" aria-live="polite"></div>
+            <p id="job-options-status" class="helper-text" role="status" aria-live="polite"></p>
+            <div id="job-suggestion-form" class="job-suggestion-form">
+              <div class="field" id="job-suggestion-field">
+                <label for="job-suggestion">Ich möchte anders helfen</label>
+                <div class="suggestion-row">
+                  <input type="text" id="job-suggestion" name="job-suggestion" placeholder="z. B. beim Dekorieren helfen" aria-describedby="job-suggestion-error" />
+                  <button type="button" id="btn-job-suggestion" class="btn-secondary">Hilfe vorschlagen</button>
+                </div>
+                <span id="job-suggestion-error" class="error-msg" role="alert" hidden>Bitte beschreibe deine Idee
+                   mit höchstens 80 Zeichen.</span>
+                <span id="job-suggestion-status" class="helper-text" role="status" aria-live="polite"></span>
+                <p class="helper-text">Ein Vorschlag wird erst mit deiner Anmeldung geteilt und auch Nachfolgenden angezeigt..</p>
+              </div>
+            </div>
+          </fieldset>
 
+          <fieldset class="field drink-field" id="drink-field">
+            <legend>Getränkevorschläge <span class="optional">(mehrfach möglich)</span></legend>
+            <div id="drink-options" class="drink-options" role="group" aria-label="Getränkevorschläge" aria-live="polite"></div>
+            <p id="drink-options-status" class="helper-text" role="status" aria-live="polite"></p>
+            <p class="helper-text">Die Getränkevorschläge sind nur Wünsche — keine Garantie. Du darfst gern Getränke in die Mitbringliste eintragen, um sicherzugehen. Der Vorschlag wird auch Nachfolgenden angezeigt.</p>
+          </fieldset>
         </div>
 
+        <p id="submit-error" class="error-msg" role="alert" aria-live="assertive" hidden></p>
       </form>
+
+      <div id="coming-suggestion-fields" hidden>
+        <form id="drink-suggestion-form" novalidate>
+          <div class="field" id="drink-suggestion-field">
+            <label for="drink-suggestion">Anderes Getränk</label>
+            <div class="suggestion-row">
+              <input type="text" id="drink-suggestion" name="drink-suggestion" placeholder="z. B. Apfelsaft" aria-describedby="drink-suggestion-error" />
+              <button type="submit" id="btn-drink-suggestion" class="btn-secondary">Hinzufügen</button>
+            </div>
+            <span id="drink-suggestion-error" class="error-msg" role="alert" hidden>Bitte gib ein Getränk ein.</span>
+            <span id="drink-suggestion-status" class="helper-text" role="status" aria-live="polite"></span>
+          </div>
+        </form>
+
+      </div>
+
+      <button type="submit" id="btn-submit-coming" class="btn-submit" form="rsvp-form">Anmeldung senden</button>
     </section>
 
   </div>
   <script src="/script.js"></script>
+  
 </body>
 </html>

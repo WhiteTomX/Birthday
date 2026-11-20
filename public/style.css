@@ -51,38 +51,6 @@ body {
   margin-bottom: 56px; /* extra breathing room before decorative divider */
 }
 
-.save-the-date__content {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.65fr);
-  gap: 32px;
-  align-items: start;
-}
-
-.venue-note {
-  padding: 20px;
-  background-color: var(--festive-light);
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--festive);
-  border-radius: var(--radius);
-}
-
-.venue-note p {
-  margin-bottom: 12px;
-}
-
-.save-the-date .venue-note__title {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.venue-note a {
-  color: var(--accent);
-  font-weight: 700;
-}
-
 .save-the-date h1 {
   font-size: 56px;
   font-weight: 700;
@@ -176,6 +144,7 @@ body {
 /* ── Text input and select — shared ──────────────────────────────────────── */
 
 input[type="text"],
+input[type="number"],
 select {
   width: 100%;
   height: 44px;
@@ -204,6 +173,7 @@ select {
 }
 
 input[type="text"]:focus-visible,
+input[type="number"]:focus-visible,
 select:focus-visible {
   border-color: var(--accent);
   outline: 2px solid var(--accent);
@@ -211,7 +181,8 @@ select:focus-visible {
 }
 
 /* Error state — applied by JS */
-input[type="text"].error {
+input[type="text"].error,
+input[type="number"].error {
   border-color: var(--error);
 }
 
@@ -230,120 +201,56 @@ input[type="text"].error {
   display: block;
 }
 
-/* ── Stepper ─────────────────────────────────────────────────────────────── */
-
-.stepper {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: fit-content;
-}
-
-.stepper button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  font-size: 20px;
-  font-weight: 400;
-  line-height: 1;
-  color: #FFFFFF;
-  background-color: var(--accent);
-  border: none;
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-  font-family: var(--font);
-}
-
-.stepper button:hover:not(:disabled) {
-  background-color: var(--accent-hover);
-}
-
-.stepper button:active:not(:disabled) {
-  background-color: var(--accent-active);
-}
-
-.stepper button:disabled {
-  background-color: var(--surface);
-  color: var(--muted);
-  cursor: not-allowed;
-}
-
-.stepper output {
-  min-width: 40px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1;
-  color: var(--text);
-  background-color: var(--surface);
-  border-radius: var(--radius);
-  text-align: center;
-  user-select: none;
-}
-
-/* ── Attendance choice buttons ───────────────────────────────────────────── */
+/* ── Attendance choice ───────────────────────────────────────────────────── */
 
 .attendance-choice {
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-bottom: 24px;
+  min-width: 0;
+  border: 0;
 }
 
-.btn-attendance {
-  width: 100%;
-  height: 48px;
-  font-family: var(--font);
-  font-size: 16px;
+.attendance-choice legend,
+.drink-field legend {
   font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.attendance-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 10px 12px;
+  background-color: var(--bg);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
-.btn-attendance--primary {
-  color: #FFFFFF;
-  background-color: var(--accent);
-  border: none;
+.attendance-option:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
-.btn-attendance--primary:hover {
-  background-color: var(--accent-hover);
+.attendance-option input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
 }
 
-.btn-attendance--primary:active {
-  background-color: var(--accent-active);
-}
-
-.btn-attendance--primary:disabled {
-  background-color: var(--accent-disabled);
-  cursor: not-allowed;
-}
-
-.btn-attendance--secondary {
+.attendance-option input:checked + span {
   color: var(--accent);
-  background-color: transparent;
-  border: 1.5px solid var(--accent);
+  font-weight: 700;
 }
 
-.btn-attendance--secondary:hover {
-  background-color: rgba(192, 57, 90, 0.08);
-}
-
-.btn-attendance--secondary:active {
-  background-color: rgba(192, 57, 90, 0.15);
-}
-
-.btn-attendance--secondary:disabled {
-  color: var(--accent-disabled);
-  border-color: var(--accent-disabled);
-  cursor: not-allowed;
+.drink-field {
+  min-width: 0;
+  border: 0;
 }
 
 /* ── Submit button ───────────────────────────────────────────────────────── */
@@ -374,6 +281,161 @@ input[type="text"].error {
 
 .btn-submit:disabled {
   background-color: var(--accent-disabled);
+  cursor: not-allowed;
+}
+
+/* ── Invitation / drink helper blocks ─────────────────────────────────────── */
+
+.event-directions,
+.event-callout {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-left: 4px solid var(--festive);
+  background-color: var(--festive-light);
+  border-radius: var(--radius);
+}
+
+.event-callout a {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.helper-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.drink-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.drink-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--bg);
+  cursor: pointer;
+}
+
+.drink-option input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+
+.job-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.job-option {
+  position: relative;
+  padding: 14px;
+  background-color: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.job-option.is-full {
+  background-color: var(--surface);
+}
+
+.job-option-details {
+  min-width: 0;
+  padding-right: 112px;
+}
+
+.job-option-details strong {
+  display: block;
+  color: var(--text);
+}
+
+.job-option-details p,
+.job-option-capacity {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.job-option-capacity {
+  margin-top: 4px;
+}
+
+.job-option-capacity:empty {
+  display: none;
+}
+
+.job-count-label {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 96px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.job-count-label input {
+  width: 100%;
+}
+
+.job-count-label input:disabled {
+  color: var(--muted);
+  background-color: var(--surface);
+  cursor: not-allowed;
+}
+
+.suggestion-row {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.job-suggestion-form {
+  margin-top: 24px;
+}
+
+.suggestion-row input {
+  flex: 1;
+}
+
+.btn-secondary {
+  flex-shrink: 0;
+  min-width: 120px;
+  height: 44px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius);
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background-color: rgba(192, 57, 90, 0.08);
+}
+
+.btn-secondary:active {
+  background-color: rgba(192, 57, 90, 0.15);
+}
+
+.btn-secondary:disabled {
+  border-color: var(--accent-disabled);
+  color: var(--accent-disabled);
   cursor: not-allowed;
 }
 
@@ -427,8 +489,23 @@ input[type="text"].error {
     font-size: 40px;
   }
 
-  .save-the-date__content {
-    grid-template-columns: 1fr;
-    gap: 24px;
+  .job-option {
+    padding: 12px;
   }
+
+  .job-option-details {
+    padding-right: 96px;
+  }
+
+  .job-option-capacity {
+    margin-top: 2px;
+  }
+
+  .job-count-label {
+    top: 12px;
+    right: 12px;
+    width: 84px;
+    font-size: 13px;
+  }
+
 }

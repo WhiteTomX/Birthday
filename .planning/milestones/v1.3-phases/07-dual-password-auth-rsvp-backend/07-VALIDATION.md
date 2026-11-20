@@ -66,8 +66,8 @@ All runtime behaviors are manual-only due to the lack of an automated test runne
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| Auth with SITE_PASSWORD__0 → access granted + RSVP stores host_ref=0 | AUTH-07, RSVP-07 | Requires live Cloudflare Pages Functions runtime (wrangler dev) — static analysis cannot confirm `next(modifiedRequest)` propagation through CF runtime | `wrangler pages dev --port 8788`; authenticate with `geburtstag1`; submit RSVP; query `SELECT host_ref FROM rsvps ORDER BY submitted_at DESC LIMIT 1` expecting `0` |
-| Auth with SITE_PASSWORD__1 → access granted + RSVP stores host_ref=1 | AUTH-07, RSVP-07 | Same CF runtime dependency | Same as above but authenticate with `geburtstag2`; expect `host_ref=1` |
+| Auth with SITE_PASSWORD__0 → access granted + RSVP stores host_ref=0 | AUTH-07, RSVP-07 | Requires live Cloudflare Pages Functions runtime (wrangler dev) — static analysis cannot confirm `next(modifiedRequest)` propagation through CF runtime | `wrangler pages dev --port 8788`; authenticate with `SITE__PASSWORD_1`; submit RSVP; query `SELECT host_ref FROM rsvps ORDER BY submitted_at DESC LIMIT 1` expecting `0` |
+| Auth with SITE_PASSWORD__1 → access granted + RSVP stores host_ref=1 | AUTH-07, RSVP-07 | Same CF runtime dependency | Same as above but authenticate with `SITE__PASSWORD_1`; expect `host_ref=1` |
 | Invalid password → 401 + no row inserted | AUTH-07 | Runtime behavior confirmation | Attempt access with wrong password; expect 401 German hint page; confirm no new D1 row |
 | "Not coming" decline with host attribution (CR-03 fix) | RSVP-07 | `not-coming.js` updated in commit b13d4c1; runtime confirmation required | Submit decline via `/api/not-coming` with each password; verify `host_ref` on decline rows matches password used |
 

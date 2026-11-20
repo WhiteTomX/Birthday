@@ -5,10 +5,10 @@ status: passed
 score: 8/8 must-haves verified
 overrides_applied: 0
 human_verification:
-  - test: "Authenticate with SITE_PASSWORD__0 (geburtstag1), submit RSVP, verify host_ref=0 in D1"
+  - test: "Authenticate with SITE_PASSWORD__0, submit RSVP, verify host_ref=0 in D1"
     expected: "Row inserted with host_ref=0; X-Host-Ref header flows end-to-end from middleware through next(modifiedRequest) to rsvp.js"
     result: pass
-  - test: "Authenticate with SITE_PASSWORD__1 (geburtstag2), submit RSVP, verify host_ref=1 in D1"
+  - test: "Authenticate with SITE_PASSWORD__1, submit RSVP, verify host_ref=1 in D1"
     expected: "Row inserted with host_ref=1"
     result: pass
   - test: "Submit RSVP with wrong password"
@@ -65,7 +65,7 @@ human_verification:
 | `migrations/0001_add_host_ref.sql` | ALTER TABLE + backfill UPDATE for host_ref | ✓ VERIFIED | Contains `ALTER TABLE rsvps ADD COLUMN host_ref INTEGER;` and `UPDATE rsvps SET host_ref = 0 WHERE host_ref IS NULL;` |
 | `wrangler.jsonc` | migrations_dir key pointing at migrations/ | ✓ VERIFIED | `"migrations_dir": "migrations"` present in d1_databases[0]; database_id and binding unchanged |
 | `functions/_middleware.js` | Dual-password auth + X-Host-Ref injection | ✓ VERIFIED | References SITE_PASSWORD__0 and SITE_PASSWORD__1; sets X-Host-Ref; no bare SITE_PASSWORD; atob() guarded; syntax valid |
-| `.dev.vars` | Both dev passwords for local testing | ✓ VERIFIED | Contains `SITE_PASSWORD__0=geburtstag1` and `SITE_PASSWORD__1=geburtstag2`; old `SITE_PASSWORD` key absent |
+| `.dev.vars` | Both dev passwords for local testing | ✓ VERIFIED | Contains `SITE_PASSWORD__0` and `SITE_PASSWORD__1`; old `SITE_PASSWORD` key absent |
 | `functions/api/rsvp.js` | X-Host-Ref read + validation + host_ref in INSERT | ✓ VERIFIED | Reads header, validates strictly as 0/1, 6-column INSERT with 6 `?` placeholders, hostRef as 6th .bind() arg |
 
 ---
@@ -154,13 +154,13 @@ All 4 phase requirements accounted for. CONT-01 is correctly assigned to Phase 8
 
 #### 1. End-to-End Auth Flow with SITE_PASSWORD__0
 
-**Test:** Start `wrangler pages dev --port 8788`. Authenticate with `SITE_PASSWORD__0` (geburtstag1). Submit a valid RSVP form. Query D1: `wrangler d1 execute birthday-rsvps --local --command "SELECT host_ref, name FROM rsvps ORDER BY submitted_at DESC LIMIT 1"`.
+**Test:** Start `wrangler pages dev --port 8788`. Authenticate with `SITE_PASSWORD__0`. Submit a valid RSVP form. Query D1: `wrangler d1 execute birthday-rsvps --local --command "SELECT host_ref, name FROM rsvps ORDER BY submitted_at DESC LIMIT 1"`.
 **Expected:** Row returned with `host_ref = 0`; 200 response from RSVP API.
 **Why human:** The Cloudflare Pages Functions runtime must be running to confirm that `next(modifiedRequest)` actually propagates the modified request (with X-Host-Ref) to the RSVP handler. Static analysis confirms the code is correct but cannot simulate the CF runtime.
 
 #### 2. End-to-End Auth Flow with SITE_PASSWORD__1
 
-**Test:** Same as above but authenticate with `SITE_PASSWORD__1` (geburtstag2). Submit RSVP.
+**Test:** Same as above but authenticate with `SITE_PASSWORD__1`. Submit RSVP.
 **Expected:** Row returned with `host_ref = 1`; 200 response.
 **Why human:** Same runtime dependency; validates the second password path.
 

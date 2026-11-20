@@ -5,8 +5,8 @@
 - ✅ **v1.0 RSVP Site** — Phases 1–4 (shipped 2026-05-10) · [Archive](.planning/milestones/v1.0-ROADMAP.md)
 - ✅ **v1.1 Password Hint Page** — Phase 5 (shipped 2026-05-10) · [Archive](.planning/milestones/v1.1-ROADMAP.md)
 - ✅ **v1.2 Not Coming** — Phase 6 (shipped 2026-06-14)
-- ◆ **v1.3 Joint Birthday** — Phases 7–8 (in progress)
-- 📋 **v2.0 Full Invitation** — Phases 9+ (planned)
+- ✅ **v1.3 Joint Birthday** — Phases 7–8 (shipped 2026-06-21)
+- ◆ **v2.0 Actual Invitation** — Phase 9 (planned)
 
 ## Phases
 
@@ -34,54 +34,64 @@
 
 </details>
 
-### ◆ v1.3 Joint Birthday (Phases 7–8 — In Progress)
+### ✅ v1.3 Joint Birthday (Phases 7–8 — SHIPPED 2026-06-21)
 
 **Goal:** Adapt the site for a joint 30th birthday celebration — two guest-facing passwords, RSVP records tagged by host, and updated German copy.
 
 - [x] **Phase 7: Dual-Password Auth & RSVP Backend** - Dual-password middleware, host_ref propagation, and D1 migration (completed 2026-06-21)
 - [x] **Phase 8: German Content Update** - Update all site copy to reflect joint celebration (completed 2026-06-21)
 
-### Phase 7: Dual-Password Auth & RSVP Backend
+### ◆ v2.0 Actual Invitation (Phase 9 — Blocked at production gate)
 
-**Goal**: Guests from either host's circle can access the site, and every RSVP is tagged with which host they belong to
-**Depends on**: Phase 6
-**Requirements**: AUTH-07, AUTH-08, RSVP-07, RSVP-08
+**Milestone Goal:** Turn the authenticated RSVP page into the formal German invitation, collect fresh attendance and group drink preferences, support next-day buffet brunch and job sign-up, and preserve existing RSVP history on the current Cloudflare Pages/Pages Functions, D1, and plain HTML/CSS/JavaScript stack.
+
+- [ ] **Phase 9: Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch** - Deliver the authenticated invitation, fresh RSVP round, reusable drink options, and described next-day brunch/job signup as one coherent guest workflow.
+
+### Phase 9: Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch
+**Goal**: Guests can use the authenticated invitation for a fresh attendance response, drink preferences, and next-day buffet brunch and job sign-up, while historical RSVP data remains intact on the current Cloudflare Pages/Pages Functions, D1, and plain HTML/CSS/JavaScript stack.
+**Depends on**: Phase 8
+**Requirements**: AUTH-09, INV-01, INV-02, INV-03, INV-04, RSVP-09, RSVP-10, DRINK-01, DRINK-02, DRINK-03, DRINK-04, BRUNCH-01, JOB-01, JOB-02, JOB-03, JOB-04, JOB-05
 **Success Criteria** (what must be TRUE):
+  1. Authenticated guests see the German joint-birthday invitation for 5 December at 17:00, configured venue/map details and park-entry directions; no street address or year is invented, private logistics remain behind authentication, and the optional buffet link appears only when configured.
+  2. Guests can submit coming or not-coming responses to a separate fresh-round D1 table; declines have no drink selection, and historical RSVP records remain unchanged.
+  3. Coming groups can select multiple fixed or catalogued drink options, submit safely reusable drink suggestions, and see the explanation that preferences are requests, not guarantees.
+  4. Coming guests can select one combined “Abbau & Brunch am nächsten Tag” option; there is no separate Brunch option, form, or special headcount, and guests declining the birthday cannot select it.
+  5. Guests can select Aufbau, Teilzeit Barkeeper nach Lust und Laune, Dinge, “Abbau & Brunch am nächsten Tag”, and “Getränkeeinkauf mit Auto (Freitag oder Samstag)”; each has a longer explanatory German description. Suggestions are shared only when selected in a submitted RSVP.
+  6. Job capacity limits are optional per option; Aufbau is capped at 15, capped options stop accepting sign-ups when full, and signing up for Abbau includes buffet brunch.
+**Plans**: 8/9 plans complete; Plan 09-05 remains halted at the production gate pending owner authorization (dependency-ordered)
 
-  1. A guest using `SITE_PASSWORD__0` can reach `/rsvp/` and is granted access
-  2. A guest using `SITE_PASSWORD__1` can reach `/rsvp/` and is granted access
-  3. A submitted RSVP record in D1 contains a `host_ref` column with value `0` or `1` matching which password was used — the password itself is never stored
-  4. Requests with an invalid or absent password are still rejected with 401
-
-**Plans**: 3 plans (2 waves)
+Plans:
 **Wave 1**
-
-- [x] 07-01-PLAN.md — D1 migration infrastructure + add host_ref column [Wave 1]
-- [x] 07-02-PLAN.md — Dual-password auth middleware + X-Host-Ref injection [Wave 1]
+- [x] 09-01: Add an additive D1 migration for the fresh yes/no RSVP table and a separate drink-options catalog; seed fixed options without changing historical RSVP rows.
 
 **Wave 2** *(blocked on Wave 1 completion)*
+- [x] 09-02: Add authenticated RSVP and drink-option endpoints, including decline-without-drinks behavior, safe validation, and unique reusable suggestions.
 
-- [x] 07-03-PLAN.md — RSVP API reads/validates X-Host-Ref and stores host_ref [Wave 2]
+**Wave 3** *(blocked on Wave 2 completion)*
+- [x] 09-03: Add authenticated invitation personalization for venue/map values, `PARK_ENTRY_DIRECTIONS`, and the optional `BUFFET_LIST_URL`.
 
-### Phase 8: German Content Update
+**Wave 4** *(blocked on Wave 3 completion)*
+- [x] 09-04: Complete the German invitation, accessible fresh RSVP form, multi-select drink control, separate suggestion form, and immediate selector updates.
 
-**Goal**: All visible site text reflects a shared celebration by two hosts, in German
-**Depends on**: Phase 7
-**Requirements**: CONT-01
-**Success Criteria** (what must be TRUE):
+**Wave 5** *(blocked on Wave 4 completion)*
+- [x] 09-06-PLAN.md: Add the additive job catalog and one end-to-end fixed-job allocation path, preserving historical RSVP data.
 
-  1. The hint page riddle refers to both hosts and a joint celebration (no single-host phrasing)
-  2. The save-the-date copy on `/rsvp/` reads as a joint birthday invitation in German
-  3. All other user-visible strings (labels, confirmations, decline page) are consistent with the joint-birthday framing
+**Wave 6** *(blocked on Wave 5 completion)*
+- [x] 09-07-PLAN.md: Enforce coming-only allocations, atomic capacity reservation, and selected-only drink/job suggestion publication.
 
-**Plans**: 1 plan (1 wave)
-**Wave 1**
+**Wave 7** *(blocked on Wave 6 completion)*
+- [x] 09-08-PLAN.md: Complete accessible job descriptions, optional attendee counts, staged suggestions, and partial-acceptance confirmation.
 
-- [x] 08-01-PLAN.md — Update hint page riddle, 401 inline riddle, and save-the-date body copy [Wave 1]
+**Wave 8** *(blocked on Wave 7 completion)*
+- [x] 09-09-PLAN.md: Verify all Phase 09 requirements and edge probes against isolated local Pages/D1, including concurrency and history preservation.
 
-### 📋 v2.0 Full Invitation (Planned)
+**Wave 9** *(blocked on Wave 8 completion)*
+- [ ] 09-05: Re-run all local checks, then preserve the merged-schema, confirmed-target, and explicit owner-authorization production gates.
+**UI hint**: yes
 
-*To be defined when venue is confirmed.*
+### 📋 v3.0 Event Day Experience (Planned)
+
+*To be defined after the invitation milestone is complete.*
 
 ---
 
@@ -91,3 +101,4 @@
 |-------|----------------|--------|-----------|
 | 7. Dual-Password Auth & RSVP Backend | 3/3 | Complete   | 2026-06-21 |
 | 8. German Content Update | 1/1 | Complete   | 2026-06-21 |
+| 9. Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch | 8/9 | Blocked | - |

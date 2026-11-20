@@ -1,0 +1,28 @@
+{
+  "contract": "1.0.0",
+  "flavor": "core",
+  "milestone": "v2.0 — Actual Invitation (Phase 9 — Blocked at production gate)",
+  "phases": [
+    {
+      "number": "7",
+      "name": "Dual-Password Auth & RSVP Backend",
+      "status": "complete"
+    },
+    {
+      "number": "8",
+      "name": "German Content Update",
+      "status": "complete"
+    },
+    {
+      "number": "9",
+      "name": "Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch",
+      "status": "pending"
+    }
+  ],
+  "next": {
+    "command": "/gsd-progress --next",
+    "label": "Advance to the next step",
+    "reason": "Phase 1 of 1 · 0% · executing"
+  },
+  "updated_at": "2026-11-15T20:58:42.762Z"
+}
