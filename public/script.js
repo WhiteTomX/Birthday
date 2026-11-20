@@ -136,7 +136,6 @@
     let isFull = false;
     if (option.max_capacity === null) {
       if (option.remaining !== null) throw new Error('Invalid uncapped job availability');
-      capacityStatus.textContent = 'Keine feste Begrenzung.';
     } else {
       if (
         !Number.isInteger(option.max_capacity)

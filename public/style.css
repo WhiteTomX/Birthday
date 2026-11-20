@@ -338,10 +338,7 @@ input[type="number"].error {
 }
 
 .job-option {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 96px;
-  align-items: center;
-  gap: 8px 16px;
+  position: relative;
   padding: 14px;
   background-color: var(--bg);
   border: 1px solid var(--border);
@@ -354,6 +351,7 @@ input[type="number"].error {
 
 .job-option-details {
   min-width: 0;
+  padding-right: 112px;
 }
 
 .job-option-details strong {
@@ -369,13 +367,21 @@ input[type="number"].error {
 }
 
 .job-option-capacity {
-  grid-column: 1;
+  margin-top: 4px;
+}
+
+.job-option-capacity:empty {
+  display: none;
 }
 
 .job-count-label {
+  position: absolute;
+  top: 14px;
+  right: 14px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  width: 96px;
   font-size: 14px;
   font-weight: 700;
   color: var(--text);
@@ -484,12 +490,21 @@ input[type="number"].error {
   }
 
   .job-option {
-    grid-template-columns: minmax(0, 1fr) 84px;
-    gap: 8px 12px;
     padding: 12px;
   }
 
+  .job-option-details {
+    padding-right: 96px;
+  }
+
+  .job-option-capacity {
+    margin-top: 2px;
+  }
+
   .job-count-label {
+    top: 12px;
+    right: 12px;
+    width: 84px;
     font-size: 13px;
   }
 
