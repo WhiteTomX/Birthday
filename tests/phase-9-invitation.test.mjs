@@ -73,20 +73,18 @@ test('renders configured invitation logistics as escaped text and a safe HTTPS m
   assert.doesNotMatch(html, /<!-- (?:VENUE_DETAILS|PARK_ENTRY_DIRECTIONS) -->/);
 });
 
-test('renders only a valid absolute HTTPS buffet URL without credentials', async () => {
+test('renders only a valid absolute HTTPS buffet link without credentials', async () => {
   const { html } = await getInvitation({
     BUFFET_LIST_URL: 'https://buffet.example/liste?group=party&view=1',
   });
 
-  assert.match(html, /class="event-callout"/);
-  assert.match(html, /Das Buffet gibt es schon bei der Feier/);
-  assert.match(html, /Was davon übrig bleibt, essen wir am nächsten Tag beim Brunch weiter/);
-  assert.match(html, /Wenn du etwas zum Buffet beitragen möchtest/);
-  assert.match(html, /href="https:\/\/buffet\.example\/liste\?group=party&amp;view=1"/);
-  assert.match(html, /Zur Mitbringliste/);
+  assert.match(
+    html,
+    /Tragt das bitte in die <a href="https:\/\/buffet\.example\/liste\?group=party&amp;view=1" target="_blank" rel="noopener noreferrer">Mitbringliste<\/a> ein\./,
+  );
 });
 
-test('omits absent, malformed, non-HTTPS, and credential-bearing buffet callouts', async (t) => {
+test('omits absent, malformed, non-HTTPS, and credential-bearing buffet links', async (t) => {
   for (const [label, value] of [
     ['unset', undefined],
     ['blank', '   '],
@@ -97,9 +95,9 @@ test('omits absent, malformed, non-HTTPS, and credential-bearing buffet callouts
     await t.test(label, async () => {
       const { html } = await getInvitation({ BUFFET_LIST_URL: value });
       assert.equal(
-        /event-callout|Buffet-Brunch am nächsten Tag|Zur Mitbringliste|<!-- BUFFET_LINK -->/.test(html),
+        /href="[^"]*buffet\.example|<a\b[^>]*>Mitbringliste<\/a>|<!-- BUFFET_LIST -->/.test(html),
         false,
-        'invalid buffet values must not produce an active callout',
+        'invalid buffet values must not produce an active link',
       );
     });
   }
@@ -111,9 +109,9 @@ test('omits a credential-bearing buffet URL', async () => {
   });
 
   assert.equal(
-    /event-callout|Buffet-Brunch am nächsten Tag|Zur Mitbringliste|href="[^"]*guest/.test(html),
+    /href="[^"]*guest|<a\b[^>]*>Mitbringliste<\/a>|<!-- BUFFET_LIST -->/.test(html),
     false,
-    'credential-bearing buffet values must not produce an active callout',
+    'credential-bearing buffet values must not produce an active link',
   );
 });
 
@@ -158,13 +156,14 @@ test('keeps venue and arrival details in the integrated invitation flow', () => 
   assert.ok(invitationSection.includes('<div class="invitation-copy">'));
   assert.equal(invitationSection.includes('<aside class="venue-note"'), false);
 
-  const buffetIndex = invitationSection.indexOf('<!-- BUFFET_LINK -->');
-  const venueIndex = invitationSection.indexOf('<!-- VENUE_DETAILS -->');
+  const buffetIndex = invitationSection.indexOf('<!-- BUFFET_LIST -->');
+  const venueIndex = invitationSection.indexOf('<!-- VENUE_NAME -->');
+  const mapIndex = invitationSection.indexOf('<!-- VENUE_MAP_URL -->');
   const directionsIndex = invitationSection.indexOf('<!-- PARK_ENTRY_DIRECTIONS -->');
   assert.ok(buffetIndex >= 0);
   assert.ok(venueIndex > buffetIndex);
-  assert.ok(venueIndex >= 0);
-  assert.ok(directionsIndex > venueIndex);
+  assert.ok(mapIndex > venueIndex);
+  assert.ok(directionsIndex > mapIndex);
 });
 
 test('keeps private logistics out of the public root and the date free of an invented year', () => {
