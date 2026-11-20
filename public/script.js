@@ -152,7 +152,7 @@
         item.classList.add('is-full');
       } else {
         const placeWord = option.remaining === 1 ? 'Platz' : 'Plätze';
-        capacityStatus.textContent = `Noch ${option.remaining} ${placeWord} frei; bei mehr Anmeldungen werden nur verfügbare Plätze bestätigt.`;
+        capacityStatus.textContent = `Noch ${option.remaining} ${placeWord} frei.`;
       }
     }
 
