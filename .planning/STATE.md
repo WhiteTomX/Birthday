@@ -6,10 +6,10 @@ current_phase: 09
 current_phase_name: Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch
 status: in_progress
 stopped_at: Completed 09-09-PLAN.md; 09-05 remains blocked at the production gate
-last_updated: "2026-11-16T12:05:52.302Z"
-last_activity: 2026-11-15
+last_updated: "2026-11-20T17:57:31.934Z"
+last_activity: 2026-11-20
 last_activity_desc: Plan 09-09 local Pages/D1 verification passed; Plan 09-05 remains blocked at the production gate
-state_head: fd0db4b519056693e8e2be5d7d4cde986f440cbe
+state_head: 010643089ac0f8453964e8d4a686f75750a9a2e9
 progress:
   total_phases: 1
   completed_phases: 0
@@ -32,7 +32,7 @@ See: .planning/PROJECT.md (updated 2026-11-14)
 Phase: 09 (Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch) — BLOCKED AT PRODUCTION GATE
 Plan: 8 of 9 complete; Plan 09-05 remains next and blocked on its production gates
 Status: Local verification complete; production changes remain behind explicit authorization and merged-schema preconditions
-Last activity: 2026-11-15 — Plan 09-09 local Pages/D1 checks passed; Plan 09-05 remains blocked
+Last activity: 2026-11-20 — Completed quick task 261120-pyu: host-0 date-gated birthday notice and optional Live-Standort link
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -88,6 +88,7 @@ v1.0 complete. v1.1 complete. v1.2 complete. v1.3 complete (shipped 2026-06-21).
 | 3 | Make buffet brunch details prominent above the location | 2026-11-16 | 0602363 | — |
 | 4 | Clarify buffet is served at the party and leftovers are reused next day | 2026-11-16 | 054d216 | — |
 | 5 | Use Helfen for user-facing RSVP help labels and place suggestions below options | 2026-11-16 | fd0db4b | — |
+| 261120-pyu | Host 0 birthday notice and optional Live-Standort link | 2026-11-20 | 0106430 | [261120-pyu-for-host-0-show-the-supplied-rsvp-messag](./quick/261120-pyu-for-host-0-show-the-supplied-rsvp-messag/) |
 
 ## Session Continuity
 
