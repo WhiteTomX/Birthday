@@ -27,6 +27,10 @@ requirements-completed: [QUICK-01]
 
 duration: 5min
 completed: 2026-06-21
+audit_acknowledged:
+  milestone: v2.0
+  at: 2026-11-20
+  status: unknown
 ---
 
 # Quick Task 260621-kyk: Update Workflow to Include Migration Steps Summary
