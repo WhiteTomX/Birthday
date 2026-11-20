@@ -659,11 +659,23 @@ test('renders job descriptions safely and communicates full, partial, and uncapp
   assert.equal(jobItems[1].children[0].children[1].textContent, maliciousDescription);
   assert.deepEqual(jobItems[1].children[0].children[1].children, []);
   assert.equal(counts[2].disabled, false);
-  assert.match(jobItems[2].textContent, /Keine feste Begrenzung/);
+  assert.doesNotMatch(jobItems[2].textContent, /Keine feste Begrenzung/);
   assert.doesNotMatch(jobItems[2].textContent, /Keine Plätze mehr frei/);
+  assert.equal(counts[2].getAttribute('aria-label'), 'Anzahl für Uncapped job');
+  assert.deepEqual(
+    counts[2].getAttribute('aria-describedby').split(' '),
+    [jobItems[2].children[0].children[1].id, jobItems[2].children[1].id],
+  );
+  assert.equal(jobItems[2].children[1].getAttribute('role'), 'status');
   assert.match(styles, /\.job-options/);
-  assert.match(styles, /\.job-option/);
-  assert.match(styles, /\.job-option-capacity/);
+  assert.match(styles, /\.job-option\s*\{[^}]*position:\s*relative/);
+  assert.match(styles, /\.job-option-details\s*\{[^}]*padding-right:\s*112px/);
+  assert.match(styles, /\.job-option-capacity\s*\{[^}]*margin-top:\s*4px/);
+  assert.match(styles, /\.job-count-label\s*\{[^}]*position:\s*absolute[^}]*top:\s*14px[^}]*right:\s*14px[^}]*width:\s*96px/);
+  const mobileJobStyles = styles.match(/@media \(max-width: 599px\) \{([\s\S]*)$/)?.[1] ?? '';
+  assert.match(mobileJobStyles, /\.job-option-details\s*\{[^}]*padding-right:\s*96px/);
+  assert.match(mobileJobStyles, /\.job-option-capacity\s*\{[^}]*margin-top:\s*2px/);
+  assert.match(mobileJobStyles, /\.job-count-label\s*\{[^}]*width:\s*84px/);
 });
 
 test('renders all six fixed jobs in catalog order with one combined cleanup and brunch choice', async () => {
