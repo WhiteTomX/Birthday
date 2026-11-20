@@ -32,7 +32,7 @@ See: .planning/PROJECT.md (updated 2026-11-14)
 Phase: 09 (Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch) — BLOCKED AT PRODUCTION GATE
 Plan: 8 of 9 complete; Plan 09-05 remains next and blocked on its production gates
 Status: Local verification complete; production changes remain behind explicit authorization and merged-schema preconditions
-Last activity: 2026-11-20 — Completed quick task 261120-pyu: host-0 date-gated birthday notice and optional Live-Standort link
+Last activity: 2026-11-20 — Completed quick task 261120-pyu; aligned RSVP tests with the current template and passed the full invitation suite
 
 Progress: [░░░░░░░░░░] 0%
 

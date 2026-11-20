@@ -39,20 +39,20 @@ status: complete
 - Restricted rendering to `X-Host-Ref: 0`; invalid dates and missing identity fail closed.
 - Escaped the optional HTTPS URL and linked only “Live-Standort.”
 - Added response-level tests for date boundaries, isolation, URL validation, response headers, and marker removal.
+- Updated stale buffet-link and invitation-layout assertions to match the current RSVP template.
+- Added the user-provided local settings to ignored `.dev.vars`; no production configuration was changed.
 
 ## Task Commits
 
 1. **RED tests** - `8e78a0c` (`test(261120-pyu): add host 0 birthday notice regression coverage`)
 2. **GREEN implementation** - `0106430` (`feat(261120-pyu): show host 0 birthday RSVP notice`)
+3. **Template-aligned tests** - `0583ce1` (`test(261120-pyu): align invitation tests with current template`)
 
 ## Validation
 
 - RED evidence: `RED_EVIDENCE_OK`; the target test failed specifically because the notice was absent.
 - Passed: `node --experimental-default-type=module --test --test-name-pattern="host 0 birthday|Live-Standort" tests/phase-9-invitation.test.mjs` — 16 passed.
-- **Known baseline failures:** The full command `node --experimental-default-type=module --test tests/phase-9-invitation.test.mjs` finishes with 33 passing and 2 failing tests. The failures are pre-existing invitation-template expectations unrelated to this notice and were confirmed in `origin/invitation`:
-  - `renders only a valid absolute HTTPS buffet URL without credentials` expects an `event-callout` absent from the current `public/rsvp/index.html`.
-  - `keeps venue and arrival details in the integrated invitation flow` expects `BUFFET_LINK` and `VENUE_DETAILS` markers absent from the current template.
-- Those unrelated expectations were left unchanged; all tests covering this task pass.
+- Passed: `node --experimental-default-type=module --test tests/phase-9-invitation.test.mjs` — 35 passed.
 
 ## Deviations from Plan
 
@@ -67,7 +67,7 @@ status: complete
 
 - RED: `8e78a0c`; machine-validated intentional assertion failure.
 - GREEN: `0106430`; all host-0 notice tests pass.
-- Feature-specific tests pass. The full invitation test file still reports the two pre-existing template-expectation failures listed above.
+- The full invitation test file passes after aligning the stale expectations with the current template.
 
 ## User Setup Required
 

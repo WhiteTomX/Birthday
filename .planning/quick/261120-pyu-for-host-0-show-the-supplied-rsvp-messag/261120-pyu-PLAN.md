@@ -71,7 +71,7 @@ This task is separate from Phase 09 and does not change Phase 09 plans, ROADMAP.
     First extend `tests/phase-9-invitation.test.mjs` with response-level cases that set `X-Host-Ref` on the test Request and exercise the current UTC date boundary, German date rendering, host 1 isolation, missing identity, invalid dates, and valid/missing/unsafe URL values. Assert the exact notice copy with `{{date}}` replaced by the German-rendered date: `An meinem Geburtstag ({{date}}) bin ich ausnahmsweise in der Stadt. Weiß noch nicht, was ich mache. Ich teile wieder einen Link mit meinem Live-Standort.` For a valid URL, assert only `Live-Standort` is an anchor; otherwise assert the sentence remains present and unlinked. Then add a dedicated marker within the invitation copy in `public/rsvp/index.html`; in `functions/rsvp/index.js`, replace that marker with generated markup only when the incoming `X-Host-Ref` is exactly `"0"` and the configured date is a real strict `YYYY-MM-DD` value greater than or equal to today's UTC date. Format it with `Intl.DateTimeFormat('de-DE', ...)` using UTC so date-only configuration is stable. Build the sentence from the supplied exact copy, substituting the formatted date; use the existing HTTPS URL validator and HTML escaping for the optional anchor, and keep the text unlinked if URL validation fails. Replace the marker with an empty string for other hosts or invalid/missing dates. Do not default an absent host header to host 0, do not edit `.dev.vars`, `wrangler.jsonc`, production settings, Phase 09 plans, or ROADMAP.md, and do not contact remote services.
   </action>
   <verify>
-    <automated>node --experimental-default-type=module --test --test-name-pattern="host 0 birthday|Live-Standort" tests/phase-9-invitation.test.mjs</automated>
+    <automated>node --experimental-default-type=module --test tests/phase-9-invitation.test.mjs</automated>
   </verify>
   <done>The RSVP page renders the exact date-gated notice only for host 0; German date output and optional HTTPS-only linking are covered by passing tests, and host 1, missing identity, invalid dates, and unsafe or absent URLs behave as specified.</done>
 </task>
@@ -99,8 +99,7 @@ Security level: OWASP ASVS 1; block on unmitigated high-severity threats.
 </threat_model>
 
 <verification>
-- `node --experimental-default-type=module --test --test-name-pattern="host 0 birthday|Live-Standort" tests/phase-9-invitation.test.mjs`
-- The full invitation test file has two pre-existing failures: its buffet/callout expectations are absent from both the base-branch template and current template.
+- `node --experimental-default-type=module --test tests/phase-9-invitation.test.mjs`
 - Confirm the implementation and test diff contains no production configuration, remote-operation, Phase 09 plan, or ROADMAP changes.
 </verification>
 
