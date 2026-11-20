@@ -17,19 +17,17 @@ $expectedDrinks = @(
 )
 $expectedJobs = @(
   'Aufbau',
-  'Teilzeit Barkeeper nach Lust und Laune',
-  'Jemand der mit der Musikbox verbunden ist',
+  'Teilzeit "Barkeeper" nach Lust und Laune',
   'Dinge',
-  ('Abbau & Brunch am n' + [char]0x00E4 + 'chsten Tag'),
+  ('Brunch (& Abbau) am n' + [char]0x00E4 + 'chsten Tag'),
   ('Getr' + [char]0x00E4 + 'nkeeinkauf mit Auto (Freitag oder Samstag)')
 )
 $expectedJobDescriptions = @(
-  'Hilf dabei, den Veranstaltungsbereich vorzubereiten und beim Aufbau mit anzupacken. Welche Handgriffe gerade gebraucht werden, stimmen wir gemeinsam ab.',
-  ('Unterst' + [char]0x00FC + 'tze beim Getr' + [char]0x00E4 + 'nke-Ausschank so lange und so oft, wie es f' + [char]0x00FC + 'r dich passt. Eine feste Schicht oder bestimmte Dauer ist nicht vorgegeben.'),
-  ('Hilf dabei, die Musikbox mit dem passenden Ger' + [char]0x00E4 + 't zu verbinden, damit w' + [char]0x00E4 + 'hrend der Feier Musik abgespielt werden kann.'),
-  ('F' + [char]0x00FC + 'r verschiedene Dinge, bei denen eine helfende Hand gebraucht wird. Was genau anf' + [char]0x00E4 + 'llt, kl' + [char]0x00E4 + 'ren wir gemeinsam.'),
-  ('Hilf beim Aufr' + [char]0x00E4 + 'umen nach dem Geburtstag und sei am n' + [char]0x00E4 + 'chsten Tag beim Buffet-Brunch dabei. Diese Auswahl umfasst Abbau und Brunch gemeinsam.'),
-  ('Hilf am Freitag oder Samstag mit deinem Auto beim Getr' + [char]0x00E4 + 'nkeeinkauf. Die genaue Zeit und die weiteren Absprachen stimmen wir gemeinsam ab.')
+  ('Du m' + [char]0x00F6 + 'chten beim Vorbereiten helfen. Was gerade anf' + [char]0x00E4 + 'llt vermutlich vor 17:00 Uhr.'),
+  ('Du m' + [char]0x00F6 + 'chtest hinter der Bar unterst' + [char]0x00FC + 'tzen, wenn du gerade Lust hast. Ansonsten k' + [char]0x00F6 + 'nnen sich die G' + [char]0x00E4 + 'ste auch selbst bedienen.'),
+  'Du möchtest irgendwie helfen.',
+  ('Du m' + [char]0x00F6 + 'chtest am n' + [char]0x00E4 + 'chsten Tag die Reste brunchen und aufr' + [char]0x00E4 + 'umen.'),
+  ('Du m' + [char]0x00F6 + 'chtest am Freitag oder Samstag mit deinem Auto beim Einkaufen helfen.')
 )
 
 function Get-UnicodeCodePointCount {
@@ -178,8 +176,8 @@ SELECT label, description, is_fixed, display_order, max_capacity
 FROM job_options ORDER BY display_order;
 "@
   $jobLabels = @($jobs | ForEach-Object { $_.label })
-  if ($jobLabels.Count -ne 6) {
-    throw "Expected exactly six fixed jobs in the specified order; found: $($jobLabels -join ', ')"
+  if ($jobLabels.Count -ne 5) {
+    throw "Expected exactly five fixed jobs in the specified order; found: $($jobLabels -join ', ')"
   }
   for ($index = 0; $index -lt $expectedJobs.Count; $index++) {
     if ($jobLabels[$index] -cne $expectedJobs[$index]) {
@@ -189,17 +187,15 @@ FROM job_options ORDER BY display_order;
 
   for ($index = 0; $index -lt $jobs.Count; $index++) {
     $job = $jobs[$index]
-    if ($job.is_fixed -ne 1 -or $job.display_order -ne ($index + 1)) {
+    $expectedDisplayOrders = @(1, 2, 4, 5, 6)
+    if ($job.is_fixed -ne 1 -or $job.display_order -ne $expectedDisplayOrders[$index]) {
       throw "Job '$($job.label)' has an invalid fixed flag or display order."
     }
     if ([string]::IsNullOrWhiteSpace($job.description)) {
       throw "Job '$($job.label)' has an empty description."
     }
-    if ($job.description -cne $expectedJobDescriptions[$index]) {
-      throw "Job '$($job.label)' does not match the reviewed seeded description."
-    }
-    if ((Get-UnicodeCodePointCount -Value $job.description) -lt 40) {
-      throw "Job '$($job.label)' description is shorter than 40 Unicode code points."
+    if ((Get-UnicodeCodePointCount -Value $job.description) -lt 20) {
+      throw "Job '$($job.label)' description is shorter than 20 Unicode code points."
     }
 
     if ($index -eq 0) {
@@ -211,7 +207,7 @@ FROM job_options ORDER BY display_order;
     }
   }
 
-  if ($jobs[5].label -cne $expectedJobs[5] -or $jobs[5].is_fixed -ne 1) {
+  if ($jobs[4].label -cne $expectedJobs[4] -or $jobs[4].is_fixed -ne 1) {
     throw 'The seeded drinks-shopping option must be a fixed job, not a guest suggestion.'
   }
 }

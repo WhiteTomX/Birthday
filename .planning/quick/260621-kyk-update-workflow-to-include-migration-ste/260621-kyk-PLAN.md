@@ -48,18 +48,12 @@ Output: Updated CLAUDE.md with fixed credential references and a new D1 Migratio
   <action>
     Make three targeted edits to CLAUDE.md:
 
-    1. **"Local Dev Server" section** — change the credential parenthetical on the second line of the section body from:
-       `credentials come from `.dev.vars` (`SITE_PASSWORD=geburtstag1`)`
-       to:
-       `credentials come from `.dev.vars` (`SITE_PASSWORD__0=geburtstag1`, `SITE_PASSWORD__1=geburtstag2` — either password grants access)`
+    1. **"Local Dev Server" section** — change the credential parenthetical on the second line of the section body.
 
     2. **"Auth for Local Testing" section** — update the opening sentence from:
-       `Password: `geburtstag1` (from `.dev.vars`). Username can be anything.`
+       `Password: (from `.dev.vars`). Username can be anything.`
        to:
-       `Passwords (from `.dev.vars`): `SITE_PASSWORD__0=geburtstag1` or `SITE_PASSWORD__1=geburtstag2`. Either password grants access. Username can be anything.`
-
-       Also update both occurrences of `geburtstag1` in the two-step code block example — they reference the old single password. Replace with `geburtstag1` (still valid as password 0, no change needed there, but add a comment):
-       Keep `geburtstag1` in the example URLs — it remains a valid password — but add a comment after the block noting that `geburtstag2` works equally.
+       `Passwords (from `.dev.vars`). Either password grants access. Username can be anything.`
 
     3. **New "D1 Migrations" section** — add immediately before the "## Stack" section:
 

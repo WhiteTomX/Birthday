@@ -15,14 +15,14 @@ updated: 2026-06-21T16:45:00Z
 ### 1. Auth with SITE_PASSWORD__0 → RSVP stores host_ref=0
 
 expected: |
-  Authenticate with geburtstag1 (SITE_PASSWORD__0). Submit a valid RSVP.
+  Authenticate with SITE_PASSWORD__0. Submit a valid RSVP.
   Expected: 200 response; D1 row with host_ref=0.
 result: pass
 
 ### 2. Auth with SITE_PASSWORD__1 → RSVP stores host_ref=1
 
 expected: |
-  Authenticate with geburtstag2 (SITE_PASSWORD__1). Submit a valid RSVP.
+  Authenticate with (SITE_PASSWORD__1). Submit a valid RSVP.
   Expected: 200 response; D1 row with host_ref=1.
 result: pass
 

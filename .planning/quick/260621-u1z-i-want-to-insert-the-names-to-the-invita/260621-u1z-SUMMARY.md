@@ -53,7 +53,7 @@ completed: 2026-06-21
 ## Accomplishments
 - Created `functions/rsvp/index.js` Pages Function that intercepts GET /rsvp/ and personalises the opening invitation line
 - INVITE_NAME__0 and INVITE_NAME__1 env vars added to .dev.vars for local development
-- Verified locally: password `geburtstag1` shows "Thimo & Lena werden 30.", password `geburtstag2` shows "Thimo & Lena werden 30.", fallback to "Wir werden 30." confirmed when env var absent
+- Verified locally: shows "Thimo & Lena werden 30.", for both passwords, fallback to "Wir werden 30." confirmed when env var absent
 
 ## Task Commits
 

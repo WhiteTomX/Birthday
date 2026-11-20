@@ -8,7 +8,7 @@ requires:
   - phase: 09-04
     provides: Accessible authenticated RSVP form and fresh RSVP API
 provides:
-  - Separate D1 job catalog with six fixed options and job-specific descriptions
+  - Separate D1 job catalog with five fixed options and job-specific descriptions
   - Atomic fresh-RSVP job allocations with capped-place acceptance
   - Authenticated job catalog API and accessible capacity-aware controls
 affects: [09-07, 09-08, 09-09, jobs, brunch]
@@ -47,14 +47,14 @@ requirements-completed: [BRUNCH-01, JOB-01, JOB-02, JOB-03, JOB-05]
 
 coverage:
   - id: D1
-    description: "An additive D1 migration seeds the six fixed jobs, their German descriptions, and Aufbau's 15-person cap without changing historical RSVP data."
+    description: "An additive D1 migration seeds the five fixed jobs, their German descriptions, and Aufbau's 15-person cap without changing historical RSVP data."
     requirement: JOB-01
     verification:
       - kind: e2e
         ref: tests/phase-9-jobs-e2e.test.mjs#traces a fixed job allocation through authenticated Pages and isolated local D1
         status: pass
       - kind: integration
-        ref: "Isolated local D1 seed audit: six fixed labels, descriptions >=40 Unicode code points, only Aufbau capped at 15"
+        ref: "Isolated local D1 seed audit: five fixed labels, descriptions >=40 Unicode code points, only Aufbau capped at 15"
         status: pass
     human_judgment: false
   - id: D2
@@ -119,7 +119,7 @@ status: complete
 
 ## Accomplishments
 
-- Added migration 0003 with six fixed jobs, German descriptions, one capped job, and coming-only allocation guards; historical RSVP rows remain unchanged.
+- Added migration 0003 with five fixed jobs, German descriptions, one capped job, and coming-only allocation guards; historical RSVP rows remain unchanged.
 - Extended fresh RSVP persistence to validate selected jobs, write assignments in the RSVP batch, and return requested versus accepted counts.
 - Added the authenticated job catalog endpoint and accessible per-job count controls with safe descriptions and full, partial, and uncapped availability.
 - Added a local Pages/D1 tracer plus API and UI coverage for validation, ordering, descriptions, availability, and partial acceptance.
@@ -133,7 +133,7 @@ status: complete
 
 ## Files Created/Modified
 
-- `migrations/0003_job_catalog.sql` - Separate job options and allocation tables, guards, index, and six fixed seeds.
+- `migrations/0003_job_catalog.sql` - Separate job options and allocation tables, guards, index, and five fixed seeds.
 - `functions/api/fresh-rsvp.js` - Optional job validation, capacity-aware batch inserts, and accepted-count response.
 - `functions/api/job-options.js` - Authenticated catalog and availability response in deterministic order.
 - `public/rsvp/index.html` - Coming-only job controls within the RSVP form.
@@ -168,7 +168,7 @@ Plan 09-07 can proceed with selected-only suggestion publication and capacity ed
 ## Self-Check: PASSED
 
 - `node --test tests/phase-9-jobs-e2e.test.mjs tests/phase-9-api.test.mjs tests/phase-9-ui.test.mjs` passed (53 tests).
-- An isolated local D1 audit confirmed exactly six fixed labels, all descriptions exceed 40 Unicode code points, and only Aufbau has capacity 15.
+- An isolated local D1 audit confirmed exactly five fixed labels, all descriptions exceed 40 Unicode code points, and only Aufbau has capacity 15.
 - Both TDD RED evidence checks returned `RED_EVIDENCE_OK`; task GREEN checks passed.
 - No remote command ran; `git diff --check` passed.
 

@@ -43,7 +43,7 @@ completed: 2026-06-21
 
 ## Accomplishments
 - Updated "Local Dev Server" section to show dual-password format from `.dev.vars`
-- Updated "Auth for Local Testing" section with both passwords and a note that `geburtstag2` works equally
+- Updated "Auth for Local Testing" section with both passwords
 - Added "D1 Migrations" section with `wrangler d1 migrations apply birthday-rsvps --local` and production command
 
 ## Task Commits
@@ -54,7 +54,7 @@ completed: 2026-06-21
 - `CLAUDE.md` - Updated credential references to dual-password format; added D1 Migrations section
 
 ## Decisions Made
-- Kept `geburtstag1` as the example URL credential (still valid as password 0) and added a post-block note that `geburtstag2` works equally — avoids breaking the visual example while conveying both passwords are valid.
+- Kept PASSWORD as the example URL credential (still valid as password 0) — avoids breaking the visual example while conveying both passwords are valid.
 
 ## Deviations from Plan
 None - plan executed exactly as written.

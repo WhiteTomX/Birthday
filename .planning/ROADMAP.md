@@ -56,7 +56,7 @@
   2. Guests can submit coming or not-coming responses to a separate fresh-round D1 table; declines have no drink selection, and historical RSVP records remain unchanged.
   3. Coming groups can select multiple fixed or catalogued drink options, submit safely reusable drink suggestions, and see the explanation that preferences are requests, not guarantees.
   4. Coming guests can select one combined “Abbau & Brunch am nächsten Tag” option; there is no separate Brunch option, form, or special headcount, and guests declining the birthday cannot select it.
-  5. Guests can select Aufbau, Teilzeit Barkeeper nach Lust und Laune, Jemand der mit der Musikbox verbunden ist, Dinge, “Abbau & Brunch am nächsten Tag”, and “Getränkeeinkauf mit Auto (Freitag oder Samstag)”; each has a longer explanatory German description. Suggestions are shared only when selected in a submitted RSVP.
+  5. Guests can select Aufbau, Teilzeit Barkeeper nach Lust und Laune, Dinge, “Abbau & Brunch am nächsten Tag”, and “Getränkeeinkauf mit Auto (Freitag oder Samstag)”; each has a longer explanatory German description. Suggestions are shared only when selected in a submitted RSVP.
   6. Job capacity limits are optional per option; Aufbau is capped at 15, capped options stop accepting sign-ups when full, and signing up for Abbau includes buffet brunch.
 **Plans**: 8/9 plans complete; Plan 09-05 remains halted at the production gate pending owner authorization (dependency-ordered)
 

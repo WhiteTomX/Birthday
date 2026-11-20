@@ -575,15 +575,6 @@ test('returns fixed jobs before stable suggestions with draft descriptions and c
       remaining: null,
     },
     {
-      id: 'musikbox',
-      label: 'Jemand der mit der Musikbox verbunden ist',
-      description: 'Hilf dabei, die Musikbox mit dem passenden Gerät zu verbinden, damit während der Feier Musik abgespielt werden kann.',
-      is_fixed: 1,
-      max_capacity: null,
-      assigned_count: 0,
-      remaining: null,
-    },
-    {
       id: 'dinge',
       label: 'Dinge',
       description: 'Für verschiedene Dinge, bei denen eine helfende Hand gebraucht wird. Was genau anfällt, klären wir gemeinsam.',
@@ -594,7 +585,7 @@ test('returns fixed jobs before stable suggestions with draft descriptions and c
     },
     {
       id: 'abbau-brunch',
-      label: 'Abbau & Brunch am nächsten Tag',
+      label: 'Brunch (& Abbau) am nächsten Tag',
       description: 'Hilf beim Aufräumen nach dem Geburtstag und sei am nächsten Tag beim Buffet-Brunch dabei. Diese Auswahl umfasst Abbau und Brunch gemeinsam.',
       is_fixed: 1,
       max_capacity: null,
@@ -637,9 +628,8 @@ test('returns fixed jobs before stable suggestions with draft descriptions and c
   assert.deepEqual(payload.options.map(({ label }) => label), [
     'Aufbau',
     'Teilzeit Barkeeper nach Lust und Laune',
-    'Jemand der mit der Musikbox verbunden ist',
     'Dinge',
-    'Abbau & Brunch am nächsten Tag',
+    'Brunch (& Abbau) am nächsten Tag',
     'Getränkeeinkauf mit Auto (Freitag oder Samstag)',
     'Alternative',
     'Zebra',

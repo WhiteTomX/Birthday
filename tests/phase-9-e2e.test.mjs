@@ -319,8 +319,12 @@ test('integrates authenticated invitation, RSVP, drink reuse, and isolated local
       }
       return html;
     }));
-    if (invitationResponses[0] !== invitationResponses[1]) {
-      throw new Error('Both host passwords did not receive the same invitation.');
+    const normalizeHostNotice = (html) => html.replace(
+      /<p class="host-0-birthday-notice">.*?<\/p>/,
+      '',
+    );
+    if (normalizeHostNotice(invitationResponses[0]) !== normalizeHostNotice(invitationResponses[1])) {
+      throw new Error('Both host passwords did not receive the same personalized invitation.');
     }
     const invitationHtml = invitationResponses[0];
     if (devVars.get('VENUE_NAME') && !invitationHtml.includes(escapeHtml(devVars.get('VENUE_NAME')))) {
@@ -332,8 +336,19 @@ test('integrates authenticated invitation, RSVP, drink reuse, and isolated local
     if (devVars.get('PARK_ENTRY_DIRECTIONS') && !invitationHtml.includes(escapeHtml(devVars.get('PARK_ENTRY_DIRECTIONS')))) {
       throw new Error('The configured park-entry directions are missing from the authenticated invitation.');
     }
-    if (/event-callout|Zum Buffetbeitrag/.test(invitationHtml)) {
-      throw new Error('A blank buffet URL rendered an optional buffet callout.');
+    const buffetUrl = devVars.get('BUFFET_LIST_URL')?.trim() ?? '';
+    let validInitialBuffetUrl = false;
+    try {
+      const parsedBuffetUrl = new URL(buffetUrl);
+      validInitialBuffetUrl = parsedBuffetUrl.protocol === 'https:'
+        && Boolean(parsedBuffetUrl.hostname)
+        && !parsedBuffetUrl.username
+        && !parsedBuffetUrl.password;
+    } catch {
+      // Invalid or absent URLs must omit the callout.
+    }
+    if (invitationHtml.includes('Mitbringliste') !== validInitialBuffetUrl) {
+      throw new Error('The optional buffet URL did not render according to its configuration.');
     }
 
     const catalogResponse = await request('/api/drink-suggestions', { password: hostPasswords[0] });
@@ -463,7 +478,7 @@ test('integrates authenticated invitation, RSVP, drink reuse, and isolated local
     const buffetResponse = await request('/rsvp/', { password: hostPasswords[0] });
     const buffetHtml = await buffetResponse.text();
     if (!buffetResponse.ok || !buffetHtml.includes('https://example.test/contribution')
-      || !/event-callout/.test(buffetHtml)) {
+      || !/Mitbringliste/.test(buffetHtml)) {
       throw new Error('A configured valid buffet URL did not render as the optional callout.');
     }
   } finally {

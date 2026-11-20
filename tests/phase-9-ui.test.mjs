@@ -668,7 +668,7 @@ test('renders job descriptions safely and communicates full, partial, and uncapp
   assert.match(mobileJobStyles, /\.job-count-label\s*\{[^}]*width:\s*84px/);
 });
 
-test('renders all six fixed jobs in catalog order with one combined cleanup and brunch choice', async () => {
+test('renders all fixed jobs in catalog order with one combined cleanup and brunch choice', async () => {
   const jobs = [
     {
       id: 'aufbau',
@@ -689,15 +689,6 @@ test('renders all six fixed jobs in catalog order with one combined cleanup and 
       remaining: null,
     },
     {
-      id: 'musikbox',
-      label: 'Jemand der mit der Musikbox verbunden ist',
-      description: 'Hilf dabei, die Musikbox mit einem passenden Gerät zu verbinden.',
-      is_fixed: true,
-      max_capacity: null,
-      assigned_count: 0,
-      remaining: null,
-    },
-    {
       id: 'dinge',
       label: 'Dinge',
       description: 'Hilf bei verschiedenen Dingen; was genau anfällt, klären wir gemeinsam.',
@@ -708,7 +699,7 @@ test('renders all six fixed jobs in catalog order with one combined cleanup and 
     },
     {
       id: 'abbau-brunch',
-      label: 'Abbau & Brunch am nächsten Tag',
+      label: 'Brunch (& Abbau) am nächsten Tag',
       description: 'Hilf beim Aufräumen nach dem Geburtstag und sei beim Buffet-Brunch dabei.',
       is_fixed: true,
       max_capacity: null,
@@ -829,28 +820,16 @@ test('leaves optional job counts blank and validates each assignment independent
         assigned_count: 0,
         remaining: 15,
       },
-      {
-        id: 'musikbox',
-        label: 'Jemand der mit der Musikbox verbunden ist',
-        description: 'Hilf beim Verbinden der Musikbox mit einem Gerät.',
-        is_fixed: true,
-        max_capacity: null,
-        assigned_count: 0,
-        remaining: null,
-      },
     ],
   });
   const counts = elements['job-options'].querySelectorAll('input[data-job-id]');
 
   assert.equal(counts[0].value, '');
   assert.equal(counts[0].min, '1');
-  assert.equal(counts[1].value, '');
-  assert.equal(counts[1].min, '1');
 
   elements.name.value = 'Mia';
   elements.attendees.value = '1';
   counts[0].value = '1';
-  counts[1].value = '1';
   radios[0].checked = true;
   await radios[0].dispatch('change');
   await elements['rsvp-form'].dispatch('submit');
@@ -863,7 +842,6 @@ test('leaves optional job counts blank and validates each assignment independent
     drinks: [],
     jobs: [
       { id: 'aufbau', count: 1 },
-      { id: 'musikbox', count: 1 },
     ],
   });
 });

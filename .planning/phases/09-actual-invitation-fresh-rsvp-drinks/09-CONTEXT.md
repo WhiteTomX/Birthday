@@ -8,7 +8,7 @@
 
 Deliver the authenticated German invitation, fresh coming/not-coming RSVP and group drink preferences, plus next-day buffet brunch and job sign-up in the existing Cloudflare Pages, Pages Functions, D1, and plain HTML/CSS/JavaScript stack. Keep `/` public and free of private logistics; keep the invitation and signup behind existing authentication; preserve historical RSVP rows.
 
-The next-day signup is one shared flow. The brunch/cleanup choice is a single job option named “Abbau & Brunch am nächsten Tag”; there is no separate Brunch option, form, or special headcount. Guests who want to attend the brunch select this combined option, which includes buffet brunch and the cleanup task. Other job choices include Aufbau, Teilzeit Barkeeper nach Lust und Laune, someone to connect to the music box, and Dinge. Job options may have optional capacity limits; Aufbau is capped at 15. Guests may suggest further drinks and jobs.
+The next-day signup is one shared flow. The brunch/cleanup choice is a single job option named “Abbau & Brunch am nächsten Tag”; there is no separate Brunch option, form, or special headcount. Guests who want to attend the brunch select this combined option, which includes buffet brunch and the cleanup task. Other job choices include Aufbau, Teilzeit Barkeeper nach Lust und Laune and Dinge. Job options may have optional capacity limits; Aufbau is capped at 15. Guests may suggest further drinks and jobs.
 
 </domain>
 
@@ -42,7 +42,7 @@ The next-day signup is one shared flow. The brunch/cleanup choice is a single jo
 ### Next-day brunch and jobs
 - **D-17:** Make “Abbau & Brunch am nächsten Tag” one combined job option. There is no separate Brunch option, form, or special brunch headcount.
 - **D-18:** Guests wanting to attend the next-day buffet brunch select the combined “Abbau & Brunch am nächsten Tag” option; that option includes both cleanup and buffet brunch.
-- **D-19:** Offer Aufbau (maximum 15 people), Teilzeit Barkeeper nach Lust und Laune, someone to connect to the music box, Dinge, “Abbau & Brunch am nächsten Tag”, and “Getränkeeinkauf mit Auto (Freitag oder Samstag)”.
+- **D-19:** Offer Aufbau (maximum 15 people), Teilzeit Barkeeper nach Lust und Laune, Dinge, “Abbau & Brunch am nächsten Tag”, and “Getränkeeinkauf mit Auto (Freitag oder Samstag)”.
 - **D-20:** One RSVP contact allocates party attendees by number across multiple selected jobs. Job assignments are optional, and the total assigned count may exceed the party size because one person may take multiple jobs.
 - **D-21:** Capacity is optional per job. A capped job closes when full; if only some requested places remain, accept those places and leave the rest unassigned.
 - **D-22:** A suggested job is staged for the current signup, selected there, and published for everyone only when the RSVP is submitted with it selected. Unselected or abandoned suggestions are not published. New suggestions are uncapped by default, and duplicate labels reuse the existing option.
@@ -114,7 +114,7 @@ Technical implementation details may follow existing project patterns, while pre
 
 - Event day is followed by a buffet brunch the next day.
 - The only brunch choice is one combined option, “Abbau & Brunch am nächsten Tag”; guests select it for the brunch and it includes cleanup.
-- Initial job options are Aufbau (maximum 15), Teilzeit Barkeeper nach Lust und Laune, someone to connect to the music box, Dinge, and “Abbau & Brunch am nächsten Tag”.
+- Initial job options are Aufbau (maximum 15), Teilzeit Barkeeper nach Lust und Laune, Dinge, and “Abbau & Brunch am nächsten Tag”.
 - Add “Getränkeeinkauf mit Auto (Freitag oder Samstag)”: help buy drinks on Friday or Saturday and provide a car; exact timing and logistics can be coordinated separately. Leave it uncapped.
 - Each job option should include a longer German explanation of the expected task. Draft descriptions for review, and keep the description for “Dinge” general rather than inventing a specific task.
 - Guests can propose additional drink and job options. A proposed option becomes shared only if included in a successfully submitted RSVP; it is selected in the current form and is not published if left unselected or abandoned.

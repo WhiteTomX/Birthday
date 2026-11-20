@@ -42,7 +42,7 @@ requirements-completed: [BRUNCH-01, JOB-01, JOB-02, JOB-03, JOB-04, JOB-05]
 
 coverage:
   - id: D1
-    description: "Coming guests see the six fixed jobs, their descriptions and capacity state, with independent optional counts; declines cannot use job controls."
+    description: "Coming guests see the five fixed jobs, their descriptions and capacity state, with independent optional counts; declines cannot use job controls."
     requirement: JOB-01
     verification:
       - kind: unit

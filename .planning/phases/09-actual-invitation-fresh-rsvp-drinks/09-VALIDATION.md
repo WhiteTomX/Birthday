@@ -50,7 +50,7 @@ created: "2026-11-14"
 | 09-05-01 | 09-05 | 9 | AUTH-09, INV-01–INV-04, RSVP-09–RSVP-10, DRINK-01–DRINK-04 | T-09-06 | Existing local invitation/drink flow and historical-row checks rerun after implementation | Pages/D1 E2E | `node --test --test-concurrency=1 tests/phase-9-e2e.test.mjs tests/phase-9-jobs-e2e.test.mjs` | Yes | ✅ pass |
 | 09-05-02 | 09-05 | 9 | AUTH-09, INV-01–INV-04, RSVP-09–RSVP-10, DRINK-01–DRINK-04, BRUNCH-01, JOB-01–JOB-05 | T-09-06, T-09-11 | Owner authorization names target and confirms configuration and draft-description review after final local checks | Blocking decision | N/A — human checkpoint | N/A | ⏸ blocked |
 | 09-05-03 | 09-05 | 9 | AUTH-09, RSVP-09 | T-09-06, T-09-11 | Only remaining Phase 09 migrations may apply after all merge/target/local gates; unrelated pending migrations stop | Production-only manual gate | `wrangler d1 migrations list birthday-rsvps --remote` — only after all preconditions | N/A | ⏸ blocked |
-| 09-06-01 | 09-06 | 5 | BRUNCH-01, JOB-01, JOB-02, JOB-03, JOB-05 | T-09-07 | One fixed Aufbau path, exact six seeds, coming-only and history-preserving D1 writes | Pages/D1 tracer | `node --test tests/phase-9-jobs-e2e.test.mjs` | Created by this task | ✅ pass |
+| 09-06-01 | 09-06 | 5 | BRUNCH-01, JOB-01, JOB-02, JOB-03, JOB-05 | T-09-07 | One fixed Aufbau path, exact five seeds, coming-only and history-preserving D1 writes | Pages/D1 tracer | `node --test tests/phase-9-jobs-e2e.test.mjs` | Created by this task | ✅ pass |
 | 09-06-02 | 09-06 | 5 | BRUNCH-01, JOB-01, JOB-05 | T-09-07 | Stable catalog order, descriptions, safe rendering, full/partial/uncapped display | API/UI unit | `node --test tests/phase-9-api.test.mjs tests/phase-9-ui.test.mjs` | Yes | ✅ pass |
 | 09-07-01 | 09-07 | 6 | RSVP-09, RSVP-10, BRUNCH-01, JOB-02, JOB-03 | T-09-08 | Per-job boundaries, aggregate counts above party size, atomic partial/full/uncapped reservations | API unit | `node --test tests/phase-9-api.test.mjs` | Yes | ✅ pass |
 | 09-07-02 | 09-07 | 6 | DRINK-02, DRINK-03, JOB-04 | T-09-08 | Staging no-write behavior, 80-code-point/Unicode boundaries, canonical duplicates, selected-only batch publish and rollback | API unit | `node --test tests/phase-9-api.test.mjs` | Yes | ✅ pass |
@@ -81,16 +81,16 @@ Every reported edge is assigned an explicit assertion or a named backstop below.
 | DRINK-03 | unclassified | Explicit: selected suggestions publish and associate atomically; unselected/abandoned/failed-batch labels do not persist; later authenticated reads reuse the canonical option in `09-07-02` / `09-09-01`. |
 | DRINK-04 | concurrency | Explicit: the neutral preference is absent and non-guarantee explanation is present; concurrent duplicate selected suggestions create one canonical row in `09-04-01` / `09-09-01`. |
 | BRUNCH-01 | unclassified | Explicit: exactly one combined Abbau/brunch option, no separate brunch control/headcount, and decline payload rejection in `09-06-01`, `09-08-01`, `09-09-01`. |
-| JOB-01 | unclassified | Explicit: exactly six fixed labels in D-19 order; drinks-shopping is seeded fixed data, not a suggestion, in `09-06-01` / `09-09-02`. |
+| JOB-01 | unclassified | Explicit: exactly five fixed labels in D-19 order; drinks-shopping is seeded fixed data, not a suggestion, in `09-06-01` / `09-09-02`. |
 | JOB-02 | boundary, precision | Explicit: each allocation is a positive integer no greater than party size; empty is valid; per-job counts are independent and total assignments may exceed the party in `09-07-01`, `09-08-01`. |
 | JOB-03 | boundary, adjacency, empty, ordering, precision | Explicit: Aufbau cap 15, available counts at zero/partial/full edges, exact `min(requested, remaining)`, uncapped jobs, stable catalog order, and parallel requests whose accepted sum stays at 15 in `09-06-02`, `09-07-01`, `09-09-01`. |
 | JOB-04 | empty, encoding | Explicit: trim/whitespace/NFC normalization, 80 versus 81 Unicode code-point boundaries (including supplementary characters), empty rejection, canonical duplicate reuse, and no-write staging in `09-07-02` / `09-09-01`. |
-| JOB-05 | adjacency, empty, ordering | Explicit: all six descriptions are nonempty German review drafts with a measurable longer-copy check, exact catalog order, general Dinge wording, and car/Friday-or-Saturday shopping description without invented timing/logistics in `09-06-02`, `09-09-02`. |
+| JOB-05 | adjacency, empty, ordering | Explicit: all five descriptions are nonempty German review drafts with a measurable length check, exact catalog order, general Dinge wording, and car/Friday-or-Saturday shopping description without invented timing/logistics in `09-06-02`, `09-09-02`. |
 
 ### Flagged assumptions and backstops
 
 - **A1 — uncapped representation:** `NULL` means uncapped; migration, API and catalog tests verify that representation for all fixed jobs except Aufbau.
-- **A2 — description review:** all six descriptions remain drafts until the owner reviews them at the preserved Plan 09-05 blocking checkpoint.
+- **A2 — description review:** all five descriptions remain drafts until the owner reviews them at the preserved Plan 09-05 blocking checkpoint.
 - **D1 SQL return shape:** accepted counts are read back for the just-created RSVP after the atomic batch; local D1 integration asserts the exact API response and persisted allocations.
 
 ---

@@ -17,7 +17,7 @@ Rewrote `functions/_middleware.js` to accept two host passwords and propagate th
 ## Tasks
 
 ### Task 1: Add both passwords to .dev.vars ✓
-Updated `.dev.vars` to define `SITE_PASSWORD__0=geburtstag1` and `SITE_PASSWORD__1=geburtstag2`. Removed the old single `SITE_PASSWORD=` key. File is gitignored — change was applied to the working tree only (as expected for secret files).
+Updated `.dev.vars` to define `SITE_PASSWORD__0` and `SITE_PASSWORD__1`. Removed the old single `SITE_PASSWORD=` key. File is gitignored — change was applied to the working tree only (as expected for secret files).
 
 ### Task 2: Rewrite middleware for dual-password auth + X-Host-Ref injection ✓
 Replaced the single-password check block in `functions/_middleware.js` with a dual-password check. After a successful match, constructs a modified request with `X-Host-Ref: 0|1` injected and calls `next({ request: modifiedRequest })`. The `unauthorizedResponse()` function and public-route allowlist are byte-for-byte identical to before.
@@ -40,12 +40,7 @@ Replaced the single-password check block in `functions/_middleware.js` with a du
 
 ## Note on .dev.vars
 
-`.dev.vars` is gitignored and cannot be committed. The orchestrator must manually apply the two-password change to the main checkout after this worktree merges:
-```
-SITE_PASSWORD__0=geburtstag1
-SITE_PASSWORD__1=geburtstag2
-```
-(Remove the old `SITE_PASSWORD=geburtstag1` line.)
+`.dev.vars` is gitignored and cannot be committed. The orchestrator must manually apply the two-password change to the main checkout after this worktree merges.
 
 ## Self-Check
 

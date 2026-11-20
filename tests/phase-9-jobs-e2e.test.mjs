@@ -331,7 +331,15 @@ test('traces a fixed job allocation through authenticated Pages and isolated loc
       assert.equal(response.headers.get('Cache-Control'), 'no-store');
       return response.text();
     }));
-    assert.equal(invitations[0], invitations[1], 'both host credentials must receive the same invitation');
+    const normalizeHostNotice = (html) => html.replace(
+      /<p class="host-0-birthday-notice">.*?<\/p>/,
+      '',
+    );
+    assert.equal(
+      normalizeHostNotice(invitations[0]),
+      normalizeHostNotice(invitations[1]),
+      'both host credentials must receive the same personalized invitation',
+    );
     const invitationHtml = invitations[0];
     for (const key of ['VENUE_NAME', 'VENUE_MAP_URL', 'PARK_ENTRY_DIRECTIONS']) {
       const value = devVars.get(key);
@@ -348,7 +356,7 @@ test('traces a fixed job allocation through authenticated Pages and isolated loc
     } catch {
       // An absent or invalid optional URL must not create an active callout.
     }
-    assert.equal(invitationHtml.includes('event-callout'), validBuffetUrl);
+    assert.equal(invitationHtml.includes('Mitbringliste'), validBuffetUrl);
     if (validBuffetUrl) assert.ok(invitationHtml.includes(buffetUrl));
 
     const drinkResponse = await request('/api/drink-suggestions', { password });
@@ -372,22 +380,21 @@ test('traces a fixed job allocation through authenticated Pages and isolated loc
     assert.equal(catalog.ok, true);
     assert.deepEqual(catalog.options.map(({ label }) => label), [
       'Aufbau',
-      'Teilzeit Barkeeper nach Lust und Laune',
-      'Jemand der mit der Musikbox verbunden ist',
+      'Teilzeit "Barkeeper" nach Lust und Laune',
       'Dinge',
-      'Abbau & Brunch am nächsten Tag',
+      'Brunch (& Abbau) am nächsten Tag',
       'Getränkeeinkauf mit Auto (Freitag oder Samstag)',
     ]);
     assert.ok(catalog.options.every(({ is_fixed, description }) => (
       is_fixed === true
       && typeof description === 'string'
-      && Array.from(description).length >= 40
-    )), 'all six fixed jobs must have a longer German description');
+      && Array.from(description).length >= 20
+    )), 'all fixed jobs must have a longer German description');
     assert.deepEqual(catalog.options.map(({ max_capacity }) => max_capacity), [
-      15, null, null, null, null, null,
+      15, null, null, null, null,
     ]);
     const thingsDescription = catalog.options.find(({ label }) => label === 'Dinge').description;
-    assert.match(thingsDescription, /gemeinsam|verschieden/i);
+    assert.match(thingsDescription, /irgendwie|gemeinsam|verschieden/i);
     assert.doesNotMatch(thingsDescription, /Einkauf|Getränke|Dekoration|Aufbau/);
     const shoppingDescription = catalog.options.find(({ label }) => (
       label === 'Getränkeeinkauf mit Auto (Freitag oder Samstag)'
@@ -395,7 +402,7 @@ test('traces a fixed job allocation through authenticated Pages and isolated loc
     assert.match(shoppingDescription, /Auto/i);
     assert.match(shoppingDescription, /Freitag|Samstag/i);
     assert.doesNotMatch(shoppingDescription, /\b\d{1,2}:\d{2}\b|Treffpunkt|Adresse/i);
-    assert.equal(catalog.options.filter(({ label }) => label === 'Abbau & Brunch am nächsten Tag').length, 1);
+    assert.equal(catalog.options.filter(({ label }) => label === 'Brunch (& Abbau) am nächsten Tag').length, 1);
 
     const declineResponse = await request('/api/fresh-rsvp', {
       password,
@@ -760,7 +767,7 @@ test('traces a fixed job allocation through authenticated Pages and isolated loc
       'SELECT label, max_capacity FROM job_options WHERE is_fixed = 1 ORDER BY display_order;',
     );
     assert.deepEqual(optionRows.map(({ label }) => label), catalog.options.map(({ label }) => label));
-    assert.deepEqual(optionRows.map(({ max_capacity }) => max_capacity), [15, null, null, null, null, null]);
+    assert.deepEqual(optionRows.map(({ max_capacity }) => max_capacity), [15, null, null, null, null]);
   } catch (error) {
     if (server) {
       let diagnostics = server.diagnosticOutput();

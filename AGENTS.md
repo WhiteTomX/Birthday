@@ -18,7 +18,7 @@ Start the local dev server with:
 wrangler pages dev --port 8788
 ```
 
-The server serves on `http://localhost:8788`. Auth is Basic Auth — credentials come from `.dev.vars` (`SITE_PASSWORD__0=geburtstag1`, `SITE_PASSWORD__1=geburtstag2` — either password grants access). Use `Authorization: Basic <base64(user:password)>` or navigate via browser (it will prompt).
+The server serves on `http://localhost:8788`. Auth is Basic Auth — credentials come from `.dev.vars`. Use `Authorization: Basic <base64(user:password)>` or navigate via browser (it will prompt).
 
 The RSVP form is at `http://localhost:8788/rsvp/`.
 
@@ -37,16 +37,16 @@ Only ask the user to verify manually for things that require physical access or 
 
 ## Auth for Local Testing
 
-The site uses Basic Auth enforced by `functions/_middleware.js`. Passwords (from `.dev.vars`): `SITE_PASSWORD__0=geburtstag1` or `SITE_PASSWORD__1=geburtstag2`. Either password grants access. Username can be anything.
+The site uses Basic Auth enforced by `functions/_middleware.js`. Passwords (from `.dev.vars`). Either password grants access. Username can be anything.
 
 **CRITICAL — Chrome DevTools MCP auth pattern:**
 
-Do NOT navigate directly to authenticated pages with credentials embedded in the URL (e.g. `http://x:geburtstag1@localhost:8788/rsvp/`). Chrome blocks all `fetch()` calls from pages loaded that way — relative URLs resolve to include the credentials, and Chrome throws `"Request cannot be constructed from a URL that includes credentials"`.
+Do NOT navigate directly to authenticated pages with credentials embedded in the URL (e.g. `http://x:Password@localhost:8788/rsvp/`). Chrome blocks all `fetch()` calls from pages loaded that way — relative URLs resolve to include the credentials, and Chrome throws `"Request cannot be constructed from a URL that includes credentials"`.
 
 Correct two-step pattern:
 
 ```
-1. navigate_page(url: 'http://x:geburtstag1@localhost:8788/rsvp/')  // authenticate — stores credentials in Chrome
+1. navigate_page(url: 'http://x:Password@localhost:8788/rsvp/')  // authenticate — stores credentials in Chrome
 2. navigate_page(url: 'http://localhost:8788/rsvp/')                    // load page cleanly — Chrome sends stored credentials, fetch works
 ```
 
