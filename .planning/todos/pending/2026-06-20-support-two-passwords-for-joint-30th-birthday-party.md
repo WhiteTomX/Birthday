@@ -6,6 +6,9 @@ resolves_phase: 7
 files:
   - functions/_middleware.js
   - public/index.html
+audit_acknowledged:
+  milestone: v2.0
+  at: 2026-11-20
 ---
 
 ## Problem

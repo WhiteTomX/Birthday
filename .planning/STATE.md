@@ -1,21 +1,21 @@
 ---
 gsd_state_version: "1.0"
 milestone: v2.0
-milestone_name: Actual Invitation (Phase 9 — Blocked at production gate)
+milestone_name: Actual Invitation
 current_phase: 09
 current_phase_name: Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch
-status: in_progress
-stopped_at: Completed 09-09-PLAN.md; 09-05 remains blocked at the production gate
-last_updated: "2026-11-20T18:26:01.486Z"
+status: shipped
+stopped_at: v2.0 milestone completed and production migrations applied
+last_updated: "2026-11-20T20:41:45+01:00"
 last_activity: 2026-11-20
-last_activity_desc: Plan 09-09 local Pages/D1 verification passed; Plan 09-05 remains blocked at the production gate
+last_activity_desc: v2.0 milestone shipped; PR 8 merged and production migrations applied
 state_head: 5c65f845e7b0de80157eea96e4ed149ed9f77396
 progress:
   total_phases: 1
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 9
-  completed_plans: 8
-  percent: 0
+  completed_plans: 9
+  percent: 100
 ---
 
 # Project State
@@ -29,18 +29,18 @@ See: .planning/PROJECT.md (updated 2026-11-14)
 
 ## Current Position
 
-Phase: 09 (Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch) — BLOCKED AT PRODUCTION GATE
-Plan: 8 of 9 complete; Plan 09-05 remains next and blocked on its production gates
-Status: Local verification complete; production changes remain behind explicit authorization and merged-schema preconditions
+Phase: 09 (Actual Invitation, Fresh RSVP, Drinks & Next-Day Brunch) — Complete
+Plan: 9 of 9 complete
+Status: Local verification complete; PR 8 merged; production migrations applied
 Last activity: 2026-11-20 — Completed quick task 261120-qtj; compacted RSVP job cards and removed redundant uncapped capacity copy
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██████████] 100%
 
 ## Progress
 
 ```
 v2.0 Actual Invitation
-Phase 9 [░░░░░░░░░░] Execution in progress; production gate remains
+Phase 9 [██████████] Complete and shipped
 ```
 
 v1.0 complete. v1.1 complete. v1.2 complete. v1.3 complete (shipped 2026-06-21).
@@ -73,11 +73,11 @@ v1.0 complete. v1.1 complete. v1.2 complete. v1.3 complete (shipped 2026-06-21).
 
 ## Pending Todos
 
-*(none)*
+*(none — legacy item acknowledged at v2.0 close)*
 
 ## Blockers / Concerns
 
-- Production must set `PARK_ENTRY_DIRECTIONS`; `BUFFET_LIST_URL` is optional and its link is hidden when unset
+- No active blockers. Production `PARK_ENTRY_DIRECTIONS` and optional `BUFFET_LIST_URL` remain deployment configuration values.
 
 ### Quick Tasks Completed
 
@@ -93,10 +93,10 @@ v1.0 complete. v1.1 complete. v1.2 complete. v1.3 complete (shipped 2026-06-21).
 
 ## Session Continuity
 
-Last session: 2026-11-15T20:59:25.037Z
-Stopped at: Completed 09-09-PLAN.md; Plan 09-05 remains blocked at the production gate
+Last session: 2026-11-20
+Stopped at: v2.0 milestone completed; PR 8 merged and production migrations applied
 Resume file: None
-Last activity: 2026-11-15 - Plan 09-09 local Pages/D1 verification passed; Plan 09-05 remains blocked
+Last activity: 2026-11-20 - v2.0 shipped
 
 ## Performance Metrics
 
@@ -120,12 +120,19 @@ Last activity: 2026-11-15 - Plan 09-09 local Pages/D1 verification passed; Plan 
 - [Phase 09]: Keep a separate job catalog from drink options. — Confirmed at the Plan 09-06 blocking architecture checkpoint.
 - [Phase 09]: Serialize local Pages/D1 integration tests. — Concurrent Wrangler test servers contend for ports/resources; serialized execution passed.
 
-### Blockers
-
-- Plan 09-05 remains last; its explicit owner-authorization, merged-schema, confirmed-target, and migration-list gates remain unchanged. No remote action was run.
 
 ## Accumulated Context
 
 ### Roadmap Evolution
 
 - Phase 09 edited: edited fields: title, goal, requirements, success_criteria
+
+### Deferred Items
+
+Items acknowledged and deferred at milestone close, most recent first:
+
+| Category | Item | Status | Deferred At | Milestone |
+|----------|------|--------|-------------|-----------|
+| quick_tasks | 260621-kyk-update-workflow-to-include-migration-ste | unknown | 2026-11-20 | v2.0 |
+| quick_tasks | 260621-u1z-i-want-to-insert-the-names-to-the-invita | unknown | 2026-11-20 | v2.0 |
+| todos | 2026-06-20-support-two-passwords-for-joint-30th-birthday-party.md | presence-only | 2026-11-20 | v2.0 |

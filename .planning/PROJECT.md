@@ -4,7 +4,7 @@
 
 A joint 30th birthday celebration website for two friends sharing the same birthday event, serving as the single source of truth. Password-protected RSVP collection supports two separate guest circles (each with their own password) while all guests join one shared party. Evolves into a full event information hub with venue details, photo uploads, games, and a wishlist.
 
-## Current Milestone: v2.0 Actual Invitation
+## Current Milestone: v2.0 Actual Invitation ✅ Shipped 2026-11-20
 
 **Goal:** Turn the authenticated RSVP page into the formal German invitation for the shared birthday, with confirmed event details, park access directions, a fresh RSVP round, group-level drink preferences, and next-day buffet brunch/job sign-up.
 
@@ -12,11 +12,13 @@ A joint 30th birthday celebration website for two friends sharing the same birth
 **Hosting:** Cloudflare Pages (free tier)  
 **Event:** 5 December at 17:00; year intentionally omitted  
 
-## Current State: v2.0 Actual Invitation — planning started 2026-11-14
+## Current State: v2.0 Actual Invitation — shipped 2026-11-20
 
 The venue is inside a park, so there is no street address. The invitation will use the existing environment-backed venue name and map link, plus park-entry directions from `PARK_ENTRY_DIRECTIONS`. An optional buffet contribution link will come from `BUFFET_LIST_URL`; neither secret value belongs in source control.
 
 The new RSVP round uses a separate D1 table so existing responses remain unchanged. Guests reconfirm whether they are coming, and coming groups may select multiple drink preferences. Drink and job suggestions are staged in the current form and become shared options only when the RSVP is submitted with them selected. The next-day signup includes the combined job option “Abbau & Brunch am nächsten Tag”, a drinks-shopping job requiring a car on Friday or Saturday, and other jobs with optional capacity limits.
+
+Production D1 migrations 0002 and 0003 were applied successfully after PR 8 merged. The remote migration list is clear and the Phase 9 tables exist in production.
 
 **Patterns to preserve:**
 - Keep `/` public and free of private logistics; the invitation and RSVP remain behind existing authentication at `/rsvp/`.
@@ -90,14 +92,14 @@ The new RSVP round uses a separate D1 table so existing responses remain unchang
 | Unique ID per RSVP | Prevents accidental overwrites, simple audit trail | All responses preserved |
 | `crypto.randomUUID()` PK | Native Workers global, no import, collision-resistant | Clean implementation |
 | `textContent` not `innerHTML` | XSS prevention for user-supplied data (guest name) in DOM | Security pattern established |
-| Separate D1 table for v2.0 RSVP round | Preserve the earlier save-the-date responses while collecting reconfirmations | Pending implementation |
-| Multi-select drinks per RSVP group | Capture several drink preferences for a group without per-person tracking | Pending implementation |
-| Separate drink-suggestion form | Let guests propose new drink options without mixing suggestions into RSVP data | Pending implementation |
+| Separate D1 table for v2.0 RSVP round | Preserve the earlier save-the-date responses while collecting reconfirmations | Implemented and deployed |
+| Multi-select drinks per RSVP group | Capture several drink preferences for a group without per-person tracking | Implemented |
+| Separate drink-suggestion form | Let guests propose new drink options without mixing suggestions into RSVP data | Implemented |
 | Publish drink/job suggestions with the selected RSVP | Avoid adding unused suggestions to shared catalogs | Added to Phase 9 |
 | Combine cleanup and brunch in one job option | Use “Abbau & Brunch am nächsten Tag”; do not add a separate Brunch option | Added to Phase 9 |
 | Job capacity and group allocations | Allow optional per-job caps and group-level attendee counts; Aufbau is capped at 15 | Added to Phase 9 |
 | Explain job options in German | Give each job a longer description clarifying the expected task, including the Friday-or-Saturday drinks shopping job with a car; keep “Dinge” general until reviewed | Added to Phase 9 |
-| Secret-backed park directions and buffet URL | Keep configuration values out of source while showing them only to authenticated invitees | Pending implementation |
+| Secret-backed park directions and buffet URL | Keep configuration values out of source while showing them only to authenticated invitees | Implemented |
 
 ## Evolution
 
